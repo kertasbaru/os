@@ -1,0 +1,163 @@
+#!/bin/bash
+# ====================================================
+#  WuzzSTORE Theme Manager
+#  Optimized for: UI Library v3.2
+# ====================================================
+
+# 1. Load UI Library (Wajib)
+source "/usr/bin/ui.sh"
+
+# Load Username
+nama=$(cat /etc/xray/username)
+
+# ====================================================
+#  LOGIC FUNCTIONS
+# ====================================================
+
+function show_banner() {
+    clear
+    lane_atas
+    tengah "THEME MANAGER" "${WHITE}${BOLD}"
+    lane_tengah
+    tengah "Customize Installer Interface" "${GRAY}"
+    lane_bawah
+    garis
+}
+
+function show_credits() {
+    echo -e ""
+    lane_atas
+    tengah "SCRIPT BY $nama" "${CYAN}"
+    lane_bawah
+}
+
+# Fungsi Validasi Input Angka (0-255)
+function read_rgb() {
+    local prompt="$1"
+    local var_name="$2"
+    while true; do
+        read -p " $prompt" val
+        if [[ "$val" =~ ^[0-9]+$ ]] && [ "$val" -ge 0 ] && [ "$val" -le 255 ]; then
+            eval "$var_name=$val"
+            break
+        else
+            msg_err "Input tidak valid! Masukkan angka 0-255."
+        fi
+    done
+}
+
+# Fungsi Edit Warna Manual (Start/Mid/End)
+function custom_color_menu() {
+    local target="$1" # start, mid, atau end
+    
+    # Ambil nilai saat ini dari variabel global ui.sh
+    read sr sg sb <<< "$RGB_START"
+    read mr mg mb <<< "$RGB_MID"
+    read er eg eb <<< "$RGB_END"
+    
+    show_banner
+    echo -e " ${INFO} Mengubah warna bagian: ${BOLD}${target^^}${RESET}"
+    echo -e " Masukkan nilai RGB (0-255)"
+    echo -e ""
+    
+    read_rgb "Red   (R): " new_r
+    read_rgb "Green (G): " new_g
+    read_rgb "Blue  (B): " new_b
+    
+    # Update logic
+    case $target in
+        "start") set_theme_scheme "$new_r $new_g $new_b" "$mr $mg $mb" "$er $eg $eb" ;;
+        "mid")   set_theme_scheme "$sr $sg $sb" "$new_r $new_g $new_b" "$er $eg $eb" ;;
+        "end")   set_theme_scheme "$sr $sg $sb" "$mr $mg $mb" "$new_r $new_g $new_b" ;;
+    esac
+    
+    msg_ok "Warna berhasil diupdate!"
+    sleep 1
+}
+
+# Fungsi 20 Preset (Sesuai script lama)
+function choose_preset() {
+    while true; do
+        show_banner
+        echo -e " ${WHITE}Pilih Preset Gradasi (3 Warna):${RESET}"
+        echo -e ""
+        # Format kolom manual agar rapi
+        echo -e " [1]  Putih-Merah-Kuning      [11] Pink-Biru-Putih"
+        echo -e " [2]  Biru-Hijau-Kuning       [12] Hijau-Kuning-Putih"
+        echo -e " [3]  Merah-Hijau-Biru        [13] Biru-Hitam-Putih"
+        echo -e " [4]  Oranye-Merah-Biru       [14] Oranye-Merah-Putih"
+        echo -e " [5]  Hijau-Cyan-Magenta      [15] Merah-Kuning-Hitam"
+        echo -e " [6]  Hitam-Merah-Kuning      [16] Biru-Putih-Hijau"
+        echo -e " [7]  Ungu-Biru-Hijau         [17] Cyan-Merah-Oranye"
+        echo -e " [8]  Putih-Hitam-Abu         [18] Hitam-Kuning-Hijau"
+        echo -e " [9]  Merah-Kuning-Biru       [19] Putih-Biru-Merah"
+        echo -e " [10] Kuning-Hijau-Biru       [20] Ungu-Hijau-Putih"
+        echo -e ""
+        echo -e " [x]  Kembali"
+        echo -e ""
+        lane_bawah
+        
+        read -p " Select Preset > " choice
+        case $choice in
+            1)  set_theme_scheme "255 255 255" "255 0 0" "255 255 0" ;;
+            2)  set_theme_scheme "0 0 255" "0 255 0" "255 255 0" ;;
+            3)  set_theme_scheme "255 0 0" "0 255 0" "0 0 255" ;;
+            4)  set_theme_scheme "255 165 0" "255 0 0" "0 0 255" ;;
+            5)  set_theme_scheme "0 255 0" "0 255 255" "255 0 255" ;;
+            6)  set_theme_scheme "0 0 0" "255 0 0" "255 255 0" ;;
+            7)  set_theme_scheme "128 0 128" "0 0 255" "0 255 0" ;;
+            8)  set_theme_scheme "255 255 255" "0 0 0" "128 128 128" ;;
+            9)  set_theme_scheme "255 0 0" "255 255 0" "0 0 255" ;;
+            10) set_theme_scheme "255 255 0" "0 255 0" "0 0 255" ;;
+            11) set_theme_scheme "255 105 180" "0 0 255" "255 255 255" ;;
+            12) set_theme_scheme "0 255 0" "255 255 0" "255 255 255" ;;
+            13) set_theme_scheme "0 0 255" "0 0 0" "255 255 255" ;;
+            14) set_theme_scheme "255 165 0" "255 0 0" "255 255 255" ;;
+            15) set_theme_scheme "255 0 0" "255 255 0" "0 0 0" ;;
+            16) set_theme_scheme "0 0 255" "255 255 255" "0 255 0" ;;
+            17) set_theme_scheme "0 255 255" "255 0 0" "255 165 0" ;;
+            18) set_theme_scheme "0 0 0" "255 255 0" "0 255 0" ;;
+            19) set_theme_scheme "255 255 255" "0 0 255" "255 0 0" ;;
+            20) set_theme_scheme "128 0 128" "0 255 0" "255 255 255" ;;
+            x|X) break ;;
+            *) msg_err "Invalid Option"; sleep 1; continue ;;
+        esac
+        
+        echo -e ""
+        print_rainbow " Preset berhasil diterapkan!"
+        sleep 1
+        break
+    done
+}
+
+# ====================================================
+#  MAIN LOOP
+# ====================================================
+
+while true; do
+    show_banner
+    echo -e " [1] Set Warna AWAL   (Start RGB)"
+    echo -e " [2] Set Warna TENGAH (Mid RGB)"
+    echo -e " [3] Set Warna AKHIR  (End RGB)"
+    echo -e " [4] Pilih Preset     (20 Pilihan)"
+    echo -e " [x] Kembali ke Menu Utama"
+    echo -e ""
+    show_credits
+    
+    # Preview Baris
+    echo -e ""
+    tengah "PREVIEW TEMA SAAT INI"
+    garis
+    
+    echo -e ""
+    read -p " Select Option: " opt
+    
+    case $opt in
+        1) custom_color_menu "start" ;;
+        2) custom_color_menu "mid" ;;
+        3) custom_color_menu "end" ;;
+        4) choose_preset ;;
+        x|X) clear; exit 0 ;;
+        *) msg_err "Pilihan tidak valid"; sleep 1 ;;
+    esac
+done

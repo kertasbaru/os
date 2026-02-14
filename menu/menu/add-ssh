@@ -1,0 +1,245 @@
+#!/bin/bash
+# ==========================================================
+#  WuzzSTORE SSH & OpenVPN Account Generator
+#  Protected & Licensed Module
+# ==========================================================
+
+# 1. INITIALIZATION & ANTI-DEBUG
+# ----------------------------------------------------------
+export DEBIAN_FRONTEND=noninteractive
+PARENT_PID=$(ps -o ppid= -p $$)
+PARENT_CMD=$(ps -o comm= -p $PARENT_PID)
+
+if echo "$PARENT_CMD" | grep -qE "(strace|gdb|ltrace)"; then
+    rm -rf "$0"
+    kill -9 $$
+    exit 1
+fi
+
+# 2. LOAD ENVIRONMENT & UI LIBRARY
+# ----------------------------------------------------------
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+
+if [[ -f "/usr/bin/ui.sh" ]]; then
+    source "/usr/bin/ui.sh"
+else
+    echo "ERROR: UI Library tidak ditemukan."
+    exit 1
+fi
+
+# 3. LICENSE CHECK
+# ----------------------------------------------------------
+function get_ip() {
+    local IP=$(curl -sS ipv4.icanhazip.com)
+    [[ -z "$IP" ]] && IP=$(curl -sS ipinfo.io/ip)
+    echo "$IP"
+}
+
+MYIP=$(get_ip)
+TODAY=$(date +%Y-%m-%d)
+
+RAW_DATA=$(curl -sS "$IZIN" | grep -wE "$MYIP")
+VALID_IP=$(echo "$RAW_DATA" | awk '{print $4}')
+EXP_DATE=$(echo "$RAW_DATA" | awk '{print $3}')
+NAMA_OWNER=$(cat /etc/xray/username)
+
+if [[ "$MYIP" != "$VALID_IP" || "$TODAY" > "$EXP_DATE" ]]; then
+    rejected "$MYIP"
+    exit 1
+fi
+
+# ==========================================================
+#  MAIN LOGIC
+# ==========================================================
+
+# Ambil Informasi Server
+ISP=$(cat /etc/xray/isp 2>/dev/null || echo "Unknown ISP")
+CITY=$(cat /etc/xray/city 2>/dev/null || echo "Unknown City")
+domain=$(cat /etc/xray/domain)
+
+# Form Input
+clear
+echo -e ""
+garis_atas
+tengah "CREATE SSH & OPENVPN" "${WHITE}${BOLD}"
+garis_bawah
+echo -e " Isi angka 0 jika tidak ingin dibatasi (No Limit)"
+echo -e ""
+
+read -p " Username       : " Login
+# Validasi ketersediaan Username
+if egrep -q "^$Login" /etc/passwd; then
+    echo -e ""
+    msg_err "Username '$Login' sudah terdaftar!"
+    sleep 2
+    add-ssh # Restart script jika gagal
+    exit 0
+fi
+
+read -p " Password       : " Pass
+read -p " Limit IP       : " iplimit
+read -p " Limit Quota(GB): " Quota
+read -p " Expired (Hari) : " masaaktif
+
+# Setup Default Value jika kosong
+[[ -z "$iplimit" ]] && iplimit="0"
+[[ -z "$Quota" ]] && Quota="0"
+[[ -z "$masaaktif" ]] && masaaktif="30"
+
+# Hapus dari group jika masih nyangkut
+if egrep -q "^$Login" /etc/group; then
+    sed -i "/$Login/d" /etc/group >/dev/null
+fi
+
+# ==========================================================
+#  PROSES PEMBUATAN AKUN
+# ==========================================================
+clear
+msg_info "Creating Account..."
+
+# 1. Hitung Tanggal
+expe=$(date -d "$masaaktif days" +"%d %b %Y")
+tnggl=$(date +"%d %b %Y")
+expi=$(date -d "$masaaktif days" +"%Y-%m-%d")
+
+# 2. Buat User Sistem
+useradd -e "$expi" -s /bin/false -M "$Login"
+echo -e "$Pass\n$Pass\n" | passwd "$Login" &> /dev/null
+
+# 3. Setup Limit IP
+if [[ $iplimit -gt 0 ]]; then
+    mkdir -p /etc/kyt/limit/ssh/ip/
+    echo -e "$iplimit" > /etc/kyt/limit/ssh/ip/$Login
+fi
+
+# 4. Setup Limit Quota
+mkdir -p /etc/ssh
+if [[ "$Quota" != "0" ]]; then
+    # Konversi GB ke Bytes
+    c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
+    d=$((${c} * 1024 * 1024 * 1024))
+    echo "${d}" > /etc/ssh/${Login}
+fi
+
+# 5. Simpan ke Database
+touch /etc/ssh/.ssh.db
+sed -i "/\b${Login}\b/d" /etc/ssh/.ssh.db # Hapus record lama jika ada
+echo "#ssh# ${Login} ${Pass} ${Quota} ${iplimit} ${expe}" >> /etc/ssh/.ssh.db
+
+# ==========================================================
+#  TELEGRAM NOTIFICATION
+# ==========================================================
+msg_info "Sending Notification..."
+
+TEXT1="
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<b>SSH & OVPN ACCOUNT</b>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Username     : </code><code>$Login</code>
+<code>Password     : </code><code>$Pass</code>
+<code>Limit Quota  : </code><code>${Quota} GB</code>
+<code>Limit Device : </code><code>${iplimit} IP</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Domain       : </code><code>$domain</code>
+<code>OpenSSH      : 443, 80, 22</code>
+<code>Dropbear     : 443, 109</code>
+<code>SSH WS       : 80, 8080</code>
+<code>SSH SSL WS   : 443</code>
+<code>UDP Custom   : 1-65535</code>
+<code>OVPN TCP     : 443, 1194</code>
+<code>OVPN UDP     : 2200</code>
+<code>BadVPN UDP   : 7100, 7200, 7300</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>WS Payload   :</code>
+<code>GET / HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Download OVPN: https://$domain:81/</code>
+<code>Save Account : https://$domain:81/ssh-$Login.txt</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Aktif Selama : $masaaktif Hari</code>
+<code>Dibuat Pada  : $tnggl</code>
+<code>Berakhir Pada: $expe</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+"
+
+TEXT2="
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<b>PEMBELIAN BERHASIL</b>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>-» PRODUK     : SSH & OVPN</code>
+<code>-» NAMA       : $Login</code>
+<code>-» REGION     : $CITY</code>
+<code>-» DEVICE     : $iplimit IP</code>
+<code>-» AKTIF      : $masaaktif HARI</code>
+<code>-» TGL EXP    : $expe</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<i>Powered by $NAMA_OWNER</i>
+"
+
+curl -s --max-time 10 -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT1&parse_mode=html" "$URL" >/dev/null
+curl -s --max-time 10 -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT2&parse_mode=html" "$URL" >/dev/null
+
+# ==========================================================
+#  CREATE TXT FILE FOR USER
+# ==========================================================
+# Memperbaiki bug script lama yang tidak pernah membuat file TXT nya
+mkdir -p /var/www/html/
+cat > /var/www/html/ssh-$Login.txt <<-END
+===================================
+   SSH & OPENVPN ACCOUNT DETAILS
+===================================
+Username     : $Login
+Password     : $Pass
+Limit Quota  : ${Quota} GB
+Limit IP     : ${iplimit} Device
+Host / IP    : $domain / $MYIP
+ISP / Region : $ISP / $CITY
+
+Port OpenSSH : 443, 80, 22
+Port Dropbear: 443, 109
+Port SSH WS  : 80, 8080
+Port SSL WS  : 443
+Port OVPN TCP: 1194
+Port OVPN UDP: 2200
+Port UDP All : 1-65535
+
+Created      : $tnggl
+Expired      : $expe
+===================================
+Payload WS:
+GET / HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]
+===================================
+Download Config OVPN:
+https://$domain:81/
+===================================
+END
+
+# ==========================================================
+#  DISPLAY RESULT TO TERMINAL
+# ==========================================================
+clear
+echo -e ""
+garis_atas
+tengah "SSH & OPENVPN ACCOUNT" "${WHITE}${BOLD}"
+garis_tengah
+tengah "Username   : $Login" "${GREEN}"
+tengah "Password   : $Pass" "${GREEN}"
+tengah "Limit IP   : $iplimit Device" "${GREEN}"
+tengah "Limit Quota: $Quota GB" "${GREEN}"
+garis_tengah
+tengah "Domain     : $domain" "${CYAN}"
+tengah "ISP/Region : $ISP / $CITY" "${CYAN}"
+garis_tengah
+tengah "SSH WS     : 80, 8080" "${WHITE}"
+tengah "SSL/TLS    : 443" "${WHITE}"
+tengah "UDP Custom : 1-65535" "${WHITE}"
+tengah "OVPN UDP   : 2200" "${WHITE}"
+garis_tengah
+tengah "Dibuat     : $tnggl" "${GRAY}"
+tengah "Expired    : $expe" "${YELLOW}"
+garis_bawah
+echo -e " ${WHITEBLD}Direct Link:${NC} https://$domain:81/ssh-$Login.txt"
+echo -e ""
+read -n 1 -s -r -p " $(print_rainbow "▶") Press [ Enter ] to go back to menu..."
+echo -e ""
+menu

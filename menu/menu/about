@@ -1,0 +1,101 @@
+#!/bin/bash
+# ==========================================================
+#  WuzzSTORE Information & Pricing
+#  Protected & Licensed Module
+# ==========================================================
+
+# 1. INITIALIZATION & ANTI-DEBUG
+# ----------------------------------------------------------
+export DEBIAN_FRONTEND=noninteractive
+PARENT_PID=$(ps -o ppid= -p $$)
+PARENT_CMD=$(ps -o comm= -p $PARENT_PID)
+
+if echo "$PARENT_CMD" | grep -qE "(strace|gdb|ltrace)"; then
+    rm -rf "$0"
+    kill -9 $$
+    exit 1
+fi
+
+# 2. LOAD ENVIRONMENT & UI LIBRARY
+# ----------------------------------------------------------
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+
+if [[ -f "/usr/bin/ui.sh" ]]; then
+    source "/usr/bin/ui.sh"
+else
+    echo "ERROR: UI Library tidak ditemukan."
+    exit 1
+fi
+
+# 3. LICENSE CHECK
+# ----------------------------------------------------------
+function get_ip() {
+    local IP=$(curl -sS ipv4.icanhazip.com)
+    [[ -z "$IP" ]] && IP=$(curl -sS ipinfo.io/ip)
+    echo "$IP"
+}
+
+MYIP=$(get_ip)
+TODAY=$(date +%Y-%m-%d)
+
+RAW_DATA=$(curl -sS "$IZIN" | grep -wE "$MYIP")
+VALID_IP=$(echo "$RAW_DATA" | awk '{print $4}')
+EXP_DATE=$(echo "$RAW_DATA" | awk '{print $3}')
+
+if [[ "$MYIP" != "$VALID_IP" || "$TODAY" > "$EXP_DATE" ]]; then
+    rejected "$MYIP"
+    exit 1
+fi
+
+# ==========================================================
+#  MAIN LOGIC (TAMPILAN ABOUT & HARGA)
+# ==========================================================
+
+clear
+echo -e ""
+
+# --- KOTAK 1: DAFTAR HARGA ---
+garis_atas
+tengah "DAFTAR HARGA SEWA SCRIPT" "${WHITE}${BOLD}"
+garis_tengah
+tengah "1 Bulan  / 1 IP   : Rp  10.000" "${GREEN}"
+tengah "2 Bulan  / 2 IP   : Rp  20.000" "${GREEN}"
+tengah "Lifetime / 1 IP   : Rp  30.000" "${GREEN}"
+tengah "Lifetime / 2 IP   : Rp  45.000" "${GREEN}"
+tengah "Lifetime / 3 IP   : Rp  60.000" "${GREEN}"
+tengah "Lifetime / 4 IP   : Rp  75.000" "${GREEN}"
+tengah "Lifetime / 5 IP   : Rp 100.000" "${GREEN}"
+tengah "Lifetime / Unli   : Rp 150.000" "${YELLOW}${BOLD}"
+garis_bawah
+
+echo -e ""
+
+# --- KOTAK 2: OPEN SOURCE ---
+garis_atas
+tengah "OPEN SOURCE SCRIPT" "${WHITE}${BOLD}"
+garis_tengah
+tengah "HARGA: Rp 800.000" "${CYAN}${BOLD}"
+garis_tengah
+tengah "Keuntungan Beli Open Source:" "${WHITE}"
+tengah "• Script Jadi Hak Milik 100%" "${GRAY}"
+tengah "• Script Bisa Disewakan Kembali" "${GRAY}"
+tengah "• Bebas Edit / Custom Sepuasnya" "${GRAY}"
+garis_bawah
+
+echo -e ""
+
+# --- KOTAK 3: KONTAK ---
+garis_atas
+tengah "CONTACT INFORMATION" "${WHITE}${BOLD}"
+garis_tengah
+tengah "Jika Anda berminat, hubungi:" "${GRAY}"
+tengah "WhatsApp: 0877-6020-4418" "${GREEN}${BOLD}"
+tengah "Telegram: t.me/WuzzSTORE" "${CYAN}${BOLD}"
+garis_bawah
+
+echo -e ""
+read -n 1 -s -r -p " $(print_rainbow "▶") Press [ Enter ] to go back to menu..."
+echo -e ""
+
+# Kembali ke menu utama (Ini akan memanggil script 'menu' di /usr/bin)
+menu

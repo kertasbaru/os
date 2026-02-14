@@ -1,0 +1,246 @@
+#!/bin/bash
+# ==========================================================
+#  WuzzSTORE Main Menu Interface
+#  Protected & Licensed Module
+# ==========================================================
+
+# 1. INITIALIZATION & ANTI-DEBUG
+# ----------------------------------------------------------
+export DEBIAN_FRONTEND=noninteractive
+PARENT_PID=$(ps -o ppid= -p $$)
+PARENT_CMD=$(ps -o comm= -p $PARENT_PID)
+
+if echo "$PARENT_CMD" | grep -qE "(strace|gdb|ltrace)"; then
+    rm -rf "$0"
+    kill -9 $$
+    exit 1
+fi
+
+# 2. LOAD ENVIRONMENT & UI LIBRARY
+# ----------------------------------------------------------
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+
+if [[ -f "/usr/bin/ui.sh" ]]; then
+    source "/usr/bin/ui.sh"
+else
+    echo "ERROR: UI Library tidak ditemukan."
+    exit 1
+fi
+
+# Override lebar menu utama agar lebih lega (sesuai script lama kamu)
+WIDTH=60
+
+# 3. LICENSE CHECK & SYNC
+# ----------------------------------------------------------
+function get_ip() {
+    local IP=$(curl -sS ipv4.icanhazip.com)
+    [[ -z "$IP" ]] && IP=$(curl -sS ipinfo.io/ip)
+    echo "$IP"
+}
+
+MYIP=$(get_ip)
+TODAY=$(date +%Y-%m-%d)
+LOCAL_IP_FILE="/etc/izin/ip"
+
+# Fungsi Auto Update Lisensi
+function update_data() {
+    mkdir -p $(dirname "$LOCAL_IP_FILE")
+    curl -sS "$IZIN" -o "$LOCAL_IP_FILE"
+}
+
+# Update paksa jika argumen 'update' diberikan
+if [[ "$1" == "update" ]]; then
+    update_data
+    msg_ok "Data lisensi berhasil diupdate!"
+    exit 0
+fi
+
+# Update jika file tidak ada
+if [[ ! -f "$LOCAL_IP_FILE" ]]; then
+    update_data
+fi
+
+RAW_DATA=$(grep -wE "$MYIP" "$LOCAL_IP_FILE")
+VALID_IP=$(echo "$RAW_DATA" | awk '{print $4}')
+EXP_DATE=$(echo "$RAW_DATA" | awk '{print $3}')
+USER_SERVER=$(echo "$RAW_DATA" | awk '{print $2}')
+
+if [[ "$MYIP" != "$VALID_IP" ]]; then
+    rejected "$MYIP"
+    exit 1
+fi
+
+if [[ "$EXP_DATE" != "Lifetime" && "$TODAY" > "$EXP_DATE" ]]; then
+    rejected "$MYIP"
+    exit 1
+fi
+
+# Update File Sistem
+echo "$USER_SERVER" > /usr/bin/user
+echo "$EXP_DATE" > /usr/bin/e
+
+# Kalkulasi Sisa Hari
+if [[ "$EXP_DATE" == "Lifetime" ]]; then
+  masaaktif="Lifetime"
+else
+  d1=$(date -d "$EXP_DATE" +%s)
+  d2=$(date -d "$TODAY" +%s)
+  certifacate=$(((d1 - d2) / 86400))
+  if [[ $certifacate -le 0 ]]; then
+    masaaktif="EXPIRED"
+  else
+    masaaktif="${certifacate} Day"
+  fi
+fi
+
+# ==========================================================
+#  COLLECT SYSTEM DATA
+# ==========================================================
+
+# Sistem
+OS=$(cat /etc/os-release | grep -w PRETTY_NAME | head -n1| sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')
+RAM=$(free -m | awk 'NR==2 {print $2}')
+UPTIME=$(uptime -p | cut -d " " -f 2-10)
+CITY=$(cat /etc/xray/city 2>/dev/null || echo "Unknown")
+ISP=$(cat /etc/xray/isp 2>/dev/null || echo "Unknown")
+DOMAIN=$(cat /etc/xray/domain 2>/dev/null || echo "None")
+MUTIARA=$(cat /etc/kata_mutiara 2>/dev/null || echo "Welcome to WuzzSTORE")
+NAMA_OWNER=$(cat /etc/xray/username 2>/dev/null || echo "Admin")
+
+# Network Speed
+NET_SPEED=$(cat /etc/traffic 2>/dev/null | awk '/Download/ {print $2}')
+[[ -z "$NET_SPEED" ]] && NET_SPEED="0"
+
+function format_speed() {
+    local speed=$1
+    if (( $(echo "$speed >= 1000" | bc -l) )); then
+        printf "%.2f Gbps\n" "$(echo "$speed / 1000" | bc -l)"
+    else
+        printf "%.2f Mbps\n" "$speed"
+    fi
+}
+formatted_speed=$(format_speed "$NET_SPEED")
+
+# Vnstat Bandwidth
+kemarin=$(date -d "-1 days" +"%m-%d")
+hariini=$(date -d "0 days" +"%m-%d")
+bulan=$(date +"%b '%y")
+
+# (Disederhanakan agar script tidak berat)
+bwkmrn1=$(vnstat -d 2>/dev/null | grep -w "${kemarin}" | awk '{print $8" "substr($9,1,1)substr($9,3,1)}') 
+bwhari=$(vnstat -d 2>/dev/null | grep -w "${hariini}" | awk '{print $8" "substr($9,1,1)substr($9,3,1)}') 
+rxtdy=$(vnstat -d 2>/dev/null | grep -w "${hariini}" | awk '{print $2" "substr($3,1,1)substr($3,3,1)}') 
+txtdy=$(vnstat -d 2>/dev/null | grep -w "${hariini}" | awk '{print $5" "substr($6,1,1)substr($6,3,1)}') 
+bwbln=$(vnstat -m 2>/dev/null | grep -w "${bulan}" | awk '{print $9" "substr($10,1,1)substr($10,3,1)}') 
+
+[[ -z "$bwkmrn1" ]] && bwkmrn1="0 KB"
+[[ -z "$bwhari" ]] && bwhari="0 KB"
+[[ -z "$rxtdy" ]] && rxtdy="0 KB"
+[[ -z "$txtdy" ]] && txtdy="0 KB"
+[[ -z "$bwbln" ]] && bwbln="0 KB"
+
+# Akun Aktif
+let VMESS_COUNT=$(grep -c -E "^### " "/etc/xray/config.json" 2>/dev/null)/2 || VMESS_COUNT=0
+let VLESS_COUNT=$(grep -c -E "^#& " "/etc/xray/config.json" 2>/dev/null)/2 || VLESS_COUNT=0
+let TROJAN_COUNT=$(grep -c -E "^#! " "/etc/xray/config.json" 2>/dev/null)/2 || TROJAN_COUNT=0
+let SS_COUNT=$(grep -c -E "^#!# " "/etc/xray/config.json" 2>/dev/null)/2 || SS_COUNT=0
+let XRAY_TOTAL=($VLESS_COUNT+$VMESS_COUNT+$TROJAN_COUNT+$SS_COUNT)
+SSH_COUNT="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
+
+# Service Status
+status_haproxy=$(systemctl is-active haproxy == "active" && echo "ON" || echo "OFF")
+status_xray=$(systemctl is-active xray == "active" && echo "ON" || echo "OFF")
+status_nginx=$(systemctl is-active nginx == "active" && echo "ON" || echo "OFF")
+status_ssh=$(systemctl is-active ws == "active" && echo "ON" || echo "OFF")
+
+services=("haproxy" "nginx" "ws" "dropbear" "xray" "udp-custom")
+status_service="${GREEN}GOOD${RESET}"
+for service in "${services[@]}"; do
+    if [[ "$(systemctl is-active $service)" != "active" ]]; then
+        status_service="${RED}ERROR ($service)${RESET}"
+        break
+    fi
+done
+
+# ==========================================================
+#  TAMPILAN MENU
+# ==========================================================
+
+clear
+echo -e ""
+garis_atas
+tengah ".:: $NAMA_OWNER ::." "${WHITE}${BOLD}"
+garis_tengah
+
+# --- BARIS 1 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${RED}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "CLIENTS" "$USER_SERVER" "OS" "${OS:0:17}"
+# --- BARIS 2 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "RAM" "${RAM} MB" "UPTIME" "${UPTIME:0:17}"
+# --- BARIS 3 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "IP" "$MYIP" "ISP" "${ISP:0:17}"
+# --- BARIS 4 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${RED}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "EXPIRED" "$masaaktif" "DOMAIN" "${DOMAIN:0:17}"
+# --- BARIS 5 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "RX" "$rxtdy" "LAST" "$bwkmrn1"
+# --- BARIS 6 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "TX" "$txtdy" "TODAY" "$bwhari"
+# --- BARIS 7 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-19s${RESET} ${WHITEBLD}%-7s${RESET} : ${BMAGENTA}${WHITE}%-17s${RESET} ${BORDER_COLOR}│${RESET}\n" "SPEED" "$formatted_speed" "MONTH" "$bwbln"
+
+garis_tengah
+tengah "SERVICE STATUS : ${status_service}" "${WHITE}"
+garis_tengah
+
+# --- STATUS BARIS 1 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-6s${RESET} ${WHITEBLD}%-5s${RESET} : ${GREEN}%-5s${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-10s${RESET} ${BORDER_COLOR}│${RESET}\n" "PROXY" "$status_haproxy" "SSH" "$status_ssh" "ACCOUNT" "$SSH_COUNT"
+# --- STATUS BARIS 2 ---
+printf " ${BORDER_COLOR}│${RESET} ${WHITEBLD}%-7s${RESET} : ${GREEN}%-6s${RESET} ${WHITEBLD}%-5s${RESET} : ${GREEN}%-5s${RESET} ${WHITEBLD}%-8s${RESET} : ${GREEN}%-10s${RESET} ${BORDER_COLOR}│${RESET}\n" "NGINX" "$status_nginx" "XRAY" "$status_xray" "ACCOUNT" "$XRAY_TOTAL"
+
+garis_bawah
+# --- KATA MUTIARA ---
+echo -e " $(print_rainbow "╭───────────────────────────────────────────────────────────╮")"
+# Kita batasi mutiara ke panjang tertentu agar tidak merusak UI jika terlalu panjang
+MUTIARA_TRIM=${MUTIARA:0:56}
+printf " $(print_rainbow "│") ${WHITE}%-57s${RESET} $(print_rainbow "│")\n" " $MUTIARA_TRIM"
+echo -e " $(print_rainbow "╰───────────────────────────────────────────────────────────╯")"
+echo -e ""
+
+# --- OPSI MENU ---
+echo -e "  ${WHITEBLD} (1) SSH/OPENVPN                    (6) ADMIN MENU  ${RESET}"
+echo -e "  ${WHITEBLD} (2) XRAY MANAGER                   (7) BOT TELEGRAM  ${RESET}"
+echo -e "  ${WHITEBLD} (3) ADD BUG CONFIG                 (8) UPDATE SCRIPT  ${RESET}"
+echo -e "  ${WHITEBLD} (4) CHANGE WARNA                   (9) BACKUP & RESTORE  ${RESET}"
+echo -e "  ${WHITEBLD} (5) REGISTER IP                   (10) FEATURES  ${RESET}"
+garis_tengah
+printf " ${BORDER_COLOR}│${RESET} ${RED}%-38s${RESET} ${WHITEBLD}%-19s${RESET} ${BORDER_COLOR}│${RESET}\n" "       [r] REBOOT SYSTEM" " [x] EXIT"
+garis_bawah
+
+# ==========================================================
+#  MENU INPUT LOGIC
+# ==========================================================
+
+while true; do
+    echo ""
+    read -p " $(print_rainbow "▶") Select Option [1-10 or x/r]: " hallo
+    case $hallo in
+        1) clear ; m-ssh ; break ;;
+        2) clear ; m-xray ; break ;;
+        3) clear ; nano /etc/xray/.bug_optr ; break ;;
+        4) clear ; change_warna ; break ;;
+        5) clear ; regisip ; break ;;
+        6) clear ; main_menu ; break ;;
+        7) clear ; m-bot ; break ;;
+        8) clear ; wget -q "${REPO}menu/update.sh" && chmod +x update.sh && ./update.sh ; break ;;
+        9) clear ; m-bkp ; break ;;
+        10) clear ; m-ftr ; break ;;
+        tembak) clear ; dorpaket ; break ;;
+        r) clear ; echo -e " ${GREEN}Rebooting System...${RESET}"; sleep 1; reboot ;;
+        0|x) clear ; echo -e " ${CYAN}Goodbye!${RESET}"; exit 0 ;;
+        *)  
+            tput cuu 1 && tput el   
+            echo -e " ${RED}Input tidak valid!${RESET}" 
+            sleep 1
+            tput cuu 1 && tput el  
+        ;;
+    esac	   
+done
