@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Upload Backup & Restore</title>
+  <style>
+    /* Reset */
+    * {
+      margin: 0; padding: 0; box-sizing: border-box;
+    }
+
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://raw.githubusercontent.com/kertasbaru/nebot/main/Assets/banner.jpg') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      padding: 1rem;
+    }
+
+    .container {
+      background: rgba(255, 255, 255, 0.12);
+      padding: 2.5rem 3rem;
+      border-radius: 14px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.3);
+      width: 360px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+
+    h2 {
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      margin-bottom: 1.8rem;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.3rem;
+    }
+
+    input[type="file"] {
+      padding: 0.7rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      background-color: rgba(255 255 255 / 0.9);
+      color: #333;
+      transition: box-shadow 0.3s ease;
+    }
+
+    input[type="file"]:focus,
+    input[type="file"]:hover {
+      box-shadow: 0 0 10px 3px #00cec9;
+      outline: none;
+    }
+
+    input[type="password"] {
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      border: none;
+      font-size: 1rem;
+      outline: none;
+      transition: box-shadow 0.3s ease;
+      color: #333;
+      background-color: #f0f0f0;
+    }
+
+    input[type="password"]:focus {
+      box-shadow: 0 0 10px 3px #00cec9;
+      background-color: #fff;
+    }
+
+    button {
+      padding: 0.95rem 1rem;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(90deg, #00cec9 0%, #6c5ce7 100%);
+      color: white;
+      font-weight: 700;
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.6);
+      transition: background 0.4s ease;
+    }
+
+    button:hover {
+      background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 100%);
+      box-shadow: 0 6px 20px rgba(0, 206, 201, 0.8);
+    }
+
+    /* Responsive */
+    @media (max-width: 400px) {
+      .container {
+        width: 100%;
+        padding: 2rem 1.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Upload File Backup (.zip)</h2>
+    <form action="/restore/upload" method="POST" enctype="multipart/form-data" autocomplete="off">
+      <input type="file" name="backup" accept=".zip" required />
+      <input type="password" name="zipPassword" placeholder="Password ZIP (Opsional)" />
+      <button type="submit">Upload &amp; Restore</button>
+    </form>
+    <a href="/restore/logout" class="logout-link">🚪 Logout</a>
+  </div>
+</body>
+</html>

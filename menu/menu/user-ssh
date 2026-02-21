@@ -1,0 +1,284 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : https://t.me/newbie_store24
+# //====================================================
+
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+domain=$(cat /etc/xray/domain)
+ISP=$(cat /etc/xray/isp)
+clear
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+garis() {
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(printf "${WHITEBLD} $TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="[ CHECK DETAIL ACCOUNT SSH ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+m-ssh
+}
+clear
+Newbie_Banner
+garis_atas
+ printf "${YELLOW}   %-17s %-17s %2s${NC}\n" "USERNAME" "EXP DATE" "STATUS"
+garis_bawah
+garis_atas
+while read expired
+do
+AKUN="$(echo $expired | cut -d: -f1)"
+ID="$(echo $expired | grep -v nobody | cut -d: -f3)"
+exp="$(chage -l $AKUN | grep "Account expires" | awk -F": " '{print $2}')"
+status="$(passwd -S $AKUN | awk '{print $2}' )"
+if [[ $ID -ge 1000 ]]; then
+if [[ "$status" = "L" ]]; then
+ printf "   %-17s %-18s %2s \n" "$AKUN" "$exp" "LOCKED${NORMAL}"
+else
+ printf "   %-17s %-18s %2s \n" "$AKUN" "$exp" "UNLOCKED${NORMAL}"
+fi
+fi
+done < /etc/passwd
+garis_bawah
+center "$(print_rainbow "Masukan Username Account SSH")"
+garis
+read -rp "Input Username : " user
+if [[ -z "$user" || ! $(getent passwd "$user") ]]; then
+    clear
+garis
+    center "$(print_rainbow "[ DETAIL ACCOUNT SSH ]")"
+garis  
+    printf "${WHITEBLD} "
+    center "$(printf "${REDBLD}AKUN TIDAK DITEMUKAN !!!${NC}")"
+    printf "${WHITEBLD} "
+garis
+    printf "${WHITEBLD} "
+    read -n 1 -s -r -p "Press any key to back"
+    m-ssh
+	exit 1
+fi
+clear
+Login=$(cat /etc/ssh/.ssh.db | grep -wE $user | awk '{print $2}')
+Pass=$(cat /etc/ssh/.ssh.db | grep -wE $user | awk '{print $3}')
+Quota=$(cat /etc/ssh/.ssh.db | grep -wE $user | awk '{print $4}')
+iplimit=$(cat /etc/ssh/.ssh.db | grep -wE $user | awk '{print $5}')
+expe=$(cat /etc/ssh/.ssh.db | grep -wE $user | awk '{print $6" "$7" "$8}')
+
+PAYLOADWS="GET / HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADTLS="GET wss://$domain/ HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADHANCED="HEAD / HTTP/1.1[crlf]Host: Masukan_Bug[crlf][crlf]PATCH / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf][split]HTTP/ 1[crlf][crlf]"
+
+
+
+function Send_Log() {
+     
+TEXT="
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH OVPN Account     </code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Username         : </code> <code>$Login</code>
+<code>Password         : </code> <code>$Pass</code>
+<code>Limit Quota      : </code> <code>$Quota</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>IP               : $IP</code>
+<code>Host             : </code> <code>$domain</code>
+<code>Port OpenSSH     : 443, 80, 22</code>
+<code>Port Dropbear    : 443, 109</code>
+<code>Port SSH WS      : 80, 8080, 8081-9999 </code>
+<code>Port SSH UDP     : 1-65535 </code>
+<code>Port SSH SSL WS  : 443</code>
+<code>Port SSL/TLS     : 400-900</code>
+<code>Port OVPN WS SSL : 443</code>
+<code>Port OVPN SSL    : 443</code>
+<code>Port OVPN TCP    : 443, 1194</code>
+<code>Port OVPN UDP    : 2200</code>
+<code>BadVPN UDP       : 7100, 7300, 7300</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH WEBSOCKET    : </code><code>$domain:80@$Login:$Pass</code>
+<code>SSH SSL          : </code><code>$domain:443@$Login:$Pass</code>
+<code>SSH UDP          : </code><code>$domain:1-65535@$Login:$Pass</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Payload WSS      : </code><code>GET wss://BUG.COM/ HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+OVPN Download : https://$domain:81/
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Save Link Account: </code>https://$domain:81/ssh-$Login.txt
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+Berakhir Pada        : $expe
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+"
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+}
+
+# Details ACcount
+function Details_Ssh(){
+garis
+center "$(print_rainbow "[ SSH OPENVPN ]")"
+garis
+printf "${WHITEBLD} Remark      : $Login\n"
+printf "${WHITEBLD} Password    : $Pass\n"
+printf "${WHITEBLD} Limit Quota : $Quota\n"
+printf "${WHITEBLD} Limit Ip    : ${iplimit} Devic\n"
+printf "${WHITEBLD} Domain      : $domain\n"
+printf "${WHITEBLD} ISP         : $ISP \n"
+printf "${WHITEBLD} OpenSSH     : 443, 80, 22\n"
+printf "${WHITEBLD} Port UDP    : 1-65535\n"
+printf "${WHITEBLD} SSH WS      : 80,8080,8880,2082\n"
+printf "${WHITEBLD} SSL/TLS     : 443\n"
+printf "${WHITEBLD} OVPN UDP    : 220\n"
+garis
+}
+
+
+
+function Copy_Faste(){
+printf "${WHITEBLD} Port 80     : $domain:80@$Login:$Pass\n"
+printf "${WHITEBLD} Port 443    : $domain:443@$Login:$Pass\n"
+printf "${WHITEBLD} Udp Custom  : $domain:1-65535@$Login:$Pass\n"
+printf "${WHITEBLD} OpenVpn     : https://$domain:81/\n"
+printf "${WHITEBLD} Account     : https://$domain:81/ssh-$Login.txt\n"
+}
+
+
+
+function Details_Payload(){
+garis
+printf "${WHITEBLD} Payload WS  : ${PAYLOADWS}\n"
+garis
+printf "${WHITEBLD} Payload TLS : ${PAYLOADTLS}\n"
+garis
+printf "${WHITEBLD} Payload ENCD: ${PAYLOADHANCED}\n"
+garis
+}
+
+
+
+function Expiry_Details(){
+printf "${WHITEBLD} \033[33m Expiry in  : $expe ${NC}\n"
+}
+
+Newbie_Banner
+Details_Ssh
+Copy_Faste
+Details_Payload
+Expiry_Details
+Send_Log
+Sc_Credit user-ssh.temp1.sh 

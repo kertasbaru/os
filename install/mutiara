@@ -1,0 +1,89 @@
+#!/bin/bash
+
+# Menyusun kombinasi yang bermakna (maksimal 58 karakter)
+quotes=(
+    "Kesuksesan datang dari usaha yang tak kenal lelah"
+    "Kesuksesan lahir dari keputusan untuk terus maju"
+    "Kesuksesan hasil dari disiplin dalam tindakan"
+    "Kegagalan mengajarkan keberanian mencoba lagi"
+    "Kegagalan memberi pelajaran dari kesalahan"
+    "Kebahagiaan ada dalam rasa syukur yang tulus"
+    "Kebahagiaan lahir dari momen kecil yang berarti"
+    "Impian berawal dari keyakinan dalam hati"
+    "Impian nyata melalui usaha yang berkelanjutan"
+    "Perjuangan butuh pengorbanan tanpa pamrih"
+    "Perjuangan lahir dari tekad yang membara"
+    "Kesabaran kunci keikhlasan dalam menunggu"
+    "Kesabaran tercipta melalui waktu yang bijak"
+    "Harapan tumbuh dari pandangan positif"
+    "Harapan memberi semangat yang tak padam"
+    "Keberanian muncul dari tindakan nyata"
+    "Keberanian diuji saat melawan keraguan"
+    "Kesederhanaan ada dalam kebahagiaan kecil"
+    "Kesederhanaan cermin kenyamanan dalam hidup"
+    "Kesuksesan butuh ketekunan dan kerja keras"
+    "Jalan panjang dimulai dari langkah pertama"
+    "Percaya diri adalah awal dari keberhasilan"
+    "Kegagalan bukan akhir, tapi pelajaran hidup"
+    "Harapan menyala di tengah kegelapan"
+    "Setiap hari adalah peluang menjadi lebih baik"
+    "Mimpi besar dimulai dari langkah sederhana"
+    "Tekad kuat mampu mengatasi semua rintangan"
+    "Kesabaran adalah kekuatan dalam ketenangan"
+    "Ketulusan membimbing langkah yang benar"
+    "Keberanian lahir dari keinginan untuk maju"
+    "Hidup bermakna saat memberi manfaat orang lain"
+    "Kesederhanaan membawa kedamaian dalam hati"
+    "Kesuksesan datang bagi mereka yang bersabar"
+    "Kegigihan membuka pintu menuju impian"
+    "Mimpi menjadi nyata dengan tindakan nyata"
+    "Setiap tantangan membentuk karakter kuat"
+    "Kesuksesan dimulai dari keyakinan diri"
+    "Jadilah cahaya di tengah kegelapan hidup"
+    "Jangan takut gagal, takutlah berhenti mencoba"
+    "Perubahan besar dimulai dari hal kecil"
+    "Harapan adalah kekuatan di masa sulit"
+    "Bersyukur membuat hidup terasa cukup"
+    "Kebahagiaan sejati datang dari hati yang damai"
+    "Keberhasilan milik mereka yang tak menyerah"
+    "Waktu terbaik memulai adalah sekarang"
+    "Langkah kecil membawa perubahan besar"
+    "Mencoba lagi bukti keberanian sejati"
+    "Kesuksesan buah dari ketekunan panjang"
+)
+
+# Pilih kutipan secara acak
+random_quote="${quotes[RANDOM % ${#quotes[@]}]}."
+
+# Simpan ke file
+echo "$random_quote" > /etc/kata_mutiara
+
+# Tampilkan di terminal
+echo "Kata Mutiara Hari Ini:"
+echo "$random_quote"
+LOCAL_IP_FILE="/etc/izin/ip"   # simpan data GitHub di sini
+
+# URL GitHub
+GITHUB_IP_URL="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+
+# Fungsi untuk update data dari GitHub
+update_data() {
+    echo "Mengupdate data dari GitHub..."
+    mkdir -p $(dirname "$LOCAL_IP_FILE")
+    curl -sS "$GITHUB_IP_URL" -o "$LOCAL_IP_FILE"
+    echo "Data berhasil diupdate!"
+}
+update_data
+speedtest-cli --simple >/etc/traffic
+if ! command -v bc >/dev/null 2>&1; then
+    echo "⚠️  bc belum terinstall, menginstal sekarang..."
+    apt update -y >/dev/null 2>&1
+    apt install -y bc >/dev/null 2>&1
+
+    # Cek ulang apakah instalasi berhasil
+    if ! command -v bc >/dev/null 2>&1; then
+        echo "❌ Gagal menginstal bc. Silakan install manual: apt install bc"
+        exit 1
+    fi
+    echo "✅ bc berhasil diinstal!"
+fi

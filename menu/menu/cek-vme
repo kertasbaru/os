@@ -1,0 +1,336 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : https://t.me/newbie_store24
+# //====================================================
+
+REDBG="\033[41m"   
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" 
+NC="\033[0m"    
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+systemctl restart xray
+>/var/log/xray/access.log
+sleep 10
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(printf "${WHITEBLD}$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+m-xray
+}
+function Newbie_Banner() {
+clear
+BOX_WIDTH=48
+TEXT="[ CHECK XRAY LOGIN ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+# Fix Data diperlukan
+dir="/etc/kyt/limit/vmess/ip"
+dir1="/etc/limit/vmess/"
+
+[[ ! -d "$dir" ]] && mkdir -p "$dir"
+[[ ! -d "$dir1" ]] && mkdir -p "$dir1"
+
+data5=( $(grep '###' /etc/xray/config.json | cut -d ' ' -f 2 | sort -u) )
+
+for akun in "${data5[@]}"
+do
+    [[ ! -e /etc/kyt/limit/vmess/ip/$akun ]] && echo "2" > /etc/kyt/limit/vmess/ip/$akun
+    [[ ! -e /etc/vmess/$akun ]] && echo "107374182400" > /etc/vmess/$akun
+    [[ ! -e /etc/limit/vmess/$akun ]] && echo "0" > /etc/limit/vmess/$akun
+done >/dev/null 2>&1
+dir2="/etc/kyt/limit/vless/ip"
+dir3="/etc/limit/vless/"
+
+[[ ! -d "$dir2" ]] && mkdir -p "$dir2"
+[[ ! -d "$dir3" ]] && mkdir -p "$dir3"
+
+data6=( $(grep '#&' /etc/xray/config.json | cut -d ' ' -f 2 | sort -u) )
+
+for akun in "${data6[@]}"
+do
+    [[ ! -e /etc/kyt/limit/vless/ip/$akun ]] && echo "2" > /etc/kyt/limit/vless/ip/$akun
+    [[ ! -e /etc/vless/$akun ]] && echo "107374182400" > /etc/vless/$akun
+    [[ ! -e /etc/limit/vless/$akun ]] && echo "0" > /etc/limit/vless/$akun
+done >/dev/null 2>&1
+
+dir4="/etc/kyt/limit/trojan/ip"
+dir5="/etc/limit/trojan"
+
+[[ ! -d "$dir1" ]] && mkdir -p "$dir1"
+[[ ! -d "$dir2" ]] && mkdir -p "$dir2"
+
+#!' /etc/xray/config.json | cut -d ' ' -f 2 | sort -u) )
+
+for akun in "${data7[@]}"
+do
+    [[ ! -e /etc/kyt/limit/trojan/ip/$akun ]] && echo "2" > /etc/kyt/limit/trojan/ip/$akun
+    [[ ! -e /etc/trojan/$akun ]] && echo "107374182400" > /etc/trojan/$akun
+    [[ ! -e /etc/limit/trojan/$akun ]] && echo "0" > /etc/limit/trojan/$akun
+done >/dev/null 2>&1
+
+function con() {
+    local -i bytes=$1;
+    if [[ $bytes -lt 1024 ]]; then
+        echo "${bytes}B"
+    elif [[ $bytes -lt 1048576 ]]; then
+        echo "$(( (bytes + 1023)/1024 ))KB"
+    elif [[ $bytes -lt 1073741824 ]]; then
+        echo "$(( (bytes + 1048575)/1048576 ))MB"
+    else
+        echo "$(( (bytes + 1073741823)/1073741824 ))GB"
+    fi
+}
+clear
+# Membersihkan file sementara
+> /tmp/other.txt
+> /tmp/ipvmess.txt
+
+# Mengambil daftar akun dari file config.json
+data=( $(cat /etc/xray/config.json | grep '###' | cut -d ' ' -f 2 | sort | uniq) )
+
+# Menampilkan banner dan garis
+Newbie_Banner
+garis
+center "$(printf "${YELLOW}[ CHECK VMESS ]${NC}\n")"
+garis
+printf "${YELLOW}   %-17s %-7s %-14s %-8s ${NC}\n" "USERNAME" "IP" "QUOTA" "LOG"
+garis
+echo ""
+garis_atas
+for akun in "${data[@]}"
+do
+if [[ -z "$akun" ]]; then
+akun="tidakada"
+fi
+echo -n > /tmp/ipvmess.txt
+data2=( `cat /var/log/xray/access.log | tail -n 500 | awk -F "from " '{print $2}' | sed 's/tcp://g' | cut -d "[" -f 1 | cut -d ":" -f 1 | sort | uniq`);
+for ip in "${data2[@]}"
+do
+jum=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | awk -F "from " '{print $2}'| sed 's/tcp://g' | cut -d ":" -f 1 | grep -w "$ip" | sort | uniq)
+if [[ "$jum" = "$ip" ]]; then
+echo "$jum" >> /tmp/ipvmess.txt
+else
+echo "$ip" >> /tmp/other.txt
+fi
+jum2=$(cat /tmp/ipvmess.txt)
+sed -i "/$jum2/d" /tmp/other.txt > /dev/null 2>&1
+done
+jum=$(cat /tmp/ipvmess.txt)
+if [[ -z "$jum" ]]; then
+echo > /dev/null
+else
+iplimit=$(cat /etc/kyt/limit/vmess/ip/${akun})
+jum2=$(cat /tmp/ipvmess.txt | wc -l)
+byte=$(cat /etc/vmess/${akun})
+lim=$(con ${byte})
+wey=$(cat /etc/limit/vmess/${akun})
+gb=$(con ${wey})
+lastlogin=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | cut -d " " -f 2 | tail -1)
+printf "${WHITEBLD}   %-17s %-6s %-12s %-5s ${NC}\n" "$akun" "$jum2/$iplimit" "$gb/$lim" "$lastlogin"
+    rm -f /tmp/ipvmess.txt
+    fi
+done
+rm -f /tmp/other.txt
+garis_bawah
+echo ""
+> /tmp/other.txt
+> /tmp/ipvless.txt
+data=( $(cat /etc/xray/config.json | grep '#&' | cut -d ' ' -f 2 | sort | uniq) )
+garis
+center "$(printf "${YELLOW}[ CHECK VLESS ]${NC}\n")"
+garis
+printf "${YELLOW}   %-17s %-7s %-13s %-5s ${NC}\n" "USERNAME" "IP" "QUOTA" "LOG"
+garis
+echo ""
+garis_atas
+for akun in "${data[@]}"
+do
+if [[ -z "$akun" ]]; then
+akun="tidakada"
+fi
+echo -n > /tmp/ipvless.txt
+data2=( `cat /var/log/xray/access.log | tail -n 500 | awk -F "from " '{print $2}' | sed 's/tcp://g' | cut -d "[" -f 1 | cut -d ":" -f 1 | sort | uniq`);
+for ip in "${data2[@]}"
+do
+jum=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | awk -F "from " '{print $2}'| sed 's/tcp://g' | cut -d ":" -f 1 | grep -w "$ip" | sort | uniq)
+if [[ "$jum" = "$ip" ]]; then
+echo "$jum" >> /tmp/ipvless.txt
+else
+echo "$ip" >> /tmp/other.txt
+fi
+jum2=$(cat /tmp/ipvless.txt)
+sed -i "/$jum2/d" /tmp/other.txt > /dev/null 2>&1
+done
+jum=$(cat /tmp/ipvless.txt)
+if [[ -z "$jum" ]]; then
+echo > /dev/null
+else
+iplimit=$(cat /etc/kyt/limit/vless/ip/${akun})
+jum2=$(cat /tmp/ipvless.txt | wc -l)
+byte=$(cat /etc/vless/${akun})
+lim=$(con ${byte})
+wey=$(cat /etc/limit/vless/${akun})
+gb=$(con ${wey})
+lastlogin=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | cut -d " " -f 2 | tail -1)
+printf "${WHITEBLD}   %-17s %-6s %-12s %-5s ${NC}\n" "$akun" "$jum2/$iplimit" "$gb/$lim" "$lastlogin"
+fi 
+rm -rf /tmp/ipvless.txt
+done
+rm -rf /tmp/other.txt
+garis_bawah
+echo ""
+echo -n > /tmp/other.txt
+#!' | cut -d ' ' -f 2 | sort | uniq) )
+garis
+center "$(printf "${YELLOW}[ CHECK TROJAN ]${NC}\n")"
+garis
+printf "${YELLOW}   %-17s %-7s %-13s %-5s ${NC}\n" "USERNAME" "IP" "QUOTA" "LOG"
+garis
+echo ""
+garis_atas
+for akun in "${data[@]}"
+do
+if [[ -z "$akun" ]]; then
+akun="tidakada"
+fi
+echo -n > /tmp/iptrojan.txt
+data2=( `cat /var/log/xray/access.log | tail -n 500 | awk -F "from " '{print $2}' | sed 's/tcp://g' | cut -d "[" -f 1 | cut -d ":" -f 1 | sort | uniq`);
+for ip in "${data2[@]}"
+do
+jum=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | awk -F "from " '{print $2}'| sed 's/tcp://g' | cut -d ":" -f 1 | grep -w "$ip" | sort | uniq)
+if [[ "$jum" = "$ip" ]]; then
+echo "$jum" >> /tmp/iptrojan.txt
+else
+echo "$ip" >> /tmp/other.txt
+fi
+jum2=$(cat /tmp/iptrojan.txt)
+sed -i "/$jum2/d" /tmp/other.txt > /dev/null 2>&1
+done
+jum=$(cat /tmp/iptrojan.txt)
+if [[ -z "$jum" ]]; then
+echo > /dev/null
+else
+iplimit=$(cat /etc/kyt/limit/trojan/ip/${akun})
+jum2=$(cat /tmp/iptrojan.txt | wc -l)
+byte=$(cat /etc/trojan/${akun})
+lim=$(con ${byte})
+wey=$(cat /etc/limit/trojan/${akun})
+gb=$(con ${wey})
+lastlogin=$(cat /var/log/xray/access.log | grep -wE "$akun" | tail -n 500 | cut -d " " -f 2 | tail -1)
+printf "${WHITEBLD}   %-17s %-6s %-12s %-5s ${NC}\n" "$akun" "$jum2/$iplimit" "$gb/$lim" "$lastlogin"
+fi 
+rm -rf /tmp/iptrojan.txt
+done
+rm -rf /tmp/other.txt
+garis_bawah
+Sc_Credit

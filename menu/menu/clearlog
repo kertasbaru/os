@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# ==========================================
+# Warna
+RED='\033[0;31m'
+NC='\033[0m'
+GREEN='\033[0;32m'
+# ==========================================
+
+# Fungsi untuk menghapus isi file log kecuali auth.log
+clear_logs() {
+  local patterns=("$@")
+  for pattern in "${patterns[@]}"; do
+    mapfile -t logs < <(find /var/log/ -name "$pattern")
+    for log in "${logs[@]}"; do
+      if [[ "$log" == *auth.log ]]; then
+        echo "$log skipped"
+        continue
+      fi
+      echo "$log cleared"
+      : > "$log"
+    done
+  done
+}
+
+# Pola file log yang akan dibersihkan
+clear_logs "*.log" "*.err" "mail.*"
+
+# File log individual yang ingin dikosongkan, kecuali auth.log
+INDIVIDUAL_LOGS=(
+  "/var/log/syslog"
+  "/var/log/btmp"
+  "/var/log/messages"
+  "/var/log/debug"
+)
+
+for logfile in "${INDIVIDUAL_LOGS[@]}"; do
+  if [[ -f "$logfile" ]]; then
+    echo "$logfile cleared"
+    : > "$logfile"
+  fi
+done
+
+# Output selesai
+echo ""
+echo -e "${GREEN}✅ Clear log selesai${NC}"
+echo ""

@@ -1,0 +1,262 @@
+#!/bin/bash
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+clear
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+garis() {
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="[ AUTO LOCK LIMIT IP SSH ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+limitssh-on-off
+}
+MYIP=$(curl -sS ipv4.icanhazip.com)
+red() { echo -e "\\033[32;1m${*}\\033[0m"; }
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+
+# Valid Script
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e ""
+    echo -e "            ${RED}PERMISSION DENIED !${NC}"
+    echo -e "   \033[0;33mYour VPS${NC} $ipsaya \033[0;33mHas been Banned${NC}"
+    echo -e "     \033[0;33mBuy access permissions for scripts${NC}"
+    echo -e "             \033[0;33mContact Admin :${NC}"
+    echo -e "      \033[0;36mTelegram${NC} t.me/newbie_store24"
+    echo -e "      ${GREEN}WhatsApp${NC} wa.me/6282326322300"
+    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+	read -p "Tekan Enter untuk kembali ke menu..."
+    exit
+  fi
+}
+checking_sc
+clear
+export TIME="10"
+IP=$(curl -sS ipv4.icanhazip.com)
+ISP=$(cat /etc/xray/isp)
+CITY=$(cat /etc/xray/city)
+domain=$(cat /etc/xray/domain)
+clear
+LIMITSSH_SCRIPT="/usr/bin/limitsship"
+CRON_FILE="/etc/cron.d/limitsship"
+
+check_cron_status() {
+    if [ -e "$CRON_FILE" ]; then
+        echo -e "${WHITEBLD} Status Limit IP : ${NC}${YELLOW}[ON]${NC}"
+    else
+        echo -e "${WHITEBLD} Status Limit IP : ${NC}${REDBLD}[OFF]${NC}"
+    fi
+}
+
+start_cron() {
+clear
+
+Newbie_Banner
+echo
+    read -p "Input Menit Untuk LimitIP (15-59): " menit
+    if [[ ! "$menit" =~ ^[1-9]$|^[1-5][0-9]$ ]]; then
+        echo -e "${RED}Input tidak valid.${NC}"
+        return
+    fi
+
+    # Membuat isi tugas cron
+    CRON_ENTRY="*/$menit * * * * root $LIMITSSH_SCRIPT"
+
+    # Menambahkan atau memperbarui tugas cron
+    echo -e "SHELL=/bin/sh\nPATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin\n$CRON_ENTRY" | tee "$CRON_FILE" > /dev/null
+
+    # Pastikan izin file dan tugas cron
+    chmod +x "$LIMITSSH_SCRIPT"
+    chmod 644 "$CRON_FILE"
+    
+clear
+Newbie_Banner
+garis
+center "$(echo -e "${YELLOW}LIMIT IP BERHASIL DINYALAKAN${NC}")"
+garis
+echo
+check_cron_status
+echo -e " ${WHITEBLD}Auto Shutdown   :${NC} ${YELLOW}$menit Menit${NC}"
+echo
+garis
+Sc_Credit
+}
+
+stop_cron() {
+    rm -f "$CRON_FILE"
+	clear
+    Newbie_Banner
+    garis
+    center "$(echo -e "${YELLOW}LIMIT IP BERHASIL DIMATIKAN${NC}")"
+	garis
+    echo
+    echo -e "${WHITEBLD} Status  :${NC} ${RED}NonActive${NC}"
+    echo
+    garis
+    Sc_Credit
+}
+
+
+
+function Environment(){
+clear
+Newbie_Banner
+garis
+center "$(check_cron_status)"
+garis
+echo -e "${WHITEBLD}"
+echo -e " 1.  Start Limit Ip ssh "
+echo -e " 2.  Stopp Limit Ip ssh "
+echo -e " x.  Back to Menu "
+echo -e "${NC}"
+garis
+echo
+}
+Environment
+while true; do
+echo ""
+read -p "Select From Options [1/2 or x] :  " REPLY
+    case $REPLY in
+        1) clear ; start_cron ; break;;
+        2) clear ; stop_cron ; break;;
+        0|x) clear ; m-ssh ; break;;
+        *) 	
+			tput cuu 1 && tput el 
+			tput cuu 1 && tput el 
+            echo -e "\nInput tidak valid! Silakan coba lagi."
+            sleep 2
+			tput cuu 1 && tput el  
+            ;;
+    esac
+	tput cuu 1 && tput el  
+    read -p "Tekan Enter untuk kembali ke menu..."
+    tput cuu 1 && tput el  # Hapus pesan error sebelum kembali ke input
+done

@@ -1,0 +1,272 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : https://t.me/newbie_store24
+# //====================================================
+clear
+REDBG="\033[41m"  
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" 
+NC="\033[0m"         
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+domain=$(cat /etc/xray/domain)
+
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="[ CHECK VLESS ACCOUNT ] "
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+systemctl restart xray > /dev/null 2>&1
+read -p "Tekan Enter untuk kembali ke menu..."
+m-xray
+exit 0
+}
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    # Jika useexp adalah "Lifetime", anggap tetap aktif
+
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          ${NC}"
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    echo -e ""
+    printf "${WHITEBLD}            \033[91;1mPERMISSION DENIED !${NC}"
+    printf "${WHITEBLD}   \033[0;33mYour VPS\033[0m $ipsaya \033[0;33mHas been Banned${NC}"
+    printf "${WHITEBLD}     \033[0;33mBuy access permissions for scripts${NC}"
+    printf "${WHITEBLD}             \033[0;33mContact Admin :${NC}"
+    printf "${WHITEBLD}      \033[2;32mWhatsApp\033[0m wa.me/6282326322300"
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    exit 1
+  fi
+}
+checking_sc
+function Gunakan_Bug() {
+filename="/etc/xray/.bug_optr"
+  clear
+  echo "Bug List:"
+  # Membaca file baris per baris
+  i=1
+  while IFS="=" read -r key value; do
+    echo "$i.) $key"
+    options["$i"]="$value"  # Menyimpan nilai (value) berdasarkan nomor pilihan
+    ((i++))
+  done < "$filename"
+  
+  # Meminta input dari pengguna
+  echo -e "\nPilih nomor (1-${i-1}):"
+  read -p "Enter choice: " choice
+  
+  # Mengecek apakah pilihan valid
+  if [[ "$choice" -ge 1 && "$choice" -lt "$i" ]]; then
+    # Mendapatkan nilai (value) yang dipilih
+    selected_value="${options[$choice]}"
+    echo "Anda memilih: ${options[$choice]}"
+    
+    # Jika ingin menggunakan nilai tersebut, misalnya menyimpan dalam variabel 'domain'
+    bug="$selected_value"
+	else
+    bug="$domain"
+  fi
+}
+function Daftar_Account() {
+grep -E "^#& " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
+    printf "${WHITEBLD}     %-23s %-12s${NC}\n" "$user" "$date"
+done
+}
+
+function Cek_Config_Vless() {
+	clear
+	Newbie_Banner
+    printf "${YELLOW}     %-23s %-12s${NC}\n" "USERNAME" "EXP DATE" 
+	garis_atas
+	Daftar_Account
+    garis_bawah
+    echo -e "${WHITEBLD}"
+	read -rp " Input Username   : " user
+	if [[ -z "$user" || "$user" == "exit" ]]; then
+    m-xray
+    exit
+	fi
+	
+	if ! grep -qwE "^#& $user" /etc/xray/config.json; then
+    echo -e "User $user Tidak Ditemukan!!"
+	sleep 1
+	check-vle
+    exit 1
+    else
+iplimit=$(cat /etc/kyt/limit/vless/ip/$user)
+Quota1=$(cat /etc/vless/$user)
+Quota=$((Quota1 / 1024 / 1024 / 1024))
+uuid=$(grep -E "^},{" "/etc/xray/config.json" |  grep -i '"'"${user}"'"' | cut -d " " -f 2 | cut -d '"' -f 2 | uniq )
+exp=$(grep -E "^#& " "/etc/xray/config.json" | grep -i ' '"${user}"' ' | cut -d ' ' -f 3 | uniq )
+
+vlesslink1="vless://${uuid}@${bug}:443?security=tls&encryption=none&type=ws&headerType=none&path=/vless&sni=${domain}&host=${domain}#${user}"
+vlesslink2="vless://${uuid}@${bug}:80?security=none&encryption=none&type=ws&headerType=none&path=/vless&host=${domain}#${uji}"
+vlesslink3="vless://${uuid}@${bug}:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=vless-grpc&sni=${domain}#${user}"
+fi
+}
+function Details_Account() {
+printf "${WHITEBLD} Remarks     : ${user} ${NC}\n"
+printf "${WHITEBLD} Domain      : ${domain}${NC}\n"
+printf "${WHITEBLD} User Quota  : ${Quota} GB${NC}\n"
+printf "${WHITEBLD} User Ip     : ${iplimit} IP${NC}\n"
+printf "${WHITEBLD} port TLS    : 443-900${NC}\n"
+printf "${WHITEBLD} port WS     : 80,8880,8080${NC}\n"
+printf "${WHITEBLD} User ID     : ${uuid}${NC}\n"
+printf "${WHITEBLD} Locations.  : $CITY${NC}\n"
+printf "${WHITEBLD} ISP         : $ISP${NC}\n"
+printf "${WHITEBLD} Encryption  : none${NC}\n"
+printf "${WHITEBLD} Path TLS    : /vless ${NC}\n"
+printf "${WHITEBLD} ServiceName : vless-grpc${NC}\n"
+}
+
+function Link_Json() {
+garis
+printf "${WHITEBLD} Link TLS    : ${vlesslink1}${NC}\n"
+garis
+printf "${WHITEBLD} Link NTLS   : ${vlesslink2}${NC}\n"
+garis
+printf "${WHITEBLD} Link GRPC   : ${vlesslink3}${NC}\n"
+garis
+printf "${WHITEBLD} OpenClash   : https://${domain}:81/vless-$user.txt${NC}\n"
+}
+
+
+function Details_Expiry() {
+garis
+printf "${REDBLD} Expiry      : $exp ${NC}\n"
+}
+Gunakan_Bug
+clear
+Cek_Config_Vless
+clear
+Newbie_Banner
+Details_Account
+Link_Json
+Details_Expiry
+Sc_Credit

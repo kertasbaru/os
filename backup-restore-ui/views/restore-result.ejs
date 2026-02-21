@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Restore Result</title>
+  <style>
+    body, html {
+      height: 100%;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: url('https://raw.githubusercontent.com/kertasbaru/nebot/main/Assets/banner.jpg') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0;
+      color: <%= success ? '#2e7d32' : '#b00020' %>;
+      padding: 1rem;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      width: 360px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+    h2 {
+      margin-bottom: 1.2rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      color: inherit;
+    }
+    p {
+      font-size: 1.1rem;
+      margin-bottom: 2rem;
+      color: inherit;
+    }
+    a.button {
+      display: inline-block;
+      padding: 0.85rem 1.5rem;
+      background: linear-gradient(90deg, #00cec9 0%, #6c5ce7 100%);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.6);
+      transition: background 0.4s ease;
+    }
+    a.button:hover {
+      background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 100%);
+      box-shadow: 0 6px 20px rgba(0, 206, 201, 0.8);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2><%= success ? '✅ Restore Berhasil' : '❌ Restore Gagal' %></h2>
+    <p><%= message %></p>
+    <a href="/restore/upload" class="button">⬅️ Kembali ke Upload</a>
+  </div>
+</body>
+</html>

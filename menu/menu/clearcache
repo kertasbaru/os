@@ -1,0 +1,41 @@
+#!/bin/bash
+
+# Warna
+GREEN='\033[0;32m'
+NC='\033[0m'
+
+# Loading Spinner
+loading() {
+  local pid=$1
+  local delay=0.1
+  local spin='-\|/'
+
+  while ps -p $pid &> /dev/null; do
+    local temp=${spin#?}
+    printf "[%c] " "$spin"
+    spin=$temp${spin%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+}
+
+# Clear Cache
+clear
+echo ""
+echo -e "[ ${GREEN}Info${NC} ] Clearing RAM cache..."
+
+# Hanya jika user adalah root
+if [[ $EUID -ne 0 ]]; then
+  echo -e "[ ${RED}Error${NC} ] Script ini harus dijalankan sebagai root!"
+  exit 1
+fi
+
+# Jalankan pembersihan cache
+echo 1 > /proc/sys/vm/drop_caches & loading $!
+
+echo ""
+echo -e "[ ${GREEN}OK${NC} ] Cache berhasil dibersihkan!"
+echo -e "${GREEN}Kembali ke menu dalam 2 detik...${NC}"
+sleep 2
+menu

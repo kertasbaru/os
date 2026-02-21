@@ -1,0 +1,421 @@
+#!/bin/bash
+clear;clear
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[92;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+MYIP=$(cat /etc/xray/ipvps)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+LOCAL_IP_FILE="/etc/izin/ip"   # simpan data GitHub di sini
+GITHUB_IP_URL="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+update_data() {
+    echo "Mengupdate data dari GitHub..."
+    mkdir -p $(dirname "$LOCAL_IP_FILE")
+    curl -sS "$GITHUB_IP_URL" -o "$LOCAL_IP_FILE"
+    echo "Data berhasil diupdate!"
+}
+if [[ "$1" == "update" ]]; then
+    update_data
+    exit 0
+fi
+if [[ ! -f "$LOCAL_IP_FILE" ]]; then
+    echo "File lokal tidak ditemukan, mengambil data dari GitHub..."
+    update_data
+fi
+MYIP=$(cat /usr/bin/.ipvps)
+username=$(grep -wE "$MYIP" "$LOCAL_IP_FILE" | awk '{print $2}')
+echo "$username" >/usr/bin/user
+valid=$(grep -wE "$MYIP" "$LOCAL_IP_FILE" | awk '{print $3}')
+echo "$valid" >/usr/bin/e
+
+# Fungsi cek masa aktif
+checking_sc() {
+    useexp="$valid"
+    if [[ "$useexp" == "Lifetime" ]]; then
+        return
+    fi
+
+    date_list_epoch=$(date -d "$date_list" +%s)
+    useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+    if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
+        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e ""
+        echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+        echo -e ""
+        echo -e "  \033[0;33m🔒 Your VPS\033[0m $MYIP \033[0;33mHas been Banned\033[0m"
+        echo -e ""
+        echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
+        echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+        echo -e ""
+        echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
+        echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
+        echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+        echo -e ""
+        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        exit 1
+    fi
+}
+checking_sc
+
+VERSIONOLD=$(cat /opt/.ver)
+VERSIONNEW=$(curl -sS https://raw.githubusercontent.com/kertasbaru/os/main/versi)
+
+if [[ "$VERSIONOLD" != "$VERSIONNEW" ]]; then
+  wget -q https://raw.githubusercontent.com/kertasbaru/os/main/menu/update.sh && chmod +x update.sh && ./update.sh
+fi
+
+dorpaket() {
+    cd ~ || exit 1
+
+    if [ ! -d "me-cli" ]; then
+        echo "[INFO] Fitur Dor belum ada, mulai download..."
+        gdown --id 15ZfWf6ZQELqzbZba5vNgwkmps439LnDA -O me-cli.zip || {
+            echo "[ERROR] Gagal download me-cli.zip"
+            return 1
+        }
+
+        unzip -o me-cli.zip || {
+            echo "[ERROR] Gagal extract me-cli.zip"
+            rm -f me-cli.zip
+            return 1
+        }
+
+        rm -f me-cli.zip
+        cd me-cli || return 1
+        chmod +x setup.sh
+        ./setup.sh
+    else
+        echo "[INFO] Fitur Dor sudah ada, langsung jalankan..."
+        cd me-cli || return 1
+    fi
+
+    python3 main.py
+}
+
+clear
+######################################
+# // DETAIL ORDER IZIN IP
+username=$(cat /usr/bin/user)
+exp=$(cat /usr/bin/e)
+######################################
+clear
+# // DAYS LEFT
+if [[ "$valid" == "Lifetime" ]]; then
+  masaaktif="Lifetime"
+else
+  d1=$(date -d "$valid" +%s)
+  d2=$(date -d "$today" +%s)
+  certifacate=$(((d1 - d2) / 86400))
+  if [[ $certifacate -le 0 ]]; then
+    masaaktif="EXPIRED"
+  else
+    masaaktif="${certifacate} Day"
+  fi
+fi
+
+clear
+######################################
+# // GETTINGS SYSTEM
+OS=$(cat /etc/os-release | grep -w PRETTY_NAME | head -n1| sed 's/=//g' | sed 's/"//g' | sed 's/PRETTY_NAME//g')
+RAM=$(free -m | awk 'NR==2 {print $2}')
+UPTIME=$(uptime -p | cut -d " " -f 2-10)
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+DOMAIN=$(cat /etc/xray/domain)
+# MUTIARA=$(cat /etc/kata_mutiara)
+MUTIARA=$(cat /opt/.ver)
+NET_SPEED=$(cat /etc/traffic | awk '/Download/ {print $2}')
+kemarin=$(date -d "-1 days" +"%m-%d")
+hariini=$(date -d "0 days" +"%m-%d")
+kemarin1=$(date -d "-1 days" +"%m/%d")
+hariini1=$(date -d "0 days" +"%m/%d")
+bulan=$(date +"%b '%y")
+bulan1=$(date +"%Y-%m")
+kemarin2=$(vnstat -d | grep -w "${kemarin}" | awk '{print $8" "substr ($9 ,1 ,1) substr ($9 ,3 ,1)}') 
+kemarin3=$(vnstat -d | grep -w "${kemarin1}" | awk '{print $8" "substr ($9 ,1 ,1) substr ($9 ,3 ,1)}') 
+if [[ $kemarin2 == "" ]]; then
+bwkmrn=${kemarin3}
+else
+bwkmrn=${kemarin2}
+fi
+if [[ $bwkmrn == "" ]]; then
+bwkmrn1="NEWVPS "
+else
+bwkmrn1=${bwkmrn}
+fi
+hariini2=$(vnstat -d | grep -w "${hariini}" | awk '{print $8" "substr ($9 ,1 ,1) substr ($9 ,3 ,1)}') 
+hariini3=$(vnstat -d | grep -w "${hariini1}" | awk '{print $8" "substr ($9 ,1 ,1) substr ($9 ,3 ,1)}') 
+if [[ $hariini2 == "" ]]; then
+bwhari=${hariini3}
+else
+bwhari=${hariini2}
+fi
+rxtdy2=$(vnstat -d | grep -w "${hariini}" | awk '{print $2" "substr ($3 ,1 ,1) substr ($3 ,3 ,1)}') 
+rxtdy3=$(vnstat -d | grep -w "${hariini1}" | awk '{print $2" "substr ($3 ,1 ,1) substr ($3 ,3 ,1)}') 
+if [[ $rxtdy2 == "" ]]; then
+rxtdy=${rxtdy3}
+else
+rxtdy=${rxtdy2}
+fi
+txtdy2=$(vnstat -d | grep -w "${hariini}" | awk '{print $5" "substr ($6 ,1 ,1) substr ($6 ,3 ,1)}') 
+txtdy3=$(vnstat -d | grep -w "${hariini1}" | awk '{print $5" "substr ($6 ,1 ,1) substr ($6 ,3 ,1)}') 
+if [[ $txtdy2 == "" ]]; then
+txtdy=${txtdy3}
+else
+txtdy=${txtdy2}
+fi
+bulan2=$(vnstat -m | grep -w "${bulan}" | awk '{print $9" "substr ($10 ,1 ,1) substr ($10 ,3 ,1)}') 
+bulan3=$(vnstat -m | grep -w "${bulan1}" | awk '{print $8" "substr ($9 ,1 ,1) substr ($9 ,3 ,1)}') 
+if [[ $bulan2 == "" ]]; then
+bwbln=${bulan3}
+else
+bwbln=${bulan2}
+fi
+vlx=$(grep -c -E "^#& " "/etc/xray/config.json")
+let VLESS_COUNT=$vlx/2
+# \\ Vmess account //
+vmc=$(grep -c -E "^### " "/etc/xray/config.json")
+let VMESS_COUNT=$vmc/2
+# \\ Trojan account //
+SSH_COUNT="$(awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd | wc -l)"
+trx=$(grep -c -E "^#! " "/etc/xray/config.json")
+let TROJAN_COUNT=$trx/2
+# \\ shadowsocks account //
+ssx=$(grep -c -E "^#!# " "/etc/xray/config.json")
+let ssa=$ssx/2
+let xra=($VLESS_COUNT+$VMESS_COUNT+$TROJAN_COUNT+$ssa)
+dropbear_service=$(/etc/init.d/dropbear status | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+
+haproxy_service=$(systemctl status haproxy | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+
+xray_service=$(systemctl status xray | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+
+nginx_service=$(systemctl status nginx | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+ssh_service=$(systemctl status ws | grep Active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
+
+clear
+######################################
+# RUNNING HAPROXY
+######################################
+if [[ $haproxy_service == "running" ]]; then 
+   status_haproxy="ON"
+else
+   status_haproxy="OFF"
+fi
+######################################
+# RUNNING XRAY
+######################################
+if [[ $xray_service == "running" ]]; then 
+   status_xray="ON"
+else
+   status_xray="OFF"
+fi
+######################################
+# RUNNING NGINX
+######################################
+if [[ $nginx_service == "running" ]]; then 
+   status_nginx="ON"
+else
+   status_nginx="OFF"
+fi
+if [[ $ssh_service == "running" ]]; then 
+   status_ssh="ON"
+else
+   status_ssh="OFF"
+fi
+######################################
+# RUNNING DROPBEAR
+######################################
+services=("haproxy" "nginx" "ws" "dropbear" "xray" "udp-custom" )
+
+# Cek status masing-masing service
+status_service="${YELLOW}GOOD${NC}"
+for service in "${services[@]}"; do
+    if [[ "$(systemctl is-active $service)" != "active" ]]; then
+        status_service="${REDBLD}ERROR $service${NC}"
+        break
+    fi
+done
+format_speed() {
+    local speed=$1
+    if (( $(echo "$speed >= 1000" | bc -l) )); then
+        printf "%.2f Gbps\n" "$(echo "$speed / 1000" | bc -l)"
+    else
+        printf "%.2f Mbps\n" "$speed"
+    fi
+}
+
+speed_value=$NET_SPEED
+formatted_speed=$(format_speed "$speed_value")
+
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+
+
+# // NEWBIE TUNNELING | NB PROJECT
+# // WHATSAPP : 082326322300
+# // TELEGRAM : NEWBIE_STORE24
+center() {
+    local BOX_WIDTH=62
+    local TEXT="$1"
+    local CLEAN_TEXT=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    local TEXT_LENGTH=${#CLEAN_TEXT}
+    local LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    local RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+    local LEFT_SPACE=$(printf '%*s' "$LEFT_PADDING" '')
+    local RIGHT_SPACE=$(printf '%*s' "$RIGHT_PADDING" '')
+    echo -e "${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+}
+
+function Newbie_Banner() {
+clear
+BOX_WIDTH=60
+TEXT=".::. $(cat /etc/xray/username) .::."
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════════════════"
+}
+function Service_System_Operating() {
+
+print_rainbow " ════════════════════════════════════════════════════════════"
+printf " ${WHITEBLD}%-7s${NC} : ${REDBLD}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "CLIENTS" "$username" "OS" "$OS"
+printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "RAM" "$RAM MB" "UPTIME" "$UPTIME"
+printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "IP" "$MYIP" "ISP" "$ISP"
+printf " ${WHITEBLD}%-7s${NC} : ${REDBLD}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "EXPIRED" "$masaaktif" "DOMAIN" "$DOMAIN"
+printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "RX" "$rxtdy" "LAST" "$bwkmrn1"
+printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "TX" "$txtdy" "TODAY" "$bwhari"
+printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${REDBG}%-8s${NC}\n" "REGION" "$CITY" "MONTH" "$bwbln"
+print_rainbow " ────────────────────────────────────────────────────────────"
+}
+function Service_Status() {
+center "$(echo -e "[ SERVICE STATUS - $status_service ]")"
+print_rainbow " ────────────────────────────────────────────────────────────"
+center "$(echo -e "${WHITEBLD}PROXY${NC} ${GREEN}: $status_haproxy${NC}")"
+center "$(echo -e "${WHITEBLD}NGINX${NC} ${GREEN}: $status_nginx${NC}")"
+center "$(printf "${WHITEBLD} %s${NC} : ${GREEN}%s${NC} ${WHITEBLD} %s${NC} : ${GREEN}%s${NC}\n" "SSH" "$status_ssh" "XRAY" "$status_xray")"
+center "$(printf "${WHITEBLD} %s${NC} : ${GREEN}%s${NC} ${WHITEBLD} %s${NC} : ${GREEN}%s${NC}\n" "SSH ACCOUNT" "$SSH_COUNT" "XRAY ACCOUNT" "$xra")"
+print_rainbow " ════════════════════════════════════════════════════════════"
+}
+function List_All_Account() {
+print_rainbow " ╭───────────────────────────────────────────────────────────╮"
+center "$(echo -e "$MUTIARA")" | lolcat
+print_rainbow " ╰───────────────────────────────────────────────────────────╯"
+}
+function Acces_Use_Command() {
+#center "$(printf "$YELLOW[ MENU ]${NC}\n")"
+#print_rainbow " ════════════════════════════════════════════════════════════"
+echo -e "  ${WHITEBLD} (1) SSH/OPENVPN                    (6) ADMIN MENU  ${NC}"
+echo -e "  ${WHITEBLD} (2) XRAY MANAGER                   (7) BOT TELEGRAM  ${NC}"
+echo -e "  ${WHITEBLD} (3) ADD BUG CONFIG                 (8) UPDATE SCRIPT  ${NC}"
+echo -e "  ${WHITEBLD} (4) CHANGE WARNA                   (9) BACKUP & RESTORE  ${NC}"
+echo -e "  ${WHITEBLD} (5) REGISTER IP                   (10) FEATURES  ${NC}"
+print_rainbow " ════════════════════════════════════════════════════════════"
+printf "${REDBLD}     %-43s${NC}${WHITEBLD}%-20s${NC}\n" "[ REBOOT SYSTEM ]" "[ EXIT ]"
+print_rainbow " ════════════════════════════════════════════════════════════"
+}
+
+checking_sc
+Newbie_Banner
+Service_System_Operating
+Service_Status
+Acces_Use_Command
+List_All_Account
+while true; do
+    echo ""
+    read -p "Select From option [1/10 or x] :  " hallo
+    case $hallo in
+        1) clear ; m-ssh ; break ;;  # menu ssh
+        2) clear ; m-xray ; break ;;  # menu vmess
+        3) clear ; nano /etc/xray/.bug_optr ; break ;;  # menu vless
+        4) clear ; change_warna ; break ;;  # menu trojan
+        5) clear ; regisip ; break ;;  # menu shadowsocks
+        6) clear ; main_menu ; break ;;  # menu noobzvps
+        7) clear ; m-bot ; break ;;  # menu bot telegram
+        8) clear ; wget -q https://raw.githubusercontent.com/kertasbaru/os/main/menu/update.sh && chmod +x update.sh && ./update.sh ; break ;;  # Update script
+        9) clear ; m-bkp ; break ;;  # menu backup
+        10) clear ; m-ftr ; break ;;  # menu managers
+        11) clear ; reboot ;;  # reboot tetap berjalan
+		tembak) clear ; dorpaket ; break ;;
+        r) clear ; figlet BYE BYE | lolcat ; reboot ;;
+        0|x) clear ; figlet WUZZSTORE | lolcat ; exit 0 ;;
+        *)  
+            tput cuu 1 && tput el   
+            echo -e "${RED}Input tidak valid!${NC} Silakan pilih menu yang benar." 
+            sleep 2
+            tput cuu 1 && tput el  
+        ;;
+    esac	   
+		tput cuu 1 && tput el
+	    read -p "Tekan Enter untuk kembali ke menu..."
+		tput cuu 1 && tput el  
+done

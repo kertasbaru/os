@@ -1,0 +1,180 @@
+#!/bin/bash
+# My Telegram : https://t.me/newbielearning
+# ==========================================
+# Color
+RED='[0;31m'
+NC='[0m'
+GREEN='[0;32m'
+ORANGE='[0;33m'
+BLUE='[0;34m'
+PURPLE='[0;35m'
+CYAN='[0;36m'
+LIGHT='[0;37m'
+# ==========================================
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    # Jika useexp adalah "Lifetime", anggap tetap aktif
+
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
+echo -e "[1;93m────────────────────────────────────────────[0m"
+echo -e "[41;1m ⚠️       AKSES DI TOLAK         ⚠️ [0m"
+echo -e "[1;93m────────────────────────────────────────────[0m"
+echo -e ""
+echo -e "        [91;1m❌ SCRIPT LOCKED ❌[0m"
+echo -e ""
+echo -e "  [0;33m🔒 Your VPS[0m $ipsaya [0;33mHas been Banned[0m"
+echo -e ""
+echo -e "  [91m⚠️  Masa Aktif Sudah Habis ⚠️[0m"
+echo -e "  [0;33m💡 Beli izin resmi hanya dari Admin![0m"
+echo -e ""
+echo -e "  [92;1m📞 Contact Admin:[0m"
+echo -e "  [96m🌍 Telegram: https://t.me/WuzzSTORE[0m"
+echo -e "  [96m📱 WhatsApp: https://wa.me/6287760204418[0m"
+echo -e ""
+echo -e "[1;93m────────────────────────────────────────────[0m"
+exit 1
+  fi
+}
+checking_sc
+CHATID=$(cat /etc/newbie_telegram_id)
+KEY="7193848831:AAFhSNDpbE3NKIb0_lzG2i-O2IN7SEas_1Q"
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+IP=$(curl -sS ipv4.icanhazip.com)
+domain=$(cat /etc/xray/domain)
+date=$(date +"%Y-%m-%d")
+clear
+echo "Mohon Menunggu , Proses Backup sedang berlangsung !!"
+rm -rf /root/backup
+mkdir /root/backup
+cp /etc/passwd backup/
+cp /etc/group backup/
+cp /etc/shadow backup/
+cp /etc/gshadow backup/
+cp /etc/crontab backup/
+cp /etc/vmess/.vmess.db backup/
+cp /etc/ssh/.ssh.db backup/
+cp /etc/vless/.vless.db backup/
+cp /etc/trojan/.trojan.db backup/
+cp /etc/bot/.bot.db backup/
+cp -r /etc/kyt/limit backup/
+cp -r /etc/limit backup/qt/
+cp -r /etc/vmess backup/
+cp -r /etc/trojan backup/
+cp -r /etc/vless backup/
+cp -r /var/lib/kyt/ backup/kyt 
+cp -r /etc/xray backup/xray
+cp -r /var/www/html/ backup/html
+backup_pw=$(tr -dc 'A-Za-z0-9' </dev/urandom | head -c 6)
+cd /root
+7z a -tzip -p"$backup_pw" "$IP.zip" backup > /dev/null 2>&1
+7z a -tzip -p"$backup_pw" "$IP-$date.zip" backup > /dev/null 2>&1
+backup_file="/root/$IP-$date.zip"    # Nama file backup
+remote_path="dr:backup/$IP-$date.zip" # Path tujuan di rclone
+max_retry=3  # Jumlah maksimal percobaan
+upload_backup() {
+    local attempt=1
+
+    while [[ $attempt -le $max_retry ]]; do
+        echo "Percobaan Membuat File Backup ke-$attempt..."
+        
+        # Upload file dengan rclone
+        rclone copy "$backup_file" "dr:backup/"
+
+
+        # Ambil URL share link
+        url=$(rclone link "$remote_path")
+
+        # Ambil ID dari URL
+        id=$(echo "$url" | grep '^https' | cut -d'=' -f2)
+
+        if [[ -n "$id" ]]; then
+		echo "$backup_pw" > /root/$id.txt
+            echo "File Backup Berhasil Dibuat"
+            return 0
+        fi
+
+        echo "Gagal Membuat Backup, mencoba ulang dalam 5 detik..."
+        sleep 5
+        ((attempt++))
+    done
+
+    echo "Backup gagal Dibuat setelah $max_retry percobaan!"
+	echo "$0" | at now + 5 minutes
+    echo "Backup akan dicoba kembali dalam 30 menit."
+    exit 1
+}
+upload_backup
+pass_backup="/root/$id.txt"
+upload_pass() {
+    local attempt=1
+
+    while [[ $attempt -le $max_retry ]]; do
+        echo "Menyiapkan Password ke-$attempt..."
+		rclone copy "$pass_backup" "pass:pass/"
+		sleep 1
+        if [[ $(rclone ls res:pass/ | grep -c $id.txt) -gt 0 ]]; then
+            echo "Password Backup Berhasil Dibuat"
+            return 0
+        fi
+
+        echo "Gagal Membuat Password, mencoba ulang dalam 5 detik..."
+        sleep 5
+        ((attempt++))
+    done
+
+    echo "Gagal Membuat Password setelah $max_retry percobaan!"
+	echo "$0" | at now + 5 minutes
+    echo "Backup akan dicoba kembali dalam 30 menit."
+    exit 1
+}
+upload_pass
+rm $id.txt
+rm -rf /root/backup
+rm -r /root/$IP-$date.zip
+clear
+curl -F chat_id="$CHATID" -F document=@"$IP.zip" https://api.telegram.org/bot$KEY/sendDocument > /dev/null 2>&1
+curl -s -X POST "https://api.telegram.org/bot$KEY/sendMessage" \
+  -H "Content-Type: multipart/form-data" \
+  -F chat_id="$CHATID" \
+  -F text="◇━━━━━━━━━━━━━━◇
+<b>⚠️Detail Backup VPS⚠️</b>
+◇━━━━━━━━━━━━━━◇
+<b>IP VPS</b>  : <code>${IP}</code>
+<b>DOMAIN</b>  : <code>${domain}</code>
+<b>Tanggal</b> : <code>${date}</code>
+<b>Pass</b>    : <code>${backup_pw}</code>
+◇━━━━━━━━━━━━━━◇
+<b>ID Backup</b>   : <code>${id}</code>
+◇━━━━━━━━━━━━━━◇
+Silahkan copy ID dan restore di VPS baru
+BY BOT : @Newbie_Store24" \
+  -F parse_mode="HTML" > /dev/null 2>&1
+
+echo ""
+rm -r /root/$IP.zip
+clear
+echo -e "
+Detail Backup 
+==================================
+IP VPS        : $IP
+ID Backup     : $id
+Tanggal       : $date
+Backup Pass   : $backup_pw
+==================================
+"
+echo "Silahkan copy Link dan restore di VPS baru"
+echo ""

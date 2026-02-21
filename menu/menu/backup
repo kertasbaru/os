@@ -1,0 +1,187 @@
+#!/bin/bash
+
+clear;clear
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[92;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+
+center() {
+    local BOX_WIDTH=62
+    local TEXT="$1"
+    local CLEAN_TEXT=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    local TEXT_LENGTH=${#CLEAN_TEXT}
+    local LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    local RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+    local LEFT_SPACE=$(printf '%*s' "$LEFT_PADDING" '')
+    local RIGHT_SPACE=$(printf '%*s' "$RIGHT_PADDING" '')
+    echo -e "${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+}
+
+
+
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+domain=$(cat /etc/xray/domain)
+
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+  if [[ "$useexp" == "Lifetime" ]]; then return; fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+  [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]] && {
+    echo -e "SCRIPT LOCKED - Expired!"
+    exit 1
+  }
+}
+checking_sc
+
+echo "📁 Membuat direktori backup..."
+
+rm -rf /root/backup
+
+function copy_backup() {
+  mkdir -p /root/backup
+  cp /etc/passwd /root/backup/
+  cp /etc/group /root/backup/
+  cp /etc/shadow /root/backup/
+  cp /etc/gshadow /root/backup/
+  cp /etc/crontab /root/backup/
+  cp /etc/vmess/.vmess.db /root/backup/
+  cp /etc/ssh/.ssh.db /root/backup/
+  cp /etc/vless/.vless.db /root/backup/
+  cp /etc/trojan/.trojan.db /root/backup/
+  cp /etc/bot/.bot.db /root/backup/
+  cp -r /etc/kyt/limit /root/backup/
+  cp -r /etc/limit /root/backup/qt/
+  cp -r /etc/vmess /root/backup/
+  cp -r /etc/trojan /root/backup/
+  cp -r /etc/vless /root/backup/
+  cp -r /var/lib/kyt/ /root/backup/kyt/
+  cp -r /etc/xray /root/backup/xray/
+  cp -r /var/www/html/ /root/backup/html/
+}
+
+IP=$(curl -sS ipv4.icanhazip.com)
+DATE=$(date +"%Y-%m-%d")
+TIME=$(date +"%H:%M:%S")
+BACKUP_NAME="$IP-$DATE-$TIME.zip"
+
+echo "🗜️ Membuat file backup.zip..."
+copy_backup > /dev/null 2>&1
+cd /root
+apt install zip -y > /dev/null 2>&1
+zip -r $BACKUP_NAME backup/ > /dev/null 2>&1
+
+echo "📤 Mengupload file backup.zip..."
+rclone copy /root/$BACKUP_NAME dr:backup/
+
+url=$(rclone link dr:backup/$BACKUP_NAME)
+id=(`echo $url | grep '^https' | cut -d'=' -f2`)
+# link="https://drive.google.com/u/4/uc?id=${id}&export=download"
+curl -F chat_id="$CHATID" -F document=@"$BACKUP_NAME" https://api.telegram.org/bot$KEYBK/sendDocument > /dev/null 2>&1
+curl -s -X POST "https://api.telegram.org/bot$KEYBK/sendMessage" \
+  -F chat_id="$CHATID" \
+  -F text="◇━━━━━━━━━━━━━━◇
+⚠️Detail Backup VPS⚠️
+◇━━━━━━━━━━━━━━◇
+IP VPS  : <code>${IP}</code>
+DOMAIN  : <code>${domain}</code>
+Tanggal : <code>${DATE} ${TIME}</code>
+◇━━━━━━━━━━━━━━◇
+ID Backup   : <code>${id}</code>
+◇━━━━━━━━━━━━━━◇
+Silahkan copy ID dan restore di VPS baru
+BY BOT : @WuzzSTORE" \
+  -F parse_mode="HTML" > /dev/null 2>&1
+
+rm -rf backup $BACKUP_NAME
+
+clear
+echo ""
+print_rainbow " ════════════════════════════════════════════════════════════"
+center "$(echo -e "\e[35m\e[33mBACKUP DATA VPS\e[35m\e[0m")"
+print_rainbow " ════════════════════════════════════════════════════════════"
+center "$(echo -e "\e[35m\e[37mSuccessfully\e[0m")"
+print_rainbow " ════════════════════════════════════════════════════════════"
+echo -e "\e[35m ID FILE      : \e[37m $id \e[0m"
+print_rainbow " ════════════════════════════════════════════════════════════"
+echo -e "\e[35m IN DATE      : \e[37m $DATE \e[0m"
+echo -e "\e[35m IN TIME      : \e[37m $TIME \e[0m"
+echo -e "\e[35m DOMAIN       : \e[37m ${domain} \e[0m"
+echo -e "\e[35m IP VPS       : \e[37m $IP \e[0m"
+print_rainbow " ════════════════════════════════════════════════════════════"
+center "$(echo -e "\e[37m Please copy the backup ID\e[0m")"
+center "$(echo -e "\e[37m paste link on the new VPS\e[0m")"
+print_rainbow " ════════════════════════════════════════════════════════════"
+echo ""
+
+read -p "Tekan Enter untuk kembali ke menu..."
+m-bkp

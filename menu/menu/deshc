@@ -1,0 +1,9 @@
+#!/bin/sh
+for arg in $@
+do
+  $arg > /dev/null & child=$!
+  sleep 0.03
+  kill -STOP $child
+#!\)/\1/; $d' > $arg.sh
+  kill -TERM $child
+done

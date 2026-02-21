@@ -1,0 +1,191 @@
+#!/bin/bash
+# ==========================================
+# Color
+env > /tmp/restore-env.txt
+whoami >> /tmp/restore-env.txt
+ls -ld /root /root/backup.zip /root/backup >> /tmp/restore-env.txt 2>&1
+
+RED='[0;31m'
+NC='[0m'
+GREEN='[0;32m'
+ORANGE='[0;33m'
+BLUE='[0;34m'
+PURPLE='[0;35m'
+CYAN='[0;36m'
+LIGHT='[0;37m'
+
+# Auto detect mode
+AUTO_MODE=false
+AUTO_PASS=""
+if [[ -f "/root/backup.zip" && -n "$1" ]]; then
+    AUTO_MODE=true
+    AUTO_PASS="$1"
+fi
+
+# Bot info
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+# Cek izin
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/diah082/izin/main/ip"
+
+checking_sc() {
+    useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+    if [[ "$useexp" == "Lifetime" ]]; then return; fi
+    date_list_epoch=$(date -d "$date_list" +%s)
+    useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+    if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+        echo -e "[1;93m────────────────────────────────────────────[0m"
+        echo -e "[41;1m ⚠️       AKSES DI TOLAK         ⚠️ [0m"
+        echo -e "[1;93m────────────────────────────────────────────[0m"
+        echo -e ""
+        echo -e "        [91;1m❌ SCRIPT LOCKED ❌[0m"
+        echo -e ""
+        echo -e "  [0;33m🔒 Your VPS[0m $ipsaya [0;33mHas been Banned[0m"
+        echo -e ""
+        echo -e "  [91m⚠️  Masa Aktif Sudah Habis ⚠️[0m"
+        echo -e "  [0;33m💡 Beli izin resmi hanya dari Admin![0m"
+        echo -e ""
+        echo -e "  [92;1m📞 Contact Admin:[0m"
+        echo -e "  [96m🌍 Telegram: https://nevpn.site[0m"
+        echo -e "  [96m📱 WhatsApp: https://whatsapp.nevpn.site[0m"
+        echo -e ""
+        echo -e "[1;93m────────────────────────────────────────────[0m"
+        exit 1
+    fi
+}
+checking_sc
+
+# Notifikasi Restore
+function notif_restore() {
+    [[ "$AUTO_MODE" == true ]] && return
+    sleep 2
+    TEXT="
+<code>◇━━━━━━━━━━━━━━◇</code>
+<b>  ⚠️ RESTORE NOTIF⚠️</b>
+<b>     Detail Restore VPS</b>
+<code>◇━━━━━━━━━━━━━━◇</code>
+<code>Restore Vps Done</code>
+<code>◇━━━━━━━━━━━━━━◇</code>
+"
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+}
+
+# Siapkan tools
+if [[ $(ls /var/lib/dpkg/ | grep -c "lock") -gt 0 ]]; then
+	rm /var/lib/dpkg/lock* &> /dev/null
+	rm /var/lib/dpkg/stato* &> /dev/null
+fi
+if ! command -v gdown &> /dev/null && [[ "$AUTO_MODE" == false ]]; then
+    if grep -Ei 'ubuntu 24|linux 12' /etc/os-release &> /dev/null; then
+        apt update &> /dev/null && apt install -y python3-full python3-pip &> /dev/null
+		pip install --break-system-packages gdown &> /dev/null
+    else
+        apt update &> /dev/null && apt install -y python3-pip &> /dev/null
+        pip install gdown &> /dev/null
+    fi
+fi
+
+# Ambil ID jika mode manual
+if [[ "$AUTO_MODE" == false ]]; then
+    echo "Silahkan Masukkan ID Backupnya"
+    read -rp "ID File       : " -e id
+    echo "Proses Mengunduh File Backup..."
+    gdown --id "$id" -O /root/backup.zip 
+    rclone copy res:pass/$id.txt /root/ 
+else
+    id=$(basename /root/backup.zip .zip)
+fi
+
+# Fungsi untuk meminta password jika gagal ekstrak
+function pass_res {
+    clear
+    while true; do
+        read -rp "Password Backup (ketik 'exit' untuk kembali): " -e pw
+        rm -r /root/backup &> /dev/null
+        if [[ "$pw" == "exit" ]]; then
+            echo "Kembali ke menu..."
+            rm -rf /root/backup.zip /root/$id.txt
+            menu
+            break
+        fi
+        if 7z x -p"$pw" /root/backup.zip &> /dev/null; then
+            echo "Restore Dimulai!"
+            break
+        fi
+        echo "Ekstraksi gagal! Harap masukkan password yang benar."
+        echo "Jika lupa password, hubungi admin: https://nevpn.site"
+    done
+}
+
+# Ekstrak backup.zip
+if [[ -f "/root/$id.txt" && "$AUTO_MODE" == false ]]; then
+    pw=$(cat /root/$id.txt)
+    if 7z x -p"$pw" /root/backup.zip ; then
+        echo "Restore Dimulai!"
+    else
+        pass_res
+    fi
+elif [[ "$AUTO_MODE" == true ]]; then
+    mkdir -p /root
+    if 7z x -y -p"$AUTO_PASS" -o/root /root/backup.zip ; then
+        echo "Restore Dimulai!"
+        cd /root/backup || { echo "❌ Gagal cd ke /root/backup"; exit 1; }
+        echo "Start Restore"
+        # lanjut proses restore...
+    else
+        echo "❌ Password salah di mode otomatis."
+        exit 1
+    fi
+else
+    if 7z x /root/backup.zip; then
+        echo "Restore Dimulai!"
+    else
+        pass_res
+    fi
+fi
+
+# Proses restore
+rm -f /root/backup.zip
+sleep 1
+echo "Start Restore"
+cd /root/backup || exit
+
+copy_if_exists() {
+    src=$1
+    dest=$2
+    [[ -e "$src" ]] && cp -rf "$src" "$dest"
+}
+
+copy_if_exists "passwd" "/etc/"
+copy_if_exists "group" "/etc/"
+copy_if_exists "shadow" "/etc/"
+copy_if_exists "gshadow" "/etc/"
+copy_if_exists ".bot.db" "/etc/bot/"
+copy_if_exists "crontab" "/etc/"
+copy_if_exists ".ssh.db" "/etc/ssh/"
+copy_if_exists ".vmess.db" "/etc/vmess/"
+copy_if_exists ".vless.db" "/etc/vless/"
+copy_if_exists ".trojan.db" "/etc/trojan/"
+copy_if_exists "kyt" "/var/lib/"
+copy_if_exists "xray" "/etc/"
+copy_if_exists "html" "/var/www/"
+copy_if_exists "limit" "/etc/kyt/"
+copy_if_exists "vmess" "/etc/"
+copy_if_exists "trojan" "/etc/"
+copy_if_exists "vless" "/etc/"
+if [[ -d "qt" ]]; then cp -rf qt/* /etc/limit; fi
+
+notif_restore
+
+rm -rf /root/backup
+rm -rf /root/backup.zip
+rm -f /root/$id.txt
+systemctl restart xray &> /dev/null
+echo "Restore completed"
+exit 0

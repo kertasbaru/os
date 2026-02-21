@@ -1,0 +1,357 @@
+#!/bin/bash
+clear
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="$nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+m-ssh
+}
+red() { echo -e "\\033[32;1m ${*}\\"; }
+clear
+#IZIN SCRIPT
+MYIP=$(curl -sS ipv4.icanhazip.com)
+echo -e "\e[32mloading...\e[0m"
+clear
+red() { echo -e " \\033[0m\033[91;1m${*}\\033[0m"; }
+
+# // Get Bot
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+export TIME="10"
+export URL="https://api.telegram.org/bot$KEY/sendMessage"
+clear
+
+# Valid Script
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    # Jika useexp adalah "Lifetime", anggap tetap aktif
+
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          ${NC}"
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    echo -e ""
+    echo -e "            \033[91;1mPERMISSION DENIED !${NC}"
+    echo -e "   \033[0;33mYour VPS\033[0m $ipsaya \033[0;33mHas been Banned${NC}"
+    echo -e "     \033[0;33mBuy access permissions for scripts${NC}"
+    echo -e "             \033[0;33mContact Admin :${NC}"
+    echo -e "      \033[2;32mWhatsApp\033[0m wa.me/6282326322300"
+    echo -e "\033[1;93m────────────────────────────────────────────${NC}"
+    exit
+  fi
+}
+checking_sc
+clear
+export TIME="10"
+IP=$(curl -sS ipv4.icanhazip.com)
+ISP=$(cat /etc/xray/isp)
+CITY=$(cat /etc/xray/city)
+domain=$(cat /etc/xray/domain)
+nama=$(cat /etc/xray/username)
+clear
+Newbie_Banner
+  echo -e ""
+  echo -e " Just input a number for \033[2;32mLimit IP${NC}"
+  echo -e ""
+  echo -e " \033[33m0\033[0m for No Limit"
+  echo -e ""
+garis
+echo -e "${WHITEBLD}"
+read -p " Username      : " Login
+egrep "^$Login" /etc/passwd >/dev/null
+if [ $? -eq 0 ]; then
+#	echo -e "${NC}"
+red USER SUDAH ADA DAN MASIH AKTIF
+sleep 2
+add-ssh
+fi
+egrep "^$Login" /etc/group >/dev/null
+if [ $? -eq 0 ]; then
+sed -i "/$Login/d" /etc/group >/dev/null
+fi
+read -p " Password      : " Pass
+read -p " Limit (IP)    : " iplimit
+read -p " Expired (day) : " masaaktif
+echo -e "${NC}"
+#limitip
+if [[ $iplimit -gt 0 ]]; then
+mkdir -p /etc/kyt/limit/ssh/ip/
+echo -e "$iplimit" > /etc/kyt/limit/ssh/ip/$Login
+else
+echo > /dev/null
+fi
+clear
+tgl=$(date -d "$masaaktif days" +"%d")
+bln=$(date -d "$masaaktif days" +"%b")
+thn=$(date -d "$masaaktif days" +"%Y")
+expe="$tgl $bln, $thn"
+tgl2=$(date +"%d")
+bln2=$(date +"%b")
+thn2=$(date +"%Y")
+tnggl="$tgl2 $bln2, $thn2"
+useradd -e `date -d "$masaaktif days" +"%Y-%m-%d"` -s /bin/false -M $Login
+expi="$(chage -l $Login | grep "Account expires" | awk -F": " '{print $2}')"
+echo -e "$Pass\n$Pass\n"| passwd $Login &> /dev/null
+hariini=`date -d "0 days" +"%Y-%m-%d"`
+expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
+
+if [ ! -e /etc/ssh ]; then
+  mkdir -p /etc/ssh
+fi
+
+if [ -z ${Quota} ]; then
+  Quota="0"
+fi
+
+c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
+d=$((${c} * 1024 * 1024 * 1024))
+
+if [[ ${c} != "0" ]]; then
+  echo "${d}" >/etc/ssh/${Login}
+fi
+DATADB=$(cat /etc/ssh/.ssh.db | grep "^#ssh#" | grep -w "${Login}" | awk '{print $2}')
+if [[ "${DATADB}" != '' ]]; then
+  sed -i "/\b${Login}\b/d" /etc/ssh/.ssh.db
+  echo "#ssh# ${Login} ${Pass} ${Quota} ${iplimit} ${expe}" >>/etc/ssh/.ssh.db
+else
+echo "#ssh# ${Login} ${Pass} ${Quota} ${iplimit} ${expe}" >>/etc/ssh/.ssh.db
+fi
+clear
+
+     
+TEXT="
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH OVPN Account     </code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Username         : </code> <code>$Login</code>
+<code>Password         : </code> <code>$Pass</code>
+<code>Limit Quota      : </code> <code>$Quota</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>IP               : $IP</code>
+<code>Host             : </code> <code>$domain</code>
+<code>Port OpenSSH     : 443, 80, 22</code>
+<code>Port Dropbear    : 443, 109</code>
+<code>Port SSH WS      : 80, 8080, 8081-9999 </code>
+<code>Port SSH UDP     : 1-65535 </code>
+<code>Port SSH SSL WS  : 443</code>
+<code>Port SSL/TLS     : 400-900</code>
+<code>Port OVPN WS SSL : 443</code>
+<code>Port OVPN SSL    : 443</code>
+<code>Port OVPN TCP    : 443, 1194</code>
+<code>Port OVPN UDP    : 2200</code>
+<code>BadVPN UDP       : 7100, 7300, 7300</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH WEBSOCKET    : </code><code>$domain:80@$Login:$Pass</code>
+<code>SSH SSL          : </code><code>$domain:443@$Login:$Pass</code>
+<code>SSH UDP          : </code><code>$domain:1-65535@$Login:$Pass</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Payload WSS      : </code><code>GET wss://BUG.COM/ HTTP/1.1[crlf]Host: $domain[crlf]Upgrade: websocket[crlf][crlf]</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+OVPN Download : https://$domain:81/
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Save Link Account: </code>https://$domain:81/ssh-$Login.txt
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+Aktif Selama         : $masaaktif Hari
+Dibuat Pada          : $tnggl
+Berakhir Pada        : $expe
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+"
+
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+
+     
+TEXT="<code>◇━━━━━━━━━━━━━━━━━◇
+*_PEMBELIAN BERHASIL_*
+◇━━━━━━━━━━━━━━━━━◇
+-» PRODUK : SSH
+-» REGION : $CITY
+-» REQ CONFIG : 
+-» REQ NAMA : $Login
+-» DEVICE : $iplimit IP
+-» HARGA : 
+-» AKTIF : $masaaktif HARI
+-» TGL EXP : $expe
+◇━━━━━━━━━━━━━━━━━◇
+$nama </code>"
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+clear
+PAYLOADWS="GET / HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADTLS="GET wss://$domain/ HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADHANCED="HEAD / HTTP/1.1[crlf]Host: Masukan_Bug[crlf][crlf]PATCH / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf][split]HTTP/ 1[crlf][crlf]"
+
+
+
+
+
+# Details ACcount
+function Details_Ssh(){
+garis_tebal
+center "$(print_rainbow "[ SSH OPENVPN ]")"
+garis_tebal
+echo -e "${WHITEBLD} Remark      : $Login ${NC}"
+echo -e "${WHITEBLD} Password    : $Pass ${NC}"
+echo -e "${WHITEBLD} Limit Ip    : ${iplimit} Devic ${NC}"
+echo -e "${WHITEBLD} Domain      : $domain ${NC}"
+echo -e "${WHITEBLD} ISP         : $ISP \033[0m "
+echo -e "${WHITEBLD} OpenSSH     : 443, 80, 22 ${NC}"
+echo -e "${WHITEBLD} Port UDP    : 1-65535 ${NC}"
+echo -e "${WHITEBLD} SSH WS      : 80,8080,8880,2082 ${NC}"
+echo -e "${WHITEBLD} SSL/TLS     : 443 ${NC}"
+echo -e "${WHITEBLD} OVPN UDP    : 2200 ${NC}"
+garis
+}
+
+
+
+function Copy_Faste(){
+echo -e "${WHITEBLD} Port 80     : $domain:80@$Login:$Pass ${NC}"
+echo -e "${WHITEBLD} Port 443    : $domain:443@$Login:$Pass ${NC}"
+echo -e "${WHITEBLD} Udp Custom  : $domain:1-65535@$Login:$Pass${NC}"
+echo -e "${WHITEBLD} OpenVpn     : https://$domain:81/ "
+echo -e "${WHITEBLD} Account     : https://$domain:81/ssh-$Login.txt "
+}
+
+
+
+function Details_Payload(){
+garis
+echo -e "${WHITEBLD} Payload WS  : ${PAYLOADWS}${NC}"
+garis
+echo -e "${WHITEBLD} Payload TLS : ${PAYLOADTLS}${NC}"
+garis
+echo -e "${WHITEBLD} Payload ENCD: ${PAYLOADHANCED}${NC}"
+garis
+}
+
+
+
+function Expiry_Details(){
+red Days in    : $masaaktif Day 
+red Expiry in  : $expe 
+}
+
+Details_Ssh
+Copy_Faste
+Details_Payload
+Expiry_Details
+Sc_Credit

