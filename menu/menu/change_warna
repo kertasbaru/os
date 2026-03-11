@@ -2,23 +2,7 @@
 
 source /usr/bin/ui.sh
 
-# //====================================================
-# //  Newbie Store - Copy 2024
-# //====================================================
-# //  System Request : DEB 9-12 / UBUNTU 18-24
-# //  Author         : Kurniawan Setiadi
-# //  Develop        : Newbie Store
-# //  email          : Newbiestore09@gmail.com
-# //  telegram       : https://t.me/newbie_store24
-# //====================================================
-source /etc/warna
 nama=$(cat /etc/xray/username)
-garis_bawah(){
-print_rainbow " └──────────────────────────────────────────────┘"
-}
-garis_atas(){
-print_rainbow " ┌──────────────────────────────────────────────┐"
-}
 
 # Fungsi untuk menampilkan pilihan menu
 show_menu() {
@@ -40,19 +24,13 @@ change_color() {
     read -p "G: " g
     read -p "B: " b
 
-    # Menggunakan sed untuk mengganti nilai tanpa menghapus nilai lain
+    load_theme_color
     if [ "$color_name" == "start" ]; then
-        sed -i "s/^start_r=.*/start_r=$r/" /etc/warna
-        sed -i "s/^start_g=.*/start_g=$g/" /etc/warna
-        sed -i "s/^start_b=.*/start_b=$b/" /etc/warna
+        set_theme_scheme "$r $g $b" "$RGB_MID" "$RGB_END"
     elif [ "$color_name" == "mid" ]; then
-        sed -i "s/^mid_r=.*/mid_r=$r/" /etc/warna
-        sed -i "s/^mid_g=.*/mid_g=$g/" /etc/warna
-        sed -i "s/^mid_b=.*/mid_b=$b/" /etc/warna
+        set_theme_scheme "$RGB_START" "$r $g $b" "$RGB_END"
     elif [ "$color_name" == "end" ]; then
-        sed -i "s/^end_r=.*/end_r=$r/" /etc/warna
-        sed -i "s/^end_g=.*/end_g=$g/" /etc/warna
-        sed -i "s/^end_b=.*/end_b=$b/" /etc/warna
+        set_theme_scheme "$RGB_START" "$RGB_MID" "$r $g $b"
     fi
 
     echo "Warna ${color_name} berhasil diubah menjadi RGB($r, $g, $b)"
@@ -181,16 +159,8 @@ banner "SCRIPT BY $nama"
             return
             ;;
     esac
-    # Menyimpan preset gradasi warna-/etc/warna
-    echo "start_r=$start_r" > /etc/warna
-    echo "start_g=$start_g" >> /etc/warna
-    echo "start_b=$start_b" >> /etc/warna
-    echo "mid_r=$mid_r" >> /etc/warna
-    echo "mid_g=$mid_g" >> /etc/warna
-    echo "mid_b=$mid_b" >> /etc/warna
-    echo "end_r=$end_r" >> /etc/warna
-    echo "end_g=$end_g" >> /etc/warna
-    echo "end_b=$end_b" >> /etc/warna
+    # Menyimpan preset gradasi warna
+    set_theme_scheme "$start_r $start_g $start_b" "$mid_r $mid_g $mid_b" "$end_r $end_g $end_b"
     echo "Warna preset berhasil diterapkan!"
 }
 
