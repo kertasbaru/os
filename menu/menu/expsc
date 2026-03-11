@@ -9,7 +9,7 @@ domain=$(cat /etc/xray/domain)
 #RAM=$(free -m | awk 'NR==2 {print $2}')
 #MODEL=$(cat /etc/os-release | grep -w ID | head -n1 | sed 's/=//g' | sed 's/"//g' | sed 's/ID//g')
 
-eval $(wget -qO- https://domainsaya.dekaa.my.id)l
+source /usr/bin/var.conf
 TIME="10"
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear

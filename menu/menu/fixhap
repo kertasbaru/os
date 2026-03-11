@@ -56,7 +56,7 @@ sleep 1
 clear
 }
 
-eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+source /usr/bin/var.conf
 
 # fixhap fix Haproxy
 clear

@@ -2,7 +2,7 @@
 # Mod By NEWBIE VPN 
 
 source /usr/bin/ui.sh
-eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+source /usr/bin/var.conf
 
 export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
 
@@ -16,7 +16,7 @@ IPCLIENT=$(curl -sS $url_izin | grep $MYIP | awk '{print $4}')
 if [[ "$MYIP" != "$IPCLIENT" ]]; then
   rejected "$MYIP"
 else
-  if [[ $date_list > $exp ]] then
+  if [[ $date_list > $exp ]]; then
     rejected "$MYIP"
   fi
 fi

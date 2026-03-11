@@ -1,12 +1,12 @@
 #!/bin/bash
 
 source /usr/bin/ui.sh
-eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+source /usr/bin/var.conf
 
 if [[ "$MYIP" != "$IPCLIENT" ]]; then
   rejected "$MYIP"
 else
-  if [[ $date_list > $exp ]] then
+  if [[ $date_list > $exp ]]; then
     rejected "$MYIP"
   fi
 fi

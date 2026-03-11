@@ -174,7 +174,7 @@ exit 1
   fi
 }
 checking_sc
-eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
+source /usr/bin/var.conf
 function register() {
 AVAILABLE=$(curl -sS https://raw.githubusercontent.com/kertasbaru/izin/main/ip | grep -wE $MYIP | awk '{print $6}')
 echo -e "${YELLOW}      $AVAILABLE ${NC} ${WHITEBLD} IP DAPAT ANDA REGISTER${NC}"

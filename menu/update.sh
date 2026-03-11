@@ -1,11 +1,13 @@
 #!/bin/bash
 
-wget -qO /usr/bin/ui.sh "https://docs.google.com/uc?export=download&id=1uDRCwDrT2TtB3Cskvxaby92GgaqWk-Du"
+wget -qO /usr/bin/var.conf "${REPO}install/var.conf"
+chmod +x /usr/bin/var.conf
+source /usr/bin/var.conf
+
+wget -qO /usr/bin/ui.sh "${REPO}install/ui.sh"
 chmod +x /usr/bin/ui.sh
 
 source /usr/bin/ui.sh
-
-eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
 
 export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
 
@@ -18,7 +20,7 @@ IPCLIENT=$(curl -sS $IZIN | grep $MYIP | awk '{print $4}')
 if [[ "$MYIP" != "$IPCLIENT" ]]; then
   rejected "$MYIP"
 else
-  if [[ $date_list > $exp ]] then
+  if [[ $date_list > $exp ]]; then
     rejected "$MYIP"
   fi
 fi
@@ -27,7 +29,7 @@ NODE_VERSION=$(node -v 2>/dev/null | grep -oP '(?<=v)\d+' || echo "0")
 
 if [ "$NODE_VERSION" -lt 22 ]; then
   msg_info "${YELLOW}Installing or upgrading NodeJS to version 22${RESET}"
-  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - || msg_err "${RED}Failed to download NodeJS setup${RESER}"
+  curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - || msg_err "${RED}Failed to download NodeJS setup${RESET}"
   apt-get install -y nodejs || msg_err "${RED}Failed to install NodeJS${RESET}"
   npm install -g npm@latest
 else
