@@ -4,27 +4,19 @@ source /usr/bin/ui.sh
 
 OK="${GREEN}--->${RESET}"
 ERROR="${RED}[ERROR]${RESET}"
-GRAY="\e[1;30m"
-red='\e[1;31m'
-green='\e[0;32m'
-DF='\e[39m'
-Bold='\e[1m'
-Blink='\e[5m'
-yell='\e[33m'
-red='\e[31m'
-green='${GREEN}'
-blue='\e[34m'
-PURPLE='\e[35m'
-cyan='\e[36m'
-Lred='\e[91m'
-Lgreen='\e[92m'
-Lyellow='\e[93m'
-ORANGE='${YELLOW}'
-LIGHT='\033[0;37m'
-grenbo="${GREEN}"
+GRAY="${GRAY}"
+DF='${RESET}'
+Bold='${BOLD}'
+Blink='${BLINK}'
+yell='${YELLOW}'
+red='${RED}'
+PURPLE='${MAGENTA}'
+cyan='${CYAN}'
+Lred='${RED}'
+Lgreen='${GREEN}'
+Lyellow='${YELLOW}'
 ISP=$(cat /etc/xray/isp)
 CITY=$(cat /etc/xray/city)
-red() { echo -e "\\033[32;1m${*}\${RESET}"; }
 # Getting
 CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
 KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
@@ -338,7 +330,6 @@ if [ -z ${Quota} ]; then
   Quota="0"
 fi
 
-c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
 d=$((${c} * 1024 * 1024 * 1024))
 
 if [[ ${c} != "0" ]]; then

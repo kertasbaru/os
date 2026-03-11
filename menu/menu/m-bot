@@ -1,5 +1,6 @@
 
 source /usr/bin/ui.sh
+nama=$(cat /etc/xray/username)
 
 # //====================================================
 # //  Newbie Store - Copy 2024
@@ -11,27 +12,14 @@ source /usr/bin/ui.sh
 # //  telegram       : https://t.me/newbie_store24
 # //====================================================
 clear
-g="${GREEN}"
-cyan='\e[36m'
-r='\e[91m'
-garis_bawah(){
-print_rainbow " └──────────────────────────────────────────────┘"
-}
-garis_atas(){
-print_rainbow " ┌──────────────────────────────────────────────┐"
-}
-
-# Getting
 
 # // STATUS SERVICE BOT
 bot_service=$(systemctl status kyt | grep active | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 if [[ $bot_service == "running" ]]; then 
-   sts_bot="${g}[ON]${RESET}"
+   sts_bot="${GREEN}[ON]${RESET}"
 else
-   sts_bot="${r}[OFF]${RESET}"
+   sts_bot="${RED}[OFF]${RESET}"
 fi
-#####
-KIRI="${GREEN}>\033[1;33m>${RED}>${RED}$RESET"
 ipsaya=$(curl -sS ipv4.icanhazip.com)
 data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 date_list=$(date +"%Y-%m-%d" -d "$data_server")

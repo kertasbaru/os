@@ -191,7 +191,7 @@ systemctl reload ssh
 clear
 echo ""
 echo -e "   ${BLUE}_______________________________$RESET"
-echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $RESET"
+echo -e "   ${GREEN}  WELCOME TO RESET FACTORY $RESET"
 echo -e "   ${BLUE}_______________________________$RESET"
 echo ""
 read -p "   VERIFIKASI ADMIN :   " host11
@@ -199,7 +199,7 @@ if [[ $host11 = 123@Newbie ]]; then
 clear
 echo ""
 echo -e "   ${BLUE}_______________________________$RESET"
-echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $RESET"
+echo -e "   ${GREEN}  WELCOME TO RESET FACTORY $RESET"
 echo -e "   ${BLUE}_______________________________$RESET"
 echo ""
 echo -e " ${RED}PENTING HAL INI AKAN MENYEABKAN SEMUA AKUN $RESET"
@@ -232,10 +232,10 @@ else
 fi
 clear
 echo -e "   ${BLUE}_______________________________$RESET"
-echo -e "   \e[1;32m      RESET FACTORY $RESET"
+echo -e "   ${GREEN}      RESET FACTORY $RESET"
 echo -e "   ${BLUE}_______________________________$RESET"
 echo -e ""
-echo -e " \033[1;91m Factory Reset Sedang Berlangsung!!${WHITE}${BOLD}"
+echo -e " ${RED} Factory Reset Sedang Berlangsung!!${WHITE}${BOLD}"
 fun_bar 'backup' 'factreset'
 echo -e "   ${BLUE}_______________________________$RESET"
 echo -e ""
@@ -250,8 +250,8 @@ clear
     echo -e "            ${RED}PERMISSION DENIED !${RESET}"
     echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
     echo -e "             ${YELLOW}Contact Admin :${RESET}"
-    echo -e "      \033[2;32mWhatsApp${RESET} wa.me/6282326322300"
-	echo -e "      \033[2;32mTelegram${RESET} t.me/Newbie_Store24"
+    echo -e "      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
+	echo -e "      ${GREEN}Telegram${RESET} t.me/Newbie_Store24"
     echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 	echo ""
 	echo -e "	${YELLOW}Kembali Ke Menu Dalam 3 Detik${RESET}"

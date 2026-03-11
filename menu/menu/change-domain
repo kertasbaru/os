@@ -45,11 +45,6 @@ checking_sc() {
 checking_sc
 echo -e "${GREEN}loading...${RESET}"
 clear
-purple() { echo -e "\\033[35;1m${*}\${RESET}"; }
-tyblue() { echo -e "\\033[36;1m${*}\${RESET}"; }
-yellow() { echo -e "\\033[33;1m${*}\${RESET}"; }
-green() { echo -e "\\033[32;1m${*}\${RESET}"; }
-red() { echo -e "\\033[31;1m${*}\${RESET}"; }
 
 clear
 

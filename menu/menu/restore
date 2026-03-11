@@ -13,7 +13,6 @@ ORANGE='[0;33m'
 BLUE='[0;34m'
 PURPLE='[0;35m'
 CYAN='[0;36m'
-LIGHT='[0;37m'
 
 # Auto detect mode
 AUTO_MODE=false

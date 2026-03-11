@@ -12,7 +12,6 @@ print_rainbow " ┌────────────────────�
 }
 
 MYIP=$(curl -sS ipv4.icanhazip.com)
-red() { echo -e "\\033[32;1m${*}\${RESET}"; }
 CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
 KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
 export TIME="10"
@@ -42,7 +41,7 @@ checking_sc() {
     echo -e "   ${YELLOW}Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
     echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
     echo -e "             ${YELLOW}Contact Admin :${RESET}"
-    echo -e "      \033[0;36mTelegram${RESET} t.me/newbie_store24"
+    echo -e "      ${CYAN}Telegram${RESET} t.me/newbie_store24"
     echo -e "      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
     echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 	read -p "Tekan Enter untuk kembali ke menu..."

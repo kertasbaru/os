@@ -2,10 +2,8 @@
 
 source /usr/bin/ui.sh
 
-ORANGE='${YELLOW}'
 PURPLE='${MAGENTA}'
-CYAN='\033[0;36m'
-LIGHT='\033[0;37m'
+CYAN='${CYAN}'
 CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
 KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
 export TIME="10"
@@ -37,8 +35,8 @@ checking_sc() {
     echo -e "   ${YELLOW}Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
     echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
     echo -e "             ${YELLOW}Contact Admin :${RESET}"
-    echo -e "      \033[2;32mWhatsApp${RESET} wa.me/6282326322300"
-	echo -e "      \033[2;32mTelegram${RESET} t.me/Newbie_Store24"
+    echo -e "      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
+	echo -e "      ${GREEN}Telegram${RESET} t.me/Newbie_Store24"
     echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     sleep 10
 	reboot
@@ -162,7 +160,6 @@ if [ -z ${Quota} ]; then
   Quota="0"
 fi
 
-c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
 d=$((${c} * 1024 * 1024 * 1024))
 
 if [[ ${c} != "0" ]]; then
@@ -243,36 +240,36 @@ PAYLOADHANCED="HEAD / HTTP/1.1[crlf]Host: Masukan_Bug[crlf][crlf]PATCH / HTTP/1.
 # Details ACcount
 function Details_Ssh(){
 banner ""
-echo -e "  \033[37;1;7mSSH OPENVPN${RESET}"
+echo -e "  ${WHITE}${BOLD}${REVERSE}SSH OPENVPN${RESET}"
 baris_panjang
-echo -e "\033[3;37m Remark      : $user ${RESET}"
-echo -e "\033[3;37m Password    : $Pass ${RESET}"
-echo -e "\033[3;37m Limit Ip    : ${iplimit} Devic ${RESET}"
-echo -e "\033[3;37m Domain      : $domain ${RESET}"
-echo -e "\033[3;37m ISP         : $ISP ${RESET} "
-echo -e "\033[3;37m OpenSSH     : 443, 80, 22 ${RESET}"
-echo -e "\033[3;37m Port UDP    : 1-65535 ${RESET}"
-echo -e "\033[3;37m SSH WS      : 80,8080,8880,2082 ${RESET}"
-echo -e "\033[3;37m SSL/TLS     : 443 ${RESET}"
-echo -e "\033[3;37m OVPN UDP    : 2200 ${RESET}"
+echo -e "${WHITE} Remark      : $user ${RESET}"
+echo -e "${WHITE} Password    : $Pass ${RESET}"
+echo -e "${WHITE} Limit Ip    : ${iplimit} Devic ${RESET}"
+echo -e "${WHITE} Domain      : $domain ${RESET}"
+echo -e "${WHITE} ISP         : $ISP ${RESET} "
+echo -e "${WHITE} OpenSSH     : 443, 80, 22 ${RESET}"
+echo -e "${WHITE} Port UDP    : 1-65535 ${RESET}"
+echo -e "${WHITE} SSH WS      : 80,8080,8880,2082 ${RESET}"
+echo -e "${WHITE} SSL/TLS     : 443 ${RESET}"
+echo -e "${WHITE} OVPN UDP    : 2200 ${RESET}"
 baris_panjang
 }
 
 function Copy_Faste(){
-echo -e "\033[3;37m Port 80     : $domain:80@$user:$Pass ${RESET}"
-echo -e "\033[3;37m Port 443    : $domain:443@$user:$Pass ${RESET}"
-echo -e "\033[3;37m Udp Custom  : $domain:1-65535@$user:$Pass${RESET}"
-echo -e "\033[3;37m OpenVpn     : https://$domain:81/ "
-echo -e "\033[3;37m Account     : https://$domain:81/ssh-$user.txt "
+echo -e "${WHITE} Port 80     : $domain:80@$user:$Pass ${RESET}"
+echo -e "${WHITE} Port 443    : $domain:443@$user:$Pass ${RESET}"
+echo -e "${WHITE} Udp Custom  : $domain:1-65535@$user:$Pass${RESET}"
+echo -e "${WHITE} OpenVpn     : https://$domain:81/ "
+echo -e "${WHITE} Account     : https://$domain:81/ssh-$user.txt "
 }
 
 function Details_Payload(){
 baris_panjang
-echo -e "\033[3;37m Payload WS  : ${PAYLOADWS}${RESET}"
+echo -e "${WHITE} Payload WS  : ${PAYLOADWS}${RESET}"
 baris_panjang
-echo -e "\033[3;37m Payload TLS : ${PAYLOADTLS}${RESET}"
+echo -e "${WHITE} Payload TLS : ${PAYLOADTLS}${RESET}"
 baris_panjang
-echo -e "\033[3;37m Payload ENCD: ${PAYLOADHANCED}${RESET}"
+echo -e "${WHITE} Payload ENCD: ${PAYLOADHANCED}${RESET}"
 baris_panjang
 }
 

@@ -2,53 +2,8 @@
 
 source /usr/bin/ui.sh
 
-# //====================================================
-# //  Newbie Store - Copy 2024
-# //====================================================
-# //  System Request : DEB 9-12 / UBUNTU 18-24
-# //  Author         : Kurniawan Setiadi
-# //  Develop        : Newbie Store
-# //  email          : Newbiestore09@gmail.com
-# //  telegram       : https://t.me/newbie_store24
-# //====================================================
-DF='\e[39m'
-Bold='\e[1m'
-Blink='\e[5m'
-yell='\e[33m'
-green='${GREEN}'
-PURPLE='\e[35m'
-cyan='\e[36m'
-LRED='\e[91m'
-Lgreen='\e[92m'
-Lyellow='\e[93m'
-ORANGE='${YELLOW}'
-LIGHT='\033[0;37m'
-grenbo="${GREEN}"
-blue="\033[0;34m"
-Blue="${CYAN}"
-g="${GREEN}"
-cyan='\e[36m'
-r='\e[91m'
-garis_bawah(){
-print_rainbow " └──────────────────────────────────────────────┘"
-}
-garis_atas(){
-print_rainbow " ┌──────────────────────────────────────────────┐"
-}
-function Newbie_Banner_Log() {
-BOX_WIDTH=48
-TEXT="[ LOG TIME BACKUP ] "
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
-
-KIRI="${GREEN}>\033[1;33m>${RED}>${RED}$RESET"
+nama=$(cat /etc/xray/username)
+clear
 ipsaya=$(curl -sS ipv4.icanhazip.com)
 data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 date_list=$(date +"%Y-%m-%d" -d "$data_server")
@@ -266,35 +221,35 @@ clear
 
 banner "SHOW ALL SERVCIE SYSTEM"
 garis_atas
-echo -e "  ${WHITE}${BOLD}Service SSH / TUN                 $blue=$RESET $status_ssh"
-echo -e "  ${WHITE}${BOLD}Service SSH UDP                   $blue=$RESET $status_udp"
-#echo -e " ${WHITE}${BOLD}Service SSH NOOBZVPNS             $blue=$RESET $status_noobz"
-echo -e "  ${WHITE}${BOLD}Service OpenVPN SSL               $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OpenVPN WS-SSL            $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OpenVPN UDP               $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OpenVPN TCP               $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OHP SSH                   $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OHP Dropbear              $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service OHP OpenVPN               $blue=$RESET $status_openvpn"
-echo -e "  ${WHITE}${BOLD}Service WS ePRO                   $blue=$RESET $status_ws_epro"
-echo -e "  ${WHITE}${BOLD}Service BadVPN 7100               $blue=$RESET $status_udp1"
-echo -e "  ${WHITE}${BOLD}Service BadVPN 7200               $blue=$RESET $status_udp2"
-echo -e "  ${WHITE}${BOLD}Service BadVPN 7300               $blue=$RESET $status_udp3"
-echo -e "  ${WHITE}${BOLD}Service Dropbear                  $blue=$RESET $status_beruangjatuh"
-echo -e "  ${WHITE}${BOLD}Service Haproxy                   $blue=$RESET $status_haproxy"
-echo -e "  ${WHITE}${BOLD}Service Crons                     $blue=$RESET $status_cron"
-echo -e "  ${WHITE}${BOLD}Service Nginx Webserver           $blue=$RESET $status_nginx"
-echo -e "  ${WHITE}${BOLD}Service Xray Vmess WS TLS         $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Vmess WS Non TLS     $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Vmess gRPC           $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Vless WS TLS         $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Vless WS Non TLS     $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Vless gRPC           $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Trojan WS            $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Trojan Non WS        $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Trojan gRPC          $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks WS       $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks Non WS   $blue=$RESET $status_ss"
-echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks gRPC     $blue=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service SSH / TUN                 ${CYAN}=$RESET $status_ssh"
+echo -e "  ${WHITE}${BOLD}Service SSH UDP                   ${CYAN}=$RESET $status_udp"
+#echo -e " ${WHITE}${BOLD}Service SSH NOOBZVPNS             ${CYAN}=$RESET $status_noobz"
+echo -e "  ${WHITE}${BOLD}Service OpenVPN SSL               ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OpenVPN WS-SSL            ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OpenVPN UDP               ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OpenVPN TCP               ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OHP SSH                   ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OHP Dropbear              ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service OHP OpenVPN               ${CYAN}=$RESET $status_openvpn"
+echo -e "  ${WHITE}${BOLD}Service WS ePRO                   ${CYAN}=$RESET $status_ws_epro"
+echo -e "  ${WHITE}${BOLD}Service BadVPN 7100               ${CYAN}=$RESET $status_udp1"
+echo -e "  ${WHITE}${BOLD}Service BadVPN 7200               ${CYAN}=$RESET $status_udp2"
+echo -e "  ${WHITE}${BOLD}Service BadVPN 7300               ${CYAN}=$RESET $status_udp3"
+echo -e "  ${WHITE}${BOLD}Service Dropbear                  ${CYAN}=$RESET $status_beruangjatuh"
+echo -e "  ${WHITE}${BOLD}Service Haproxy                   ${CYAN}=$RESET $status_haproxy"
+echo -e "  ${WHITE}${BOLD}Service Crons                     ${CYAN}=$RESET $status_cron"
+echo -e "  ${WHITE}${BOLD}Service Nginx Webserver           ${CYAN}=$RESET $status_nginx"
+echo -e "  ${WHITE}${BOLD}Service Xray Vmess WS TLS         ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Vmess WS Non TLS     ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Vmess gRPC           ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Vless WS TLS         ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Vless WS Non TLS     ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Vless gRPC           ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Trojan WS            ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Trojan Non WS        ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Trojan gRPC          ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks WS       ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks Non WS   ${CYAN}=$RESET $status_ss"
+echo -e "  ${WHITE}${BOLD}Service Xray Shadowsocks gRPC     ${CYAN}=$RESET $status_ss"
 garis_bawah
 banner "SCRIPT BY $nama"

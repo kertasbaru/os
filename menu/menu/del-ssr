@@ -4,8 +4,7 @@ source /usr/bin/ui.sh
 
 ORANGE='${CYAN}'
 PURPLE='${MAGENTA}'
-CYAN='\033[0;36m'
-LIGHT='\033[0;37m'
+CYAN='${CYAN}'
 
 clear
 #!# " "/etc/xray/config.json")

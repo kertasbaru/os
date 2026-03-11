@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source /usr/bin/ui.sh
+nama=$(cat /etc/xray/username)
 
 # //====================================================
 # //  Newbie Store - Copy 2024

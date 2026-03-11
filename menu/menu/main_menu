@@ -65,7 +65,6 @@ exit 1
 checking_sc
 # Definisi warna
 y='${YELLOW}'  # Kuning
-c='\033[0;36m'  # Cyan
 g='${GREEN}'  # Hijau
 r='${RED}'  # Merah
 

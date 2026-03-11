@@ -6,21 +6,8 @@ data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date |
 date_list=$(date +"%Y-%m-%d" -d "$data_server")
 #########################
 [[ ! -f /usr/bin/git ]] && apt install git -y &> /dev/null
-# COLOR VALIDATION
-
-y='${YELLOW}'
-c="\033[0;36m"
-g="${GREEN}"
-r="${RED}"
-gray="\e[1;30m"
-Blue="\033[1;36m"
-grenbo="\033[1;95m"
-yell='\e[33m'
-BGX="${BGREEN}"
-END='${RESET}'
-bc="\e[5;36m"
 Green_background="${BGREEN}${WHITE}"
-Red_background="\033[41;37m"
+Red_background="${BRED}${WHITE}"
 nama='NEWBIE STORE'
 #################
 eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
@@ -96,7 +83,7 @@ regisip
 list-ips() {
 git clone ${REPO}
     clear
-    echo -e "${c}DAFTAR IP VPS${RESET}"
+    echo -e "${CYAN}DAFTAR IP VPS${RESET}"
 
     # Header tabel
     printf "${bc}┌──────────────────────────────────────────────────────┐${RESET}\n"
@@ -120,11 +107,11 @@ git clone ${REPO}
 # Fungsi untuk mengganti IP yang terdaftar
 change-ip() {
     if [[ ! -e /root/inventory.ini ]]; then 
-        echo -e "${Blue}[INFO]${RESET} Membuat file inventory.ini baru..."
+        echo -e "${CYAN}[INFO]${RESET} Membuat file inventory.ini baru..."
         echo "[vps_group]" > /root/inventory.ini
     fi
 
-    echo -e "${y}\nMASUKAN IP VPS YANG INGIN DIGANTI!${RESET}"
+    echo -e "${YELLOW}\nMASUKAN IP VPS YANG INGIN DIGANTI!${RESET}"
     echo ""
     read -p "Input IP Address yang sudah terdaftar: " ipqu
     CLIENT_EXISTS=$(grep -w $ipqu /root/izin/ip | wc -l)
@@ -134,17 +121,17 @@ change-ip() {
         exit 0
     fi
 
-    echo -e "${g}\nIP Ditemukan! Silakan masukkan IP baru.${RESET}"
+    echo -e "${GREEN}\nIP Ditemukan! Silakan masukkan IP baru.${RESET}"
     echo ""
     read -p "Input IP Baru: " new_ip
     echo ""
     # Input Domain
-    echo -e "${Blue}\nMasukkan Domain yang Ingin Digunakan:${RESET}"
+    echo -e "${CYAN}\nMasukkan Domain yang Ingin Digunakan:${RESET}"
     read -p "Input Domain: " lol
     clear
 
     # Output hasil
-    echo -e "${Green_background}[SUKSES]${RESET} Domain '${grenbo}${lol}${RESET}' berhasil diproses dengan IP baru '${g}${new_ip}${RESET}'."
+    echo -e "${BGREEN}[SUKSES]${RESET} Domain '${MAGENTA}${lol}${RESET}' berhasil diproses dengan IP baru '${GREEN}${new_ip}${RESET}'."
     # Mendapatkan Nama VPS sesuai dengan IP yang lama
     NAMA_VPS=$(grep -w $ipqu /root/izin/ip | awk '{print $2}')
     sed -i "s/${ipqu}/${new_ip}/g" /root/izin/ip
@@ -238,14 +225,14 @@ clear
     curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
     clear
     lane
-    echo -e "${g}         SUCCESS CHANGE IP VPS      $RESET"
+    echo -e "${GREEN}         SUCCESS CHANGE IP VPS      $RESET"
     lane
-    echo -e "${y}  NAMA VPS   :${RESET}${yell} $NAMA_VPS ${RESET}"
-    echo -e "${y}  OLD IP     :${RESET}${yell} $ipqu ${RESET}"
-    echo -e "${y}  NEW IP     :${RESET}${yell} $new_ip ${RESET}"
-    echo -e "${y}  DOMAIN VPS :${RESET}${yell} $lol ${RESET}"
+    echo -e "${YELLOW}  NAMA VPS   :${RESET}${YELLOW} $NAMA_VPS ${RESET}"
+    echo -e "${YELLOW}  OLD IP     :${RESET}${YELLOW} $ipqu ${RESET}"
+    echo -e "${YELLOW}  NEW IP     :${RESET}${YELLOW} $new_ip ${RESET}"
+    echo -e "${YELLOW}  DOMAIN VPS :${RESET}${YELLOW} $lol ${RESET}"
     lane
-echo -e "[ ${Blue}WARNING${RESET} ] Do you want to Replace Again ? (y/n)? "
+echo -e "[ ${CYAN}WARNING${RESET} ] Do you want to Replace Again ? (y/n)? "
 read answer
 
 # Memeriksa input jawaban

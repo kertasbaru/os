@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source /usr/bin/ui.sh
+nama=$(cat /etc/xray/username)
 
 # //====================================================
 # //  Newbie Store - Copy 2024
@@ -12,28 +13,6 @@ source /usr/bin/ui.sh
 # //  telegram       : https://t.me/newbie_store24
 # //====================================================
 clear
-g="${GREEN}"
-cyan='\e[36m'
-r='\e[91m'
-garis_bawah(){
-print_rainbow " └──────────────────────────────────────────────┘"
-}
-garis_atas(){
-print_rainbow " ┌──────────────────────────────────────────────┐"
-}
-function Newbie_Banner_Log() {
-BOX_WIDTH=48
-TEXT="[ CHANGE YOUR RESPON HEADER ] "
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
-KIRI="${GREEN}>\033[1;33m>${RED}>${RED}$RESET"
 ipsaya=$(curl -sS ipv4.icanhazip.com)
 data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 date_list=$(date +"%Y-%m-%d" -d "$data_server")
@@ -80,7 +59,7 @@ function Info_Port() {
 }
 function change_respon() {
     local file_path="/etc/handeling"
-    Newbie_Banner_Log
+    banner "CHANGE YOUR RESPON HEADER"
     echo -e "$WHITE$BOLD"
     echo -e "Tindakan ini akan membuat semua user SSH disconnect!!" 
 	read -p "Apakah Anda ingin melanjutkan? (y/n): " confirm
@@ -89,7 +68,7 @@ function change_respon() {
         return
     fi
 	clear
-	Newbie_Banner_Log
+	banner "CHANGE YOUR RESPON HEADER"
     read -p "Masukkan respon yang diinginkan : " user_response
     read -p "Masukkan warna respon (contoh: green, red, blue): " user_color
     echo -e "$user_response\n$user_color" | sudo tee "$file_path" > /dev/null

@@ -3,10 +3,8 @@
 source /usr/bin/ui.sh
 
 # SL
-ORANGE='${YELLOW}'
 PURPLE='${MAGENTA}'
-CYAN='\033[0;36m'
-LIGHT='\033[0;37m'
+CYAN='${CYAN}'
 # Getting
 MYIP=$(curl -sS ipv4.icanhazip.com);
 echo "Checking VPS"
@@ -19,7 +17,7 @@ echo -e "${RESET}${LIGHT}Fuck You!!"
 exit 0
 fi
 clear
-Green_font_prefix="\033[32m" && Red_font_prefix="\033[31m" && Green_background_prefix="${BGREEN}${WHITE}" && Red_background_prefix="\033[41;37m" && Font_color_suffix="${RESET}"
+Green_font_prefix="${GREEN}" && Red_font_prefix="${RED}" && Green_background_prefix="${BGREEN}${WHITE}" && Red_background_prefix="${BRED}${WHITE}" && Font_color_suffix="${RESET}"
 Info="${Green_font_prefix}[ON]${Font_color_suffix}"
 Error="${Red_font_prefix}[OFF]${Font_color_suffix}"
 cek=$(cat /home/limit)

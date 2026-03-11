@@ -49,7 +49,7 @@ checking_sc() {
     printf "${WHITE}${BOLD}   ${YELLOW}Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
     printf "${WHITE}${BOLD}     ${YELLOW}Buy access permissions for scripts${RESET}"
     printf "${WHITE}${BOLD}             ${YELLOW}Contact Admin :${RESET}"
-    printf "${WHITE}${BOLD}      \033[2;32mWhatsApp${RESET} wa.me/6282326322300"
+    printf "${WHITE}${BOLD}      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
     echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     exit 1
   fi

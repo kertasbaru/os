@@ -2,26 +2,6 @@
 
 source /usr/bin/ui.sh
 
-DF='\e[39m'
-Bold='\e[1m'
-Blink='\e[5m'
-yell='\e[33m'
-red='\e[31m'
-green='${GREEN}'
-blue='\e[34m'
-PURPLE='\e[35m'
-cyan='\e[36m'
-Lred='\e[91m'
-Lgreen='\e[92m'
-ORANGE='${YELLOW}'
-LIGHT='\033[0;37m'
-grenbo="${GREEN}"
-purple() { echo -e "\\033[35;1m${*}\${RESET}"; }
-tyblue() { echo -e "\\033[36;1m${*}\${RESET}"; }
-yellow() { echo -e "\\033[33;1m${*}\${RESET}"; }
-green() { echo -e "\\033[32;1m${*}\${RESET}"; }
-red() { echo -e "\\033[31;1m${*}\${RESET}"; }
-
 duration=6
 frames=("██10%" "█████35%" "█████████65%" "█████████████80%" "█████████████████████90%" "█████████████████████████100%")
 
