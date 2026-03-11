@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source /usr/bin/var.conf
+
 wget -qO /usr/bin/var.conf "${REPO}install/var.conf"
 chmod +x /usr/bin/var.conf
 source /usr/bin/var.conf
