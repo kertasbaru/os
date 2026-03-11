@@ -1,17 +1,7 @@
 #!/bin/bash
-yellow="\033[0;33m"
-ungu="\033[0;35m"
-Red="\033[91;1m"
-Xark="\033[0m"
-BlueCyan="\033[5;36m"
-Cyan="\033[96;1m"
-Purple="\033[95;1m"
-Green="\033[92;1m"
-WhiteBe="\033[5;37m"
-GreenBe="\033[5;32m"
-YellowBe="\033[5;33m"
-BlueBe="\033[5;34m"
-NC='\e[0m'
+
+source /usr/bin/ui.sh
+
 nama=$(cat /etc/xray/username)
 # . Liner 
 fun_bar() {
@@ -24,20 +14,20 @@ fun_bar() {
         touch $HOME/fim
     ) >/dev/null 2>&1 &
     tput civis
-    echo -ne "  \033[0;33mPlease Wait Loading \033[1;37m- \033[0;33m["
+    echo -ne "  ${YELLOW}Please Wait Loading ${WHITE}${BOLD}- ${YELLOW}["
     while true; do
         for ((i = 0; i < 18; i++)); do
-            echo -ne "\033[0;32m#"
+            echo -ne "${GREEN}#"
             sleep 0.1s
         done
         [[ -e $HOME/fim ]] && rm $HOME/fim && break
-        echo -e "\033[0;33m]"
+        echo -e "${YELLOW}]"
         sleep 1s
         tput cuu1
         tput dl1
-        echo -ne "  \033[0;33mPlease Wait Loading \033[1;37m- \033[0;33m["
+        echo -ne "  ${YELLOW}Please Wait Loading ${WHITE}${BOLD}- ${YELLOW}["
     done
-    echo -e "\033[0;33m]\033[1;37m -\033[1;32m OK !\033[1;37m"
+    echo -e "${YELLOW}]${WHITE}${BOLD} -${GREEN} OK !${WHITE}${BOLD}"
     tput cnorm
 }
 
@@ -200,71 +190,71 @@ systemctl reload ssh
 }
 clear
 echo ""
-echo -e "   ${BLUE}_______________________________$NC"
-echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $NC"
-echo -e "   ${BLUE}_______________________________$NC"
+echo -e "   ${BLUE}_______________________________$RESET"
+echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $RESET"
+echo -e "   ${BLUE}_______________________________$RESET"
 echo ""
 read -p "   VERIFIKASI ADMIN :   " host11
 if [[ $host11 = 123@Newbie ]]; then
 clear
 echo ""
-echo -e "   ${BLUE}_______________________________$NC"
-echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $NC"
-echo -e "   ${BLUE}_______________________________$NC"
+echo -e "   ${BLUE}_______________________________$RESET"
+echo -e "   \e[1;32m  WELCOME TO RESET FACTORY $RESET"
+echo -e "   ${BLUE}_______________________________$RESET"
 echo ""
-echo -e " ${Red}PENTING HAL INI AKAN MENYEABKAN SEMUA AKUN $NC"
-echo -e " ${Red}PADA SERVER ANDA HILANG! APAKAH ANDA AKAN MELANJUTKAN? $NC"
+echo -e " ${RED}PENTING HAL INI AKAN MENYEABKAN SEMUA AKUN $RESET"
+echo -e " ${RED}PADA SERVER ANDA HILANG! APAKAH ANDA AKAN MELANJUTKAN? $RESET"
 read -p " MASUKAN PILIHAN Y/N :   " arg
 if [[ $arg == 'Y' ]]; then
-  echo -e "${Blue}Tindakan Diteruskan! $NC"
+  echo -e "${Blue}Tindakan Diteruskan! $RESET"
   sleep 1
-  echo -e "${green}START. . . $NC"
+  echo -e "${green}START. . . $RESET"
 elif [[ $arg == 'y' ]]; then
-  echo -e "${Blue}Tindakan Diteruskan! $NC"
+  echo -e "${Blue}Tindakan Diteruskan! $RESET"
   sleep 1
-  echo -e "${Blue}START . . .$NC"
+  echo -e "${Blue}START . . .$RESET"
 elif [[ $arg == 'N' ]]; then
-  echo -e "${RED}Tindakan Dihentikan! $NC"
+  echo -e "${RED}Tindakan Dihentikan! $RESET"
   sleep 1
   clear
   menu
   exit 0
 elif [[ $arg == 'n' ]]; then
-  echo -e "${RED}Tindakan Dihentikan! $NC"
+  echo -e "${RED}Tindakan Dihentikan! $RESET"
   sleep 1
   clear
   exit 0
 else
-  echo -e "${RED}Argumen Tidak Diketahui! $NC"
+  echo -e "${RED}Argumen Tidak Diketahui! $RESET"
   sleep 1
   clear
   exit 0
 fi
 clear
-echo -e "   ${BLUE}_______________________________$NC"
-echo -e "   \e[1;32m      RESET FACTORY $NC"
-echo -e "   ${BLUE}_______________________________$NC"
+echo -e "   ${BLUE}_______________________________$RESET"
+echo -e "   \e[1;32m      RESET FACTORY $RESET"
+echo -e "   ${BLUE}_______________________________$RESET"
 echo -e ""
-echo -e " \033[1;91m Factory Reset Sedang Berlangsung!!\033[1;37m"
+echo -e " \033[1;91m Factory Reset Sedang Berlangsung!!${WHITE}${BOLD}"
 fun_bar 'backup' 'factreset'
-echo -e "   ${BLUE}_______________________________$NC"
+echo -e "   ${BLUE}_______________________________$RESET"
 echo -e ""
 read -n 1 -s -r -p "Press [ Enter ] to back on menu"
 menu
 else
 clear
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+    echo -e "${BGREEN}          404 NOT FOUND AUTOSCRIPT          ${RESET}"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     echo ""
-    echo -e "            \033[91;1mPERMISSION DENIED !\033[0m"
-    echo -e "     \033[0;33mBuy access permissions for scripts\033[0m"
-    echo -e "             \033[0;33mContact Admin :\033[0m"
-    echo -e "      \033[2;32mWhatsApp\033[0m wa.me/6282326322300"
-	echo -e "      \033[2;32mTelegram\033[0m t.me/Newbie_Store24"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "            ${RED}PERMISSION DENIED !${RESET}"
+    echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
+    echo -e "             ${YELLOW}Contact Admin :${RESET}"
+    echo -e "      \033[2;32mWhatsApp${RESET} wa.me/6282326322300"
+	echo -e "      \033[2;32mTelegram${RESET} t.me/Newbie_Store24"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 	echo ""
-	echo -e "	\033[0;33mKembali Ke Menu Dalam 3 Detik\033[0m"
+	echo -e "	${YELLOW}Kembali Ke Menu Dalam 3 Detik${RESET}"
     sleep 3
     menu
 fi

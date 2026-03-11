@@ -1,6 +1,8 @@
 #!/bin/bash
 clear
 
+source /usr/bin/ui.sh
+
 echo " "
 echo " "
 sed -i "d" /var/log/udp.log 
@@ -22,7 +24,7 @@ sed -i "d" /tmp/login-udp-fix.txt
 cat /tmp/login-udp-db1.txt | sort | uniq > /tmp/login-udp-fix.txt
 clear
 data3=(`cat /tmp/login-udp-fix.txt | awk '{print $2}'`)
-Newbie_Banner
+banner ""
 garis_atas
 for akun in "${data3[@]}"
 do
@@ -38,4 +40,4 @@ echo -ne
 fi
 done
 garis_bawah
-Sc_Credit
+banner "SCRIPT BY $NAME"

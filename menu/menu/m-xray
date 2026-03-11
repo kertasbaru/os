@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source /usr/bin/ui.sh
+
 # //====================================================
 # //  Newbie Store - Copy 2024
 # //====================================================
@@ -12,120 +15,8 @@
 ASSET="xray"
 OWNER="kertasbaru"
 REPO="vip"
-REDBG="\033[41m"   
-WHITEBLD="\033[1;37m"
-WHITE="\033[1;37m" 
-NC="\033[0m"    
-GREEN="\033[96;1m"
-REDBLD="\033[0m\033[91;1m"
-Green="\e[92;1m"
-RED="\033[1;31m"
-YELLOW="\033[33m"
-BLUE="\033[36m"
-FONT="\033[0m"
-GREENBG="\033[42;37m"
 nama=$(cat /etc/xray/username)
-print_rainbow() {
-    local text="$1"
-    local warna_file="/etc/warna"
 
-    # Inisialisasi warna default
-    local start_r=0 start_g=255 start_b=150
-    local mid_r=0 mid_g=150 mid_b=255
-    local end_r=0 end_g=255 end_b=150
-
-    # Fungsi untuk membaca nilai numerik dari file
-    function get_value() {
-        local key="$1"
-        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
-        echo "${value:-0}"
-    }
-
-    # Jika file warna ada, baca isinya
-    if [[ -f "$warna_file" ]]; then
-        start_r=$(get_value "start_r")
-        start_g=$(get_value "start_g")
-        start_b=$(get_value "start_b")
-
-        mid_r=$(get_value "mid_r")
-        mid_g=$(get_value "mid_g")
-        mid_b=$(get_value "mid_b")
-
-        end_r=$(get_value "end_r")
-        end_g=$(get_value "end_g")
-        end_b=$(get_value "end_b")
-    fi
-
-    # Jalankan awk dengan warna yang sudah dimuat dari file
-    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
-                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
-                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
-    {
-        len = length($0);
-        for (i = 1; i <= len; i++) {
-            progress = (i - 1) / (len - 1);
-            if (progress < 0.5) {
-                factor = progress * 2;
-                r = int((1 - factor) * start_r + factor * mid_r);
-                g = int((1 - factor) * start_g + factor * mid_g);
-                b = int((1 - factor) * start_b + factor * mid_b);
-            } else {
-                factor = (progress - 0.5) * 2;
-                r = int((1 - factor) * mid_r + factor * end_r);
-                g = int((1 - factor) * mid_g + factor * end_g);
-                b = int((1 - factor) * mid_b + factor * end_b);
-            }
-            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
-        }
-        print "\033[0m";
-    }'
-}
-garis(){
-print_rainbow " ────────────────────────────────────────────────"
-}
-garis_tebal(){
-print_rainbow " ════════════════════════════════════════════════"
-}
-
-center() {
-    BOX_WIDTH=48
-    TEXT="$1"
-    TEXT_LENGTH=${#TEXT}
-    TEXT_CLEAN=$(printf "${WHITEBLD}$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
-    TEXT_LENGTH=${#TEXT_CLEAN}
-    # Hitung padding
-    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-
-    # Cetak dengan warna menggunakan printf
-    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
-}
-
-function Sc_Credit(){
-BOX_WIDTH=48
-TEXT="SCRIPT BY $nama"
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
-function Newbie_Banner() {
-clear
-BOX_WIDTH=48
-TEXT="[ XRAY MANAGER ]"
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
 ipsaya=$(curl -sS ipv4.icanhazip.com)
 data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 date_list=$(date +"%Y-%m-%d" -d "$data_server")
@@ -143,22 +34,22 @@ checking_sc() {
 
   if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
     # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+echo -e "${BRED}${BOLD} ⚠️       AKSES DI TOLAK         ⚠️ ${RESET}"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 echo -e ""
-echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+echo -e "        ${RED}❌ SCRIPT LOCKED ❌${RESET}"
 echo -e ""
-echo -e "  \033[0;33m🔒 Your VPS\033[0m $ipsaya \033[0;33mHas been Banned\033[0m"
+echo -e "  ${YELLOW}🔒 Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
 echo -e ""
-echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
-echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+echo -e "  ${RED}⚠️  Masa Aktif Sudah Habis ⚠️${RESET}"
+echo -e "  ${YELLOW}💡 Beli izin resmi hanya dari Admin!${RESET}"
 echo -e ""
-echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
-echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
-echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+echo -e "  ${GREEN}📞 Contact Admin:${RESET}"
+echo -e "  ${CYAN}🌍 Telegram: https://t.me/WuzzSTORE${RESET}"
+echo -e "  ${CYAN}📱 WhatsApp: https://wa.me/6287760204418${RESET}"
 echo -e ""
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 exit 1
   fi
 }
@@ -177,14 +68,14 @@ function List_Member() {
 # Fungsi untuk membuat akun
 function Create_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ CREATE ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Create Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Create Account Vless\n"
-  printf "${WHITEBLD}  3.)  Create Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ CREATE ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Create Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Create Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Create Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -215,14 +106,14 @@ add-tro
 }
 function Trial_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ TRIAL ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Trial Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Trial Account Vless\n"
-  printf "${WHITEBLD}  3.)  Trial Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ TRIAL ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Trial Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Trial Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Trial Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -253,14 +144,14 @@ trial-tro
 }
 function Delete_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ DELETE ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Delete Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Delete Account Vless\n"
-  printf "${WHITEBLD}  3.)  Delete Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ DELETE ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Delete Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Delete Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Delete Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -292,14 +183,14 @@ del-tro
 
 function Renew_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ RENEW ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Renew Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Renew Account Vless\n"
-  printf "${WHITEBLD}  3.)  Renew Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ RENEW ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Renew Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Renew Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Renew Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -332,14 +223,14 @@ renew-tro
 # Menu untuk Check Config Account
 function Check_Config_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ CHECK CONFIG ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Check Config Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Check Config Account Vless\n"
-  printf "${WHITEBLD}  3.)  Check Config Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ CHECK CONFIG ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Check Config Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Check Config Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Check Config Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -354,14 +245,14 @@ function Check_Config_Account() {
 # Menu untuk Recovery Account
 function Recovery_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ RECOVERY ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Recover Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Recover Account Vless\n"
-  printf "${WHITEBLD}  3.)  Recover Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ RECOVERY ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Recover Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Recover Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Recover Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -376,14 +267,14 @@ function Recovery_Account() {
 # Menu untuk Edit Limit IP Account
 function Edit_Limit_IP() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ EDIT LIMIT IP ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Edit Limit IP Vmess\n"
-  printf "${WHITEBLD}  2.)  Edit Limit IP Vless\n"
-  printf "${WHITEBLD}  3.)  Edit Limit IP Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ EDIT LIMIT IP ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Edit Limit IP Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Edit Limit IP Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Edit Limit IP Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -398,14 +289,14 @@ function Edit_Limit_IP() {
 # Menu untuk Edit Limit Bandwidth Account
 function Edit_Limit_Bandwidth() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ EDIT LIMIT BW ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Edit Bandwidth Limit Vmess\n"
-  printf "${WHITEBLD}  2.)  Edit Bandwidth Limit Vless\n"
-  printf "${WHITEBLD}  3.)  Edit Bandwidth Limit Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ EDIT LIMIT BW ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Edit Bandwidth Limit Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Edit Bandwidth Limit Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Edit Bandwidth Limit Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -420,14 +311,14 @@ function Edit_Limit_Bandwidth() {
 # Menu untuk Lock Account
 function Lock_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ LOCK ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Lock Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Lock Account Vless\n"
-  printf "${WHITEBLD}  3.)  Lock Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ LOCK ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Lock Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Lock Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Lock Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -442,14 +333,14 @@ function Lock_Account() {
 # Menu untuk Unlock Account
 function Unlock_Account() {
   clear
-  garis_tebal
-  center "$(printf "${YELLOW}[ UNLOCK ACCOUNT ]${NC}\n")"
-  garis_tebal
   garis
-  printf "${WHITEBLD}  1.)  Unlock Account Vmess\n"
-  printf "${WHITEBLD}  2.)  Unlock Account Vless\n"
-  printf "${WHITEBLD}  3.)  Unlock Account Trojan\n"
-  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  center "$(printf "${YELLOW}[ UNLOCK ACCOUNT ]${RESET}\n")"
+  garis
+  garis
+  printf "${WHITE}${BOLD}  1.)  Unlock Account Vmess\n"
+  printf "${WHITE}${BOLD}  2.)  Unlock Account Vless\n"
+  printf "${WHITE}${BOLD}  3.)  Unlock Account Trojan\n"
+  printf "${WHITE}${BOLD}  x.)  Back to Main Menu\n"
   garis
   read -p "Select Account Type [1-3 or x] : " pilih_akun
   case $pilih_akun in
@@ -521,39 +412,39 @@ function Edit_Trojan_Bandwidth() {
 }
 function change_onering() {
   clear
-  Newbie_Banner
+banner "XRAY MANAGER"
   garis
-  center "$(printf " ${YELLOW}[ SETUP ONE RING XRAY ]${NC}")"
+  center "$(printf " ${YELLOW}[ SETUP ONE RING XRAY ]${RESET}")"
   garis
   systemctl stop xray
   wget -O /usr/local/bin/${ASSET} "https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/${ASSET}"
   systemctl start xray
   garis
-  center "$(printf " ${YELLOW}[ Succesfully Setup ]${NC}")"
+  center "$(printf " ${YELLOW}[ Succesfully Setup ]${RESET}")"
   garis
-  printf "${WHITEBLD}Link Apk V2rayang OneRing : https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/v2rayNG_Onering_1.10.26_universal.apk${NC}\n"
+  printf "${WHITE}${BOLD}Link Apk V2rayang OneRing : https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/v2rayNG_Onering_1.10.26_universal.apk${RESET}\n"
 }
 
 # Main Menu
 function Main_Menu() { 
-Newbie_Banner
+banner "XRAY MANAGER"
 garis
-center "$(printf " ${YELLOW}[ ACCOUNT MANAGEMENT ]${NC}")"
+center "$(printf " ${YELLOW}[ ACCOUNT MANAGEMENT ]${RESET}")"
 garis
-printf "  ${WHITEBLD}(1) Check Users Login      (5) Delete Account${NC}\n"
-printf "  ${WHITEBLD}(2) List Member            (6) Renew Accounts${NC}\n"
-printf "  ${WHITEBLD}(3) Create Account         (7) Check Config Accounts${NC}\n"
-printf "  ${WHITEBLD}(4) Trial Account${NC}\n"
+printf "  ${WHITE}${BOLD}(1) Check Users Login      (5) Delete Account${RESET}\n"
+printf "  ${WHITE}${BOLD}(2) List Member            (6) Renew Accounts${RESET}\n"
+printf "  ${WHITE}${BOLD}(3) Create Account         (7) Check Config Accounts${RESET}\n"
+printf "  ${WHITE}${BOLD}(4) Trial Account${RESET}\n"
 garis
-center "$(printf " ${YELLOW}[ SECURITY & SETTINGS ]${NC}")"
+center "$(printf " ${YELLOW}[ SECURITY & SETTINGS ]${RESET}")"
 garis
-printf "  ${WHITEBLD}(8) Recovery Account      (11) Lock Account${NC}\n"
-printf "  ${WHITEBLD}(9) Edit Limit IP Account (12) Unlock Account${NC}\n"
-printf " ${WHITEBLD}(10) Edit Limit Bw Account (13) Setup Onering Metode${NC}\n"
+printf "  ${WHITE}${BOLD}(8) Recovery Account      (11) Lock Account${RESET}\n"
+printf "  ${WHITE}${BOLD}(9) Edit Limit IP Account (12) Unlock Account${RESET}\n"
+printf " ${WHITE}${BOLD}(10) Edit Limit Bw Account (13) Setup Onering Metode${RESET}\n"
 garis
-center "$(printf " ${WHITEBLD}(14) Back to Main Menu${NC}     ${REDBLD}(x) Exit${NC}\n")"
+center "$(printf " ${WHITE}${BOLD}(14) Back to Main Menu${RESET}     ${RED}(x) Exit${RESET}\n")"
 garis
-Sc_Credit
+banner "SCRIPT BY $nama"
 while true; do
 echo ""
 	  read -p "Select Option [1-13 or x] : " main_menu_option

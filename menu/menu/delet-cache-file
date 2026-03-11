@@ -1,38 +1,10 @@
 #!/bin/bash
 
+source /usr/bin/ui.sh
 
-yellow="\033[0;33m"
-ungu="\033[0;35m"
-Red="\033[91;1m"
-Xark="\033[0m"
-BlueCyan="\033[5;36m"
-Cyan="\033[96;1m"
-Purple="\033[95;1m"
-Green="\033[92;1m"
-WhiteBe="\033[5;37m"
-GreenBe="\033[5;32m"
-YellowBe="\033[5;33m"
-BlueBe="\033[5;34m"
 # . Liner 
 function baris_panjang() {
-  echo -e "${BlueCyan} ——————————————————————————————————— ${Xark} "
-}
-
-function Newbie_Banner() {
-clear
-baris_panjang
-echo -e "${ungu}           $nama      ${Xark} "
-baris_panjang
-}
-
-function Sc_Credit(){
-sleep 1
-baris_panjang
-echo -e "${ungu}  Terimakasih Telah Menggunakan ${Xark}"
-echo -e "${ungu}          Script Credit ${Xark}"
-echo -e "${ungu}          $nama ${Xark}"
-baris_panjang
-exit 1
+  echo -e "${CYAN} ——————————————————————————————————— ${RESET} "
 }
 
 duration=6
@@ -54,7 +26,7 @@ Loading_Animasi() {
 echo ""
 echo ""
 echo ""
-echo -e "\e[1;${color_code}m ${frames[$index]}\e[0m"
+echo -e "\e[1;${color_code}m ${frames[$index]}${RESET}"
 sleep 0.5
     done
 }
@@ -64,11 +36,10 @@ sleep 0.5
 # Menampilkan pesan setelah animasi selesai
 function Loading_Succes() {
 clear
-echo -e  "\033[5;32mSucces\033[0m"
+echo -e  "${GREEN}Succes${RESET}"
 sleep 1
 clear
 }
-
 
 cd /root/
 rm -rf m-ssh
@@ -154,7 +125,7 @@ rm -rf reset
 Loading_Animasi
 Loading_Succes
 echo ""
-Sc_Credit
+banner "SCRIPT BY $NAME"
 echo ""
 echo ""
 read -p "Back To Menu"

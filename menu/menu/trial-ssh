@@ -1,123 +1,14 @@
 #!/bin/bash
-REDBG="\033[41m"      # Latar belakang merah
-WHITEBLD="\033[1;37m"
-WHITE="\033[1;37m" # Teks putih tebal
-NC="\033[0m"          # Reset warna
-GREEN="\033[96;1m"
-REDBLD="\033[0m\033[91;1m"
-Green="\e[92;1m"
-RED="\033[1;31m"
-YELLOW="\033[33m"
-BLUE="\033[36m"
-GREENBG="\033[42;37m"
+
+source /usr/bin/ui.sh
+
 nama=$(cat /etc/xray/username)
 clear
-print_rainbow() {
-    local text="$1"
-    local warna_file="/etc/warna"
 
-    # Inisialisasi warna default
-    local start_r=0 start_g=255 start_b=150
-    local mid_r=0 mid_g=150 mid_b=255
-    local end_r=0 end_g=255 end_b=150
-
-    # Fungsi untuk membaca nilai numerik dari file
-    function get_value() {
-        local key="$1"
-        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
-        echo "${value:-0}"
-    }
-
-    # Jika file warna ada, baca isinya
-    if [[ -f "$warna_file" ]]; then
-        start_r=$(get_value "start_r")
-        start_g=$(get_value "start_g")
-        start_b=$(get_value "start_b")
-
-        mid_r=$(get_value "mid_r")
-        mid_g=$(get_value "mid_g")
-        mid_b=$(get_value "mid_b")
-
-        end_r=$(get_value "end_r")
-        end_g=$(get_value "end_g")
-        end_b=$(get_value "end_b")
-    fi
-
-    # Jalankan awk dengan warna yang sudah dimuat dari file
-    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
-                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
-                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
-    {
-        len = length($0);
-        for (i = 1; i <= len; i++) {
-            progress = (i - 1) / (len - 1);
-            if (progress < 0.5) {
-                factor = progress * 2;
-                r = int((1 - factor) * start_r + factor * mid_r);
-                g = int((1 - factor) * start_g + factor * mid_g);
-                b = int((1 - factor) * start_b + factor * mid_b);
-            } else {
-                factor = (progress - 0.5) * 2;
-                r = int((1 - factor) * mid_r + factor * end_r);
-                g = int((1 - factor) * mid_g + factor * end_g);
-                b = int((1 - factor) * mid_b + factor * end_b);
-            }
-            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
-        }
-        print "\033[0m";
-    }'
-}
-garis(){
-print_rainbow " ────────────────────────────────────────────────"
-}
-garis_tebal(){
-print_rainbow " ════════════════════════════════════════════════"
-}
-center() {
-    BOX_WIDTH=48
-    TEXT="$1"
-    TEXT_LENGTH=${#TEXT}
-    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
-    TEXT_LENGTH=${#TEXT_CLEAN}
-    # Hitung padding
-    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-
-    # Cetak dengan warna menggunakan printf
-    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
-}
-
-function Newbie_Banner() {
-BOX_WIDTH=48
-TEXT="[ MEMBER SSH ]"
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
-function Sc_Credit(){
-BOX_WIDTH=48
-TEXT="SCRIPT BY $nama"
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-read -p "Tekan Enter untuk kembali ke menu..."
-m-ssh
-exit 0
-}
 # Getting
 #IZIN SCRIPT
 MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m"
+echo -e "${GREEN}loading...${RESET}"
 clear
 # Valid Script
 ipsaya=$(wget -qO- ipinfo.io/ip)
@@ -134,16 +25,16 @@ checking_sc() {
   useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
 
   if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
-   echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+   echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+    echo -e "${BGREEN}          404 NOT FOUND AUTOSCRIPT          ${RESET}"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     echo -e ""
-    echo -e "            ${RED}PERMISSION DENIED !${NC}"
-    echo -e "   \033[0;33mYour VPS${NC} $ipsaya \033[0;33mHas been Banned${NC}"
-    echo -e "     \033[0;33mBuy access permissions for scripts${NC}"
-    echo -e "             \033[0;33mContact Admin :${NC}"
-    echo -e "      ${GREEN}WhatsApp${NC} wa.me/6282326322300"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "            ${RED}PERMISSION DENIED !${RESET}"
+    echo -e "   ${YELLOW}Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
+    echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
+    echo -e "             ${YELLOW}Contact Admin :${RESET}"
+    echo -e "      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     exit
   fi
 }
@@ -186,13 +77,13 @@ hariini=`date -d "0 days" +"%Y-%m-%d"`
 expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
 echo -e "$Pass\n$Pass\n"|passwd $Login &> /dev/null
 clear
-Newbie_Banner
-center "$(printf "${YELLOW}[ SET MINUTES ]${NC}")"
+banner "MEMBER SSH"
+center "$(printf "${YELLOW}[ SET MINUTES ]${RESET}")"
 garis
-echo -e "${WHITEBLD}"
+echo -e "${WHITE}${BOLD}"
 read -p " Minutes : " pup
 echo userdel ${Login} | at now + $pup minutes &> /dev/null
-echo -e "${NC}"
+echo -e "${RESET}"
 TEXT="<code>◇━━━━━━━━━━━━━━━━━◇</code>
 <code>Your Premium VPN Details</code>
 <code>◇━━━━━━━━━━━━━━━━━◇</code>
@@ -264,14 +155,13 @@ PAYLOADTLS="GET wss://$domain/ HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgra
 
 PAYLOADHANCED="HEAD / HTTP/1.1[crlf]Host: Masukan_Bug[crlf][crlf]PATCH / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf][split]HTTP/ 1[crlf][crlf] "
 
-
 clear
 # Port Account Detail
 function Ssh_Details(){
-garis_tebal
+garis
 center "$(print_rainbow "[ SSH OPENVPN ]")"
-garis_tebal
-echo -e "${WHITEBLD}"
+garis
+echo -e "${WHITE}${BOLD}"
 echo -e " Remark   : ${Login}"
 echo -e " pasword  : ${Pass}"
 echo -e " limit ip : ${iplimit}"
@@ -283,36 +173,36 @@ echo -e " OpenSSH  : 22,143 "
 echo -e " OVPN Tls : 443 "
 echo -e " Ovpn UdP : 2200 "
 echo -e " Ovpn Tcp : 443 "
-echo -e "${NC}"
+echo -e "${RESET}"
 garis
 }
 function Copy_Faste(){
-echo -e "${WHITEBLD} Port 80     : $domain:80@$Login:$Pass ${NC}"
-echo -e "${WHITEBLD} Port 443    : $domain:443@$Login:$Pass ${NC}"
-echo -e "${WHITEBLD} Udp Custom  : $domain:1-65535@$Login:$Pass${NC}"
-echo -e "${WHITEBLD} OpenVpn     : https://$domain:81/ "
-echo -e "${WHITEBLD} Account     : https://$domain:81/ssh-$Login.txt "
+echo -e "${WHITE}${BOLD} Port 80     : $domain:80@$Login:$Pass ${RESET}"
+echo -e "${WHITE}${BOLD} Port 443    : $domain:443@$Login:$Pass ${RESET}"
+echo -e "${WHITE}${BOLD} Udp Custom  : $domain:1-65535@$Login:$Pass${RESET}"
+echo -e "${WHITE}${BOLD} OpenVpn     : https://$domain:81/ "
+echo -e "${WHITE}${BOLD} Account     : https://$domain:81/ssh-$Login.txt "
 }
 # Payload Detail 
 function Payload_Details(){
 garis
-echo -e "${WHITEBLD}"
+echo -e "${WHITE}${BOLD}"
 echo " Payload WS    : ${PAYLOADWS}"
 garis
 echo " Payload Tls   : ${PAYLOADTLS}"
 garis
 echo " Payload Hnced : ${PAYLOADHANCED}"
-echo -e "${NC}"
+echo -e "${RESET}"
 garis
 }
 
 # Expired Account
 function Expiry_Account(){
-echo -e "${REDBLD} Expiry in  : ${pup} "
+echo -e "${RED} Expiry in  : ${pup} "
 garis
 }
 Ssh_Details
 Copy_Faste
 Payload_Details
 Expiry_Account
-Sc_Credit
+banner "SCRIPT BY $nama"

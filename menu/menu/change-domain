@@ -1,6 +1,7 @@
 #!/bin/bash
-NC='\e[0m'
-GREEN='\033[0;32m'
+
+source /usr/bin/ui.sh
+
 # Getting
 CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
 KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
@@ -9,7 +10,7 @@ export URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear
 #IZIN SCRIPT
 MYIP=$(curl -sS ipv4.icanhazip.com)
-echo -e "\e[32mloading...\e[0m"
+echo -e "${GREEN}loading...${RESET}"
 clear
 # Valid Script
 ipsaya=$(curl -sS ipv4.icanhazip.com)
@@ -28,27 +29,27 @@ checking_sc() {
   useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
 
   if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-    echo -e "\033[42m          404 NOT FOUND AUTOSCRIPT          \033[0m"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+    echo -e "${BGREEN}          404 NOT FOUND AUTOSCRIPT          ${RESET}"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     echo -e ""
-    echo -e "            ${RED}PERMISSION DENIED !${NC}"
-    echo -e "   \033[0;33mYour VPS${NC} $ipsaya \033[0;33mHas been Banned${NC}"
-    echo -e "     \033[0;33mBuy access permissions for scripts${NC}"
-    echo -e "             \033[0;33mContact Admin :${NC}"
-    echo -e "      ${GREEN}WhatsApp${NC} wa.me/6282326322300"
-    echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+    echo -e "            ${RED}PERMISSION DENIED !${RESET}"
+    echo -e "   ${YELLOW}Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
+    echo -e "     ${YELLOW}Buy access permissions for scripts${RESET}"
+    echo -e "             ${YELLOW}Contact Admin :${RESET}"
+    echo -e "      ${GREEN}WhatsApp${RESET} wa.me/6282326322300"
+    echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
     exit 1
   fi
 }
 checking_sc
-echo -e "\e[32mloading...\e[0m"
+echo -e "${GREEN}loading...${RESET}"
 clear
-purple() { echo -e "\\033[35;1m${*}\\033[0m"; }
-tyblue() { echo -e "\\033[36;1m${*}\\033[0m"; }
-yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
-green() { echo -e "\\033[32;1m${*}\\033[0m"; }
-red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+purple() { echo -e "\\033[35;1m${*}\${RESET}"; }
+tyblue() { echo -e "\\033[36;1m${*}\${RESET}"; }
+yellow() { echo -e "\\033[33;1m${*}\${RESET}"; }
+green() { echo -e "\\033[32;1m${*}\${RESET}"; }
+red() { echo -e "\\033[31;1m${*}\${RESET}"; }
 
 clear
 
@@ -66,7 +67,6 @@ function pasang_domain() {
         echo "IP=$pp" > /var/lib/ipvps.conf
     fi
 }
-
 
 function pasang_ssl() {
     green "Pasang SSL"
@@ -110,6 +110,6 @@ pasang_ssl
 notif_addhost
 
 echo ""
-green "Back to menu in 2 sec ${NC}"
+green "Back to menu in 2 sec ${RESET}"
 sleep 2
 menu

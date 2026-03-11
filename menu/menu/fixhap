@@ -1,26 +1,26 @@
 #!/bin/bash
+
+source /usr/bin/ui.sh
+
 DF='\e[39m'
 Bold='\e[1m'
 Blink='\e[5m'
 yell='\e[33m'
 red='\e[31m'
-green='\e[32m'
+green='${GREEN}'
 blue='\e[34m'
 PURPLE='\e[35m'
 cyan='\e[36m'
 Lred='\e[91m'
 Lgreen='\e[92m'
-yellow='\e[93m'
-NC='\e[0m'
-GREEN='\033[0;32m'
-ORANGE='\033[0;33m'
+ORANGE='${YELLOW}'
 LIGHT='\033[0;37m'
-grenbo="\e[92;1m"
-purple() { echo -e "\\033[35;1m${*}\\033[0m"; }
-tyblue() { echo -e "\\033[36;1m${*}\\033[0m"; }
-yellow() { echo -e "\\033[33;1m${*}\\033[0m"; }
-green() { echo -e "\\033[32;1m${*}\\033[0m"; }
-red() { echo -e "\\033[31;1m${*}\\033[0m"; }
+grenbo="${GREEN}"
+purple() { echo -e "\\033[35;1m${*}\${RESET}"; }
+tyblue() { echo -e "\\033[36;1m${*}\${RESET}"; }
+yellow() { echo -e "\\033[33;1m${*}\${RESET}"; }
+green() { echo -e "\\033[32;1m${*}\${RESET}"; }
+red() { echo -e "\\033[31;1m${*}\${RESET}"; }
 
 duration=6
 frames=("██10%" "█████35%" "█████████65%" "█████████████80%" "█████████████████████90%" "█████████████████████████100%")
@@ -41,7 +41,7 @@ Loading_Animasi() {
 echo ""
 echo ""
 echo ""
-echo -e "\e[1;${color_code}m ${frames[$index]}\e[0m"
+echo -e "\e[1;${color_code}m ${frames[$index]}${RESET}"
 sleep 0.5
     done
 }
@@ -51,7 +51,7 @@ sleep 0.5
 # Menampilkan pesan setelah animasi selesai
 function Loading_Succes() {
 clear
-echo -e  "\033[5;32mSucces\033[0m"
+echo -e  "${GREEN}Succes${RESET}"
 sleep 1
 clear
 }
@@ -60,9 +60,9 @@ eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3
 
 # fixhap fix Haproxy
 clear
-echo -e "${BlueCyan} ------------------------- ${Xark} "
-echo -e "${ungu}             FIXHAP            ${Xark} "
-echo -e "${BlueCyan} ------------------------- ${Xark} "
+echo -e "${CYAN} ------------------------- ${RESET} "
+echo -e "${MAGENTA}             FIXHAP            ${RESET} "
+echo -e "${CYAN} ------------------------- ${RESET} "
 echo -e ""
 read -p " Input Your Domain : " -e domain
 rm -fr /etc/xray/domain

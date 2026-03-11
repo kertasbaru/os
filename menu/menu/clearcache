@@ -1,8 +1,8 @@
 #!/bin/bash
 
+source /usr/bin/ui.sh
+
 # Warna
-GREEN='\033[0;32m'
-NC='\033[0m'
 
 # Loading Spinner
 loading() {
@@ -23,11 +23,11 @@ loading() {
 # Clear Cache
 clear
 echo ""
-echo -e "[ ${GREEN}Info${NC} ] Clearing RAM cache..."
+echo -e "[ ${GREEN}Info${RESET} ] Clearing RAM cache..."
 
 # Hanya jika user adalah root
 if [[ $EUID -ne 0 ]]; then
-  echo -e "[ ${RED}Error${NC} ] Script ini harus dijalankan sebagai root!"
+  echo -e "[ ${RED}Error${RESET} ] Script ini harus dijalankan sebagai root!"
   exit 1
 fi
 
@@ -35,7 +35,7 @@ fi
 echo 1 > /proc/sys/vm/drop_caches & loading $!
 
 echo ""
-echo -e "[ ${GREEN}OK${NC} ] Cache berhasil dibersihkan!"
-echo -e "${GREEN}Kembali ke menu dalam 2 detik...${NC}"
+echo -e "[ ${GREEN}OK${RESET} ] Cache berhasil dibersihkan!"
+echo -e "${GREEN}Kembali ke menu dalam 2 detik...${RESET}"
 sleep 2
 menu

@@ -1,3 +1,6 @@
+
+source /usr/bin/ui.sh
+
 #!/bin/sh
 for arg in $@
 do

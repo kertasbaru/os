@@ -1,6 +1,7 @@
 #!/bin/bash
-# ==========================================
-# Color
+
+source /usr/bin/ui.sh
+
 env > /tmp/restore-env.txt
 whoami >> /tmp/restore-env.txt
 ls -ld /root /root/backup.zip /root/backup >> /tmp/restore-env.txt 2>&1

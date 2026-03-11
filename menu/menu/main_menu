@@ -1,4 +1,7 @@
 #!/bin/bash
+
+source /usr/bin/ui.sh
+
 # //====================================================
 # //  Newbie Store - Copy 2024
 # //====================================================
@@ -9,96 +12,11 @@
 # //  telegram       : https://t.me/newbie_store24
 # //====================================================
 clear
-REDBG="\033[41m"  
-WHITEBLD="\033[1;37m"
-WHITE="\033[1;37m" 
-NC="\033[0m"         
-GREEN="\033[96;1m"
-REDBLD="\033[0m\033[91;1m"
-Green="\e[92;1m"
-RED="\033[1;31m"
-YELLOW="\033[33m"
-BLUE="\033[36m"
-GREENBG="\033[42;37m"
-print_rainbow() {
-    local text="$1"
-    local warna_file="/etc/warna"
-
-    # Inisialisasi warna default
-    local start_r=0 start_g=255 start_b=150
-    local mid_r=0 mid_g=150 mid_b=255
-    local end_r=0 end_g=255 end_b=150
-
-    # Fungsi untuk membaca nilai numerik dari file
-    function get_value() {
-        local key="$1"
-        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
-        echo "${value:-0}"
-    }
-
-    # Jika file warna ada, baca isinya
-    if [[ -f "$warna_file" ]]; then
-        start_r=$(get_value "start_r")
-        start_g=$(get_value "start_g")
-        start_b=$(get_value "start_b")
-
-        mid_r=$(get_value "mid_r")
-        mid_g=$(get_value "mid_g")
-        mid_b=$(get_value "mid_b")
-
-        end_r=$(get_value "end_r")
-        end_g=$(get_value "end_g")
-        end_b=$(get_value "end_b")
-    fi
-
-    # Jalankan awk dengan warna yang sudah dimuat dari file
-    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
-                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
-                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
-    {
-        len = length($0);
-        for (i = 1; i <= len; i++) {
-            progress = (i - 1) / (len - 1);
-            if (progress < 0.5) {
-                factor = progress * 2;
-                r = int((1 - factor) * start_r + factor * mid_r);
-                g = int((1 - factor) * start_g + factor * mid_g);
-                b = int((1 - factor) * start_b + factor * mid_b);
-            } else {
-                factor = (progress - 0.5) * 2;
-                r = int((1 - factor) * mid_r + factor * end_r);
-                g = int((1 - factor) * mid_g + factor * end_g);
-                b = int((1 - factor) * mid_b + factor * end_b);
-            }
-            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
-        }
-        print "\033[0m";
-    }'
-}
-garis(){
-print_rainbow " ────────────────────────────────────────────────"
-}
 garis_bawah(){
 print_rainbow " └──────────────────────────────────────────────┘"
 }
 garis_atas(){
 print_rainbow " ┌──────────────────────────────────────────────┐"
-}
-garis_tebal(){
-print_rainbow " ════════════════════════════════════════════════"
-}
-center() {
-    BOX_WIDTH=48
-    TEXT="$1"
-    TEXT_LENGTH=${#TEXT}
-    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
-    TEXT_LENGTH=${#TEXT_CLEAN}
-    # Hitung padding
-    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-
-    # Cetak dengan warna menggunakan printf
-    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
 }
 function Loading() {
 BOX_WIDTH=48
@@ -113,34 +31,6 @@ print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
 print_rainbow " ════════════════════════════════════════════════"
 }
 
-function Newbie_Banner() {
-BOX_WIDTH=48
-TEXT="[ MENU ADMIN ] "
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-}
-function Sc_Credit(){
-nama=$(cat /etc/xray/username)
-BOX_WIDTH=48
-TEXT="SCRIPT BY $nama"
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════"
-read -p "Tekan Enter untuk kembali ke menu..."
-regisip
-exit 0
-}
 MYIP=$(curl -sS ipv4.icanhazip.com)
 PROFIL=$(curl -sS https://raw.githubusercontent.com/kertasbaru/izin/main/ip | grep -wE $MYIP | awk '{print $2}')
 TOKEN=$(cat /etc/github/api)
@@ -153,84 +43,83 @@ if [[ -n "$data_ip" || "$data_ip" -gt 0 ]]; then
     echo -ne
   else
     # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+echo -e "${BRED}${BOLD} ⚠️       AKSES DI TOLAK         ⚠️ ${RESET}"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 echo -e ""
-echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+echo -e "        ${RED}❌ SCRIPT LOCKED ❌${RESET}"
 echo -e ""
-echo -e "  \033[0;33m🔒 Your VPS\033[0m $ipsaya \033[0;33mHas been Banned\033[0m"
+echo -e "  ${YELLOW}🔒 Your VPS${RESET} $ipsaya ${YELLOW}Has been Banned${RESET}"
 echo -e ""
-echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
-echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+echo -e "  ${RED}⚠️  Masa Aktif Sudah Habis ⚠️${RESET}"
+echo -e "  ${YELLOW}💡 Beli izin resmi hanya dari Admin!${RESET}"
 echo -e ""
-echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
-echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
-echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+echo -e "  ${GREEN}📞 Contact Admin:${RESET}"
+echo -e "  ${CYAN}🌍 Telegram: https://t.me/WuzzSTORE${RESET}"
+echo -e "  ${CYAN}📱 WhatsApp: https://wa.me/6287760204418${RESET}"
 echo -e ""
-echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
 exit 1
   fi
 }
 checking_sc
 # Definisi warna
-y='\033[1;93m'  # Kuning
+y='${YELLOW}'  # Kuning
 c='\033[0;36m'  # Cyan
-g='\033[0;32m'  # Hijau
-r='\033[1;31m'  # Merah
-NC='\033[0m'    # Reset warna
+g='${GREEN}'  # Hijau
+r='${RED}'  # Merah
 
 # Fungsi untuk menampilkan menu utama
 show_menu() {
     clear
-Newbie_Banner
-    echo -e "${WHITEBLD}  1.) Cek VPS Online${NC}"
-    echo -e "${WHITEBLD}  2.) Replace IP Offline${NC}"
-    echo -e "${WHITEBLD}  3.) Input Data VPS${NC}"  # Tambahan opsi baru
-    echo -e "${WHITEBLD}  4.) Hubungkan VPS${NC}"
-    echo -e "${WHITEBLD}  5.) Pasang SC ke VPS${NC}"
-    echo -e "${WHITEBLD}  6.) Rebuild VPS${NC}"
-    echo -e "${WHITEBLD}  7.) Ganti URL Izin${NC}"
-    echo -e "${WHITEBLD}  8.) Hapus Data Inventory${NC}"
-    echo -e "${r}  x.) Back To Menu${NC}"
+banner "MENU ADMIN"
+    echo -e "${WHITE}${BOLD}  1.) Cek VPS Online${RESET}"
+    echo -e "${WHITE}${BOLD}  2.) Replace IP Offline${RESET}"
+    echo -e "${WHITE}${BOLD}  3.) Input Data VPS${RESET}"  # Tambahan opsi baru
+    echo -e "${WHITE}${BOLD}  4.) Hubungkan VPS${RESET}"
+    echo -e "${WHITE}${BOLD}  5.) Pasang SC ke VPS${RESET}"
+    echo -e "${WHITE}${BOLD}  6.) Rebuild VPS${RESET}"
+    echo -e "${WHITE}${BOLD}  7.) Ganti URL Izin${RESET}"
+    echo -e "${WHITE}${BOLD}  8.) Hapus Data Inventory${RESET}"
+    echo -e "${r}  x.) Back To Menu${RESET}"
 garis
-    echo -ne "${y}Pilih opsi [1-8/x]: ${NC}"
+    echo -ne "${y}Pilih opsi [1-8/x]: ${RESET}"
 }
 
 Fungsi untuk input data VPS
 input_data_vps() {
     clear
-    echo -e "${c}Menambahkan data VPS ke file inventory...${NC}"
+    echo -e "${c}Menambahkan data VPS ke file inventory...${RESET}"
     INVENTORY_FILE="/root/inventory.ini"
 
     if [[ ! -f $INVENTORY_FILE ]]; then
         echo "[vps_group]" > $INVENTORY_FILE
-        echo -e "${y}File inventory baru dibuat.${NC}"
+        echo -e "${y}File inventory baru dibuat.${RESET}"
     fi
 
     while true; do
-        echo -ne "${y}Masukkan nama VPS (atau 'exit' untuk kembali): ${NC}"
+        echo -ne "${y}Masukkan nama VPS (atau 'exit' untuk kembali): ${RESET}"
         read -r vps_name
         [[ $vps_name == "exit" ]] && break
 
-        echo -ne "${y}Masukkan IP VPS: ${NC}"
+        echo -ne "${y}Masukkan IP VPS: ${RESET}"
         read -r ansible_host
 
-        echo -ne "${y}Masukkan domain (${r}wajib sudah terpointing!${NC}): ${NC}"
+        echo -ne "${y}Masukkan domain (${r}wajib sudah terpointing!${RESET}): ${RESET}"
         read -r domain
 
         # Validasi input
         if [[ -z $vps_name || -z $ansible_host || -z $domain ]]; then
-            echo -e "${r}Data tidak boleh kosong. Coba lagi.${NC}"
+            echo -e "${r}Data tidak boleh kosong. Coba lagi.${RESET}"
             continue
         fi
 
         echo "${vps_name} ansible_host=${ansible_host} ansible_user=root domain=${domain} ansible_python_interpreter=/usr/bin/python3" >> "$INVENTORY_FILE"
-        echo -e "${WHITEBLD}Data VPS berhasil ditambahkan.${NC}\n"
+        echo -e "${WHITE}${BOLD}Data VPS berhasil ditambahkan.${RESET}\n"
         sleep 0.5 && clear
     done
 
-    echo -e "${WHITEBLD}Selesai menambahkan data VPS.${NC}"
+    echo -e "${WHITE}${BOLD}Selesai menambahkan data VPS.${RESET}"
     sleep 0.5
     menu_ftr
 }
@@ -239,18 +128,18 @@ hapus_inventory() {
     INVENTORY_FILE="/root/inventory.ini"
     if [[ -f $INVENTORY_FILE ]]; then
         rm "$INVENTORY_FILE"
-        echo -e "${WHITEBLD}File inventory telah dihapus.${NC}"
+        echo -e "${WHITE}${BOLD}File inventory telah dihapus.${RESET}"
     else
-        echo -e "${r}File inventory tidak ditemukan.${NC}"
+        echo -e "${r}File inventory tidak ditemukan.${RESET}"
     fi
-    echo -e "\n${WHITEBLD}Tekan Enter untuk kembali ke menu...${NC}"
+    echo -e "\n${WHITE}${BOLD}Tekan Enter untuk kembali ke menu...${RESET}"
     read -r
     menu_ftr
 }
 # Fungsi untuk cek VPS online
 cek_vps() {
     cek_vps_online
-    echo -e "\n${WHITEBLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${NC}"
+    echo -e "\n${WHITE}${BOLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${RESET}"
     read -r
     menu_ftr
 }
@@ -264,10 +153,10 @@ replace_ip_offline() {
 ganti_url_izin() {
     if [ -f "/root/.url" ]; then
         rm /root/.url
-        echo -e "${WHITEBLD}URL izin telah dihapus. Tekan Enter untuk kembali ke menu...${NC}"
+        echo -e "${WHITE}${BOLD}URL izin telah dihapus. Tekan Enter untuk kembali ke menu...${RESET}"
     else
-        echo -e "${r}File /root/.url tidak ditemukan. Tidak ada URL yang dihapus.${NC}"
-        echo -e "${r}Tekan Enter untuk kembali ke menu...${NC}"
+        echo -e "${r}File /root/.url tidak ditemukan. Tidak ada URL yang dihapus.${RESET}"
+        echo -e "${r}Tekan Enter untuk kembali ke menu...${RESET}"
     fi
     read -r
     menu_ftr
@@ -281,41 +170,41 @@ hubungkan_vps() {
 
     # Memastikan sshpass sudah terinstal
     if ! command -v sshpass &> /dev/null; then
-        echo -e "${y}sshpass tidak ditemukan. Menginstal sshpass...${NC}"
+        echo -e "${y}sshpass tidak ditemukan. Menginstal sshpass...${RESET}"
         apt update -y &> /dev/null
         apt install sshpass -y &> /dev/null
-        echo -e "${WHITEBLD}sshpass berhasil diinstal.${NC}"
+        echo -e "${WHITE}${BOLD}sshpass berhasil diinstal.${RESET}"
     fi
 
     # Menghapus entri known_hosts untuk memastikan koneksi sukses
-    echo -e "${c}Menghapus semua entri SSH known_hosts...${NC}"
+    echo -e "${c}Menghapus semua entri SSH known_hosts...${RESET}"
     rm -f /root/.ssh/known_hosts
 
     # Memeriksa apakah file inventory ada
     if [[ ! -f $INVENTORY_FILE ]]; then
-        echo -e "${r}File inventory tidak ditemukan: $INVENTORY_FILE${NC}"
+        echo -e "${r}File inventory tidak ditemukan: $INVENTORY_FILE${RESET}"
         return
     fi
 
 # Menanyakan apakah semua VPS memiliki password yang sama
-echo -ne "${y}Apakah semua VPS memiliki password yang sama? (Y/n): ${NC}"
+echo -ne "${y}Apakah semua VPS memiliki password yang sama? (Y/n): ${RESET}"
 read -r same_password
 
 if [[ "${same_password,,}" == "y" ]]; then
     # Jika semua VPS memiliki password yang sama
     while true; do
-        echo -ne "${y}Masukkan password untuk semua VPS: ${NC}"
+        echo -ne "${y}Masukkan password untuk semua VPS: ${RESET}"
         read -rs password
         echo ""
 
         # Memastikan password tidak kosong
         if [[ -z "$password" ]]; then
-            echo -e "${r}Password tidak boleh kosong. Silakan coba lagi.${NC}"
+            echo -e "${r}Password tidak boleh kosong. Silakan coba lagi.${RESET}"
             continue
         fi
 
         # Menghubungkan ke semua VPS
-        echo -e "${c}Menghubungkan ke semua VPS yang terdaftar...${NC}"
+        echo -e "${c}Menghubungkan ke semua VPS yang terdaftar...${RESET}"
 
         while IFS= read -r line; do
             # Skip baris kosong, komentar, atau grup
@@ -326,21 +215,21 @@ if [[ "${same_password,,}" == "y" ]]; then
             ansible_host=$(echo "$line" | grep -oP 'ansible_host=\K\S+')
             ansible_user=$(echo "$line" | grep -oP 'ansible_user=\K\S+')
 
-            echo -e "${y}Menghubungkan ke VPS: ${vps_name} (${ansible_host})...${NC}"
+            echo -e "${y}Menghubungkan ke VPS: ${vps_name} (${ansible_host})...${RESET}"
 
             sshpass -p "$password" ssh-copy-id -o StrictHostKeyChecking=no "${ansible_user}@${ansible_host}"
             if [[ $? -ne 0 ]]; then
-                echo -e "${r}Gagal menghubungkan ke ${vps_name}. Silakan periksa password atau konfigurasi VPS.${NC}"
+                echo -e "${r}Gagal menghubungkan ke ${vps_name}. Silakan periksa password atau konfigurasi VPS.${RESET}"
                 continue
             fi
         done < "$INVENTORY_FILE"
 
-        echo -e "${WHITEBLD}Proses selesai! Semua VPS telah terhubung.${NC}"
+        echo -e "${WHITE}${BOLD}Proses selesai! Semua VPS telah terhubung.${RESET}"
         break
     done
 else
     # Jika password berbeda, meminta user memilih VPS dan memasukkan password manual
-    echo -e "${y}Pilih VPS yang ingin Anda hubungkan: ${NC}"
+    echo -e "${y}Pilih VPS yang ingin Anda hubungkan: ${RESET}"
 
     # Menampilkan daftar VPS
     declare -A vps_data
@@ -364,12 +253,12 @@ else
     done < "$INVENTORY_FILE"
 
     # Meminta pengguna memilih VPS
-    echo -ne "${y}Masukkan nomor VPS yang ingin Anda hubungkan: ${NC}"
+    echo -ne "${y}Masukkan nomor VPS yang ingin Anda hubungkan: ${RESET}"
     read -r vps_choice
 
     # Validasi input pengguna
     if [[ ! "$vps_choice" =~ ^[0-9]+$ ]] || [ "$vps_choice" -le 0 ] || [ "$vps_choice" -gt "$index" ]; then
-        echo -e "${r}Pilihan tidak valid.${NC}"
+        echo -e "${r}Pilihan tidak valid.${RESET}"
         exit 1
     fi
 
@@ -378,24 +267,24 @@ else
     selected_host="${vps_data["$selected_vps_index,host"]}"
     selected_user="${vps_data["$selected_vps_index,user"]}"
 
-    echo -e "${y}Anda memilih VPS: ${selected_vps}${NC}"
+    echo -e "${y}Anda memilih VPS: ${selected_vps}${RESET}"
 
     while true; do
-        echo -ne "${y}Masukkan password untuk VPS ${selected_vps}: ${NC}"
+        echo -ne "${y}Masukkan password untuk VPS ${selected_vps}: ${RESET}"
         read -rs password
         echo ""
 
         if [[ -z "$password" ]]; then
-            echo -e "${r}Password tidak boleh kosong. Silakan coba lagi.${NC}"
+            echo -e "${r}Password tidak boleh kosong. Silakan coba lagi.${RESET}"
             continue
         fi
 
         sshpass -p "$password" ssh-copy-id -o StrictHostKeyChecking=no "${selected_user}@${selected_host}"
         if [[ $? -eq 0 ]]; then
-            echo -e "${WHITEBLD}Berhasil menghubungkan ke VPS ${selected_vps}.${NC}"
+            echo -e "${WHITE}${BOLD}Berhasil menghubungkan ke VPS ${selected_vps}.${RESET}"
             break
         else
-            echo -e "${r}Password salah atau koneksi gagal. Silakan coba lagi.${NC}"
+            echo -e "${r}Password salah atau koneksi gagal. Silakan coba lagi.${RESET}"
         fi
     done
 fi
@@ -406,20 +295,19 @@ menu_ftr
 
 }
 
-
 # Fungsi untuk pasang SC ke VPS
 pasang_sc_ke_vps() {
 clear
     # Cek apakah file inventory.ini ada
     if [[ ! -f /root/inventory.ini ]]; then
-        echo -e "${r}File inventory.ini tidak ditemukan.${NC}"
-        echo -e "${y}Silakan atur penggantian VPS dan hubungkan terlebih dahulu sebelum melanjutkan.${NC}"
+        echo -e "${r}File inventory.ini tidak ditemukan.${RESET}"
+        echo -e "${y}Silakan atur penggantian VPS dan hubungkan terlebih dahulu sebelum melanjutkan.${RESET}"
         return
     fi
 
     # Cek apakah file install.yml ada, jika tidak buat file baru
     if [[ ! -f /root/install.yml ]]; then
-        echo -e "${y}File install.yml tidak ditemukan, membuat file baru...${NC}"
+        echo -e "${y}File install.yml tidak ditemukan, membuat file baru...${RESET}"
         cat <<EOF > /root/install.yml
 ---
 - name: Install script on multiple VPS without prompts
@@ -465,24 +353,24 @@ EOF
     fi
 
     # Pastikan semua VPS memiliki Ansible Playbook
-    echo -e "${c}Memeriksa apakah Ansible Playbook sudah terinstal di VPS...${NC}"
+    echo -e "${c}Memeriksa apakah Ansible Playbook sudah terinstal di VPS...${RESET}"
     ansible-playbook --version &> /dev/null
     if [[ $? -ne 0 ]]; then
-        echo -e "${y}Ansible Playbook tidak ditemukan. Memasang Ansible Playbook...${NC}"
+        echo -e "${y}Ansible Playbook tidak ditemukan. Memasang Ansible Playbook...${RESET}"
         apt update -y &> /dev/null
         apt install ansible -y &> /dev/null
     fi
 
     # Pastikan python3-apt terinstal
-    echo -e "${c}Memeriksa apakah python3-apt terinstal di VPS...${NC}"
+    echo -e "${c}Memeriksa apakah python3-apt terinstal di VPS...${RESET}"
     apt list --installed | grep -q python3-apt || apt install python3-apt -y &> /dev/null
 
     # Jalankan playbook untuk memasang SC
-    echo -e "${c}Menjalankan playbook untuk memasang script pada VPS...${NC}"
+    echo -e "${c}Menjalankan playbook untuk memasang script pada VPS...${RESET}"
     ansible-playbook -i /root/inventory.ini /root/install.yml
 
-    echo -e "${WHITEBLD}Pemasangan script selesai.${NC}"
-    echo -e "\n${WHITEBLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${NC}"
+    echo -e "${WHITE}${BOLD}Pemasangan script selesai.${RESET}"
+    echo -e "\n${WHITE}${BOLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${RESET}"
     read -r
     menu_ftr
 }
@@ -490,16 +378,16 @@ rebuild_vps() {
     clear
     # Cek apakah file inventory.ini ada
     if [[ ! -f /root/inventory.ini ]]; then
-        echo -e "${r}File inventory.ini tidak ditemukan.${NC}"
-        echo -e "${y}Silakan tambahkan inventory terlebih dahulu sebelum melanjutkan.${NC}"
+        echo -e "${r}File inventory.ini tidak ditemukan.${RESET}"
+        echo -e "${y}Silakan tambahkan inventory terlebih dahulu sebelum melanjutkan.${RESET}"
         return
     fi
 
     # Tampilkan daftar VPS dari inventory.ini
-    echo -e "${c}Daftar VPS yang tersedia:${NC}"
+    echo -e "${c}Daftar VPS yang tersedia:${RESET}"
     mapfile -t vps_list < <(grep -E 'ansible_host=' /root/inventory.ini | awk '{print $1, $2}')
     if [[ ${#vps_list[@]} -eq 0 ]]; then
-        echo -e "${r}Tidak ada VPS yang ditemukan di inventory.ini.${NC}"
+        echo -e "${r}Tidak ada VPS yang ditemukan di inventory.ini.${RESET}"
         return
     fi
 
@@ -510,27 +398,27 @@ rebuild_vps() {
     done
 
     # Pilih VPS
-    echo -ne "${y}Pilih VPS yang ingin di-rebuild [1-${#vps_list[@]}]: ${NC}"
+    echo -ne "${y}Pilih VPS yang ingin di-rebuild [1-${#vps_list[@]}]: ${RESET}"
     read -r vps_choice
     if [[ ! $vps_choice =~ ^[0-9]+$ ]] || (( vps_choice < 1 || vps_choice > ${#vps_list[@]} )); then
-        echo -e "${r}Pilihan tidak valid.${NC}"
+        echo -e "${r}Pilihan tidak valid.${RESET}"
         return
     fi
 
     selected_vps=$(echo "${vps_list[vps_choice-1]}" | awk '{print $1}')
     selected_ip=$(grep -E "^${selected_vps}" /root/inventory.ini | awk '{print $2}' | cut -d'=' -f2)
     clear
-    echo -e "${c}VPS terpilih: $selected_vps ($selected_ip)${NC}"
+    echo -e "${c}VPS terpilih: $selected_vps ($selected_ip)${RESET}"
 
     # Pilih OS yang ingin digunakan
-    echo -e "${c}Pilih OS untuk VPS:${NC}"
+    echo -e "${c}Pilih OS untuk VPS:${RESET}"
     echo "1. Ubuntu 20.04"
     echo "2. Ubuntu 22.04"
     echo "3. Ubuntu 24.04"
     echo "4. Debian 10"
     echo "5. Debian 11"
     echo "6. Debian 12"
-    echo -ne "${y}Masukkan pilihan OS [1-6]: ${NC}"
+    echo -ne "${y}Masukkan pilihan OS [1-6]: ${RESET}"
     read -r os_choice
 
     case $os_choice in
@@ -541,29 +429,29 @@ rebuild_vps() {
         5) os_selected="Debian 11" ;;
         6) os_selected="Debian 12" ;;
         *) 
-            echo -e "${r}Pilihan tidak valid.${NC}"
+            echo -e "${r}Pilihan tidak valid.${RESET}"
             return
             ;;
     esac
 
     # Meminta input password baru untuk VPS
-    echo -ne "${y}Masukkan password baru untuk root VPS: ${NC}"
+    echo -ne "${y}Masukkan password baru untuk root VPS: ${RESET}"
     read -s new_password
     echo
 
     # Validasi password (minimal 4 karakter)
     if [[ ${#new_password} -lt 4 ]]; then
-        echo -e "${r}Password terlalu pendek. Minimal 4 karakter.${NC}"
+        echo -e "${r}Password terlalu pendek. Minimal 4 karakter.${RESET}"
         return
     fi
 clear
     # Rebuild VPS dengan OS terpilih dan kata sandi baru
-    echo -e "${c}Memulai reinstall OS pada VPS $selected_vps ($selected_ip)...${NC}"
+    echo -e "${c}Memulai reinstall OS pada VPS $selected_vps ($selected_ip)...${RESET}"
     ssh root@"$selected_ip" "curl -O https://raw.githubusercontent.com/bin456789/reinstall/main/reinstall.sh && \
         printf '${new_password}\n${new_password}\n' | bash reinstall.sh ${os_selected} && reboot"
 
-    echo -e "${WHITEBLD}Proses reinstall selesai. VPS akan reboot.${NC}"
-    echo -e "\n${WHITEBLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${NC}"
+    echo -e "${WHITE}${BOLD}Proses reinstall selesai. VPS akan reboot.${RESET}"
+    echo -e "\n${WHITE}${BOLD}Tugas selesai. Tekan Enter untuk kembali ke menu...${RESET}"
     read -r
     menu_ftr
 }
@@ -597,11 +485,11 @@ menu_ftr() {
             hapus_inventory
             ;;
         x)
-            echo -e "${y}Kembali ke menu utama...${NC}"
+            echo -e "${y}Kembali ke menu utama...${RESET}"
             menu
             ;;
         *)
-            echo -e "${r}Pilihan tidak valid, coba lagi.${NC}"
+            echo -e "${r}Pilihan tidak valid, coba lagi.${RESET}"
             menu_ftr
             ;;
     esac

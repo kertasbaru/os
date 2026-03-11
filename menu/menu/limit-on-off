@@ -1,56 +1,54 @@
 #!/bin/bash
-#Color
+
+source /usr/bin/ui.sh
+
 DF='\e[39m'
 Bold='\e[1m'
 Blink='\e[5m'
 yell='\e[33m'
-RED='\033[0;31m'
-green='\e[32m'
+green='${GREEN}'
 PURPLE='\e[35m'
 cyan='\e[36m'
 LRED='\e[91m'
 Lgreen='\e[92m'
 Lyellow='\e[93m'
-NC='\e[0m'
-GREEN='\033[0;32m'
-ORANGE='\033[0;33m'
+ORANGE='${YELLOW}'
 LIGHT='\033[0;37m'
-grenbo="\e[92;1m"
+grenbo="${GREEN}"
 blue="\033[0;34m"
-WhiteBe="\033[5;37m"
-Blue="\033[36m"
+Blue="${CYAN}"
 clear
 
-echo -e "\e[32mloading...\e[0m"
+echo -e "${GREEN}loading...${RESET}"
 clear
 
 limitip=$(systemctl status vmip | grep running | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 limitquota=$(systemctl status limitvmess | grep running | awk '{print $3}' | cut -d "(" -f2 | cut -d ")" -f1)
 # STATUS SERVICE
 if [[ $limitip == "running" ]]; then 
-   status_limip="${GREEN}ON$NC${blue} │$NC"
+   status_limip="${GREEN}ON$RESET${blue} │$RESET"
 else
-   status_limip="${RED}OFF${NC} "
+   status_limip="${RED}OFF${RESET} "
 fi
 
 # Status 
 if [[ $limitquota == "running" ]]; then 
-   status_limq="${GREEN}ON$NC${blue} │$NC"
+   status_limq="${GREEN}ON$RESET${blue} │$RESET"
 else
-   status_limq="${RED}OFF${NC} "
+   status_limq="${RED}OFF${RESET} "
 fi
 
-echo -e "\033[5;36m┌──────────────────────────────────────────┐\033[0m"
+echo -e "${CYAN}┌──────────────────────────────────────────┐${RESET}"
 echo -e "       Status limit ip      : $status_limip"
 echo -e "       Status limit quota   : $status_limq"
-echo -e "\033[5;36m└──────────────────────────────────────────┘\033[0m"
-echo -e "\033[5;36m┌──────────────────────────────────────────┐\033[0m"
-echo -e " ${WhiteBe}1. TURN OFF LIMIT IP VIA LOCK${NC}"
-echo -e " ${WhiteBe}2. TURN ON  LIMIT IP VIA LOCK${NC}"
-echo -e " ${WhiteBe}3. TURN OFF LIMIT QUOTA VIA LOCK${NC}"
-echo -e " ${WhiteBe}4. TURN ON  LIMIT QUOTA VIA LOCK${NC}"
-echo -e " ${WhiteBe}x. Back To Main Menu ${NC}"
-echo -e "\033[5;36m└──────────────────────────────────────────┘\033[0m"
+echo -e "${CYAN}└──────────────────────────────────────────┘${RESET}"
+echo -e "${CYAN}┌──────────────────────────────────────────┐${RESET}"
+echo -e " ${WHITE}1. TURN OFF LIMIT IP VIA LOCK${RESET}"
+echo -e " ${WHITE}2. TURN ON  LIMIT IP VIA LOCK${RESET}"
+echo -e " ${WHITE}3. TURN OFF LIMIT QUOTA VIA LOCK${RESET}"
+echo -e " ${WHITE}4. TURN ON  LIMIT QUOTA VIA LOCK${RESET}"
+echo -e " ${WHITE}x. Back To Main Menu ${RESET}"
+echo -e "${CYAN}└──────────────────────────────────────────┘${RESET}"
 
 # Fungsi untuk
 start_limip() {
@@ -62,7 +60,7 @@ clear
 	systemctl start vlip
 	systemctl start trip
 clear
-    echo -e "Limit IP Xray ${GREEN}Diaktifkan${NC}."
+    echo -e "Limit IP Xray ${GREEN}Diaktifkan${RESET}."
 	sleep 2
 	limit-on-off
 }
@@ -76,7 +74,7 @@ clear
 	systemctl stop vlip
 	systemctl stop trip
 clear
-    echo -e "Limit IP Xray ${RED}Dinonaktifkan${NC}."
+    echo -e "Limit IP Xray ${RED}Dinonaktifkan${RESET}."
 	sleep 2
 	limit-on-off
 }
@@ -90,7 +88,7 @@ clear
 	systemctl start limitvless
 	systemctl start limittrojan
 clear
-    echo -e "Limit IP Xray ${GREEN}Diaktifkan${NC}."
+    echo -e "Limit IP Xray ${GREEN}Diaktifkan${RESET}."
 	sleep 2
 	limit-on-off
 }
@@ -104,7 +102,7 @@ clear
 	systemctl stop limitvless
 	systemctl stop limittrojan
 clear
-    echo -e "Limit IP Xray ${RED}Dinonaktifkan${NC}."
+    echo -e "Limit IP Xray ${RED}Dinonaktifkan${RESET}."
 	sleep 2
 	limit-on-off
 }

@@ -1,17 +1,8 @@
 #!/bin/bash
 clear;clear
-REDBG="\033[41m"      # Latar belakang merah
-WHITEBLD="\033[1;37m"
-WHITE="\033[1;37m" # Teks putih tebal
-NC="\033[0m"          # Reset warna
-GREEN="\033[92;1m"
-REDBLD="\033[0m\033[91;1m"
-Green="\e[92;1m"
-RED="\033[1;31m"
-YELLOW="\033[33m"
-BLUE="\033[36m"
-FONT="\033[0m"
-GREENBG="\033[42;37m"
+
+source /usr/bin/ui.sh
+
 MYIP=$(cat /etc/xray/ipvps)
 data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
 date_list=$(date +"%Y-%m-%d" -d "$data_server")
@@ -48,22 +39,22 @@ checking_sc() {
     useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
 
     if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
-        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
-        echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
-        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
+        echo -e "${BRED}${BOLD} ⚠️       AKSES DI TOLAK         ⚠️ ${RESET}"
+        echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
         echo -e ""
-        echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+        echo -e "        ${RED}❌ SCRIPT LOCKED ❌${RESET}"
         echo -e ""
-        echo -e "  \033[0;33m🔒 Your VPS\033[0m $MYIP \033[0;33mHas been Banned\033[0m"
+        echo -e "  ${YELLOW}🔒 Your VPS${RESET} $MYIP ${YELLOW}Has been Banned${RESET}"
         echo -e ""
-        echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
-        echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+        echo -e "  ${RED}⚠️  Masa Aktif Sudah Habis ⚠️${RESET}"
+        echo -e "  ${YELLOW}💡 Beli izin resmi hanya dari Admin!${RESET}"
         echo -e ""
-        echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
-        echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
-        echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+        echo -e "  ${GREEN}📞 Contact Admin:${RESET}"
+        echo -e "  ${CYAN}🌍 Telegram: https://t.me/WuzzSTORE${RESET}"
+        echo -e "  ${CYAN}📱 WhatsApp: https://wa.me/6287760204418${RESET}"
         echo -e ""
-        echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+        echo -e "${YELLOW}────────────────────────────────────────────${RESET}"
         exit 1
     fi
 }
@@ -241,10 +232,10 @@ fi
 services=("haproxy" "nginx" "ws" "dropbear" "xray" "udp-custom" )
 
 # Cek status masing-masing service
-status_service="${YELLOW}GOOD${NC}"
+status_service="${YELLOW}GOOD${RESET}"
 for service in "${services[@]}"; do
     if [[ "$(systemctl is-active $service)" != "active" ]]; then
-        status_service="${REDBLD}ERROR $service${NC}"
+        status_service="${RED}ERROR $service${RESET}"
         break
     fi
 done
@@ -260,110 +251,29 @@ format_speed() {
 speed_value=$NET_SPEED
 formatted_speed=$(format_speed "$speed_value")
 
-print_rainbow() {
-    local text="$1"
-    local warna_file="/etc/warna"
-
-    # Inisialisasi warna default
-    local start_r=0 start_g=255 start_b=150
-    local mid_r=0 mid_g=150 mid_b=255
-    local end_r=0 end_g=255 end_b=150
-
-    # Fungsi untuk membaca nilai numerik dari file
-    function get_value() {
-        local key="$1"
-        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
-        echo "${value:-0}"
-    }
-
-    # Jika file warna ada, baca isinya
-    if [[ -f "$warna_file" ]]; then
-        start_r=$(get_value "start_r")
-        start_g=$(get_value "start_g")
-        start_b=$(get_value "start_b")
-
-        mid_r=$(get_value "mid_r")
-        mid_g=$(get_value "mid_g")
-        mid_b=$(get_value "mid_b")
-
-        end_r=$(get_value "end_r")
-        end_g=$(get_value "end_g")
-        end_b=$(get_value "end_b")
-    fi
-
-    # Jalankan awk dengan warna yang sudah dimuat dari file
-    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
-                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
-                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
-    {
-        len = length($0);
-        for (i = 1; i <= len; i++) {
-            progress = (i - 1) / (len - 1);
-            if (progress < 0.5) {
-                factor = progress * 2;
-                r = int((1 - factor) * start_r + factor * mid_r);
-                g = int((1 - factor) * start_g + factor * mid_g);
-                b = int((1 - factor) * start_b + factor * mid_b);
-            } else {
-                factor = (progress - 0.5) * 2;
-                r = int((1 - factor) * mid_r + factor * end_r);
-                g = int((1 - factor) * mid_g + factor * end_g);
-                b = int((1 - factor) * mid_b + factor * end_b);
-            }
-            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
-        }
-        print "\033[0m";
-    }'
-}
-
-
 # // NEWBIE TUNNELING | NB PROJECT
 # // WHATSAPP : 082326322300
 # // TELEGRAM : NEWBIE_STORE24
-center() {
-    local BOX_WIDTH=62
-    local TEXT="$1"
-    local CLEAN_TEXT=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
-    local TEXT_LENGTH=${#CLEAN_TEXT}
-    local LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-    local RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-    local LEFT_SPACE=$(printf '%*s' "$LEFT_PADDING" '')
-    local RIGHT_SPACE=$(printf '%*s' "$RIGHT_PADDING" '')
-    echo -e "${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-}
 
-function Newbie_Banner() {
-clear
-BOX_WIDTH=60
-TEXT=".::. $(cat /etc/xray/username) .::."
-TEXT_LENGTH=${#TEXT}
-LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
-RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
-LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
-RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
-print_rainbow " ════════════════════════════════════════════════════════════"
-print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
-print_rainbow " ════════════════════════════════════════════════════════════"
-}
 function Service_System_Operating() {
 
 print_rainbow " ════════════════════════════════════════════════════════════"
-printf " ${WHITEBLD}%-7s${NC} : ${REDBLD}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "CLIENTS" "$username" "OS" "$OS"
-printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "RAM" "$RAM MB" "UPTIME" "$UPTIME"
-printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "IP" "$MYIP" "ISP" "$ISP"
-printf " ${WHITEBLD}%-7s${NC} : ${REDBLD}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "EXPIRED" "$masaaktif" "DOMAIN" "$DOMAIN"
-printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "RX" "$rxtdy" "LAST" "$bwkmrn1"
-printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${GREEN}%-20s${NC}\n" "TX" "$txtdy" "TODAY" "$bwhari"
-printf " ${WHITEBLD}%-7s${NC} : ${GREEN}%-20s${NC} ${WHITEBLD}%-6s${NC} : ${REDBG}%-8s${NC}\n" "REGION" "$CITY" "MONTH" "$bwbln"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${RED}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "CLIENTS" "$username" "OS" "$OS"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${GREEN}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "RAM" "$RAM MB" "UPTIME" "$UPTIME"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${GREEN}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "IP" "$MYIP" "ISP" "$ISP"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${RED}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "EXPIRED" "$masaaktif" "DOMAIN" "$DOMAIN"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${GREEN}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "RX" "$rxtdy" "LAST" "$bwkmrn1"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${GREEN}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${GREEN}%-20s${RESET}\n" "TX" "$txtdy" "TODAY" "$bwhari"
+printf " ${WHITE}${BOLD}%-7s${RESET} : ${GREEN}%-20s${RESET} ${WHITE}${BOLD}%-6s${RESET} : ${BRED}%-8s${RESET}\n" "REGION" "$CITY" "MONTH" "$bwbln"
 print_rainbow " ────────────────────────────────────────────────────────────"
 }
 function Service_Status() {
 center "$(echo -e "[ SERVICE STATUS - $status_service ]")"
 print_rainbow " ────────────────────────────────────────────────────────────"
-center "$(echo -e "${WHITEBLD}PROXY${NC} ${GREEN}: $status_haproxy${NC}")"
-center "$(echo -e "${WHITEBLD}NGINX${NC} ${GREEN}: $status_nginx${NC}")"
-center "$(printf "${WHITEBLD} %s${NC} : ${GREEN}%s${NC} ${WHITEBLD} %s${NC} : ${GREEN}%s${NC}\n" "SSH" "$status_ssh" "XRAY" "$status_xray")"
-center "$(printf "${WHITEBLD} %s${NC} : ${GREEN}%s${NC} ${WHITEBLD} %s${NC} : ${GREEN}%s${NC}\n" "SSH ACCOUNT" "$SSH_COUNT" "XRAY ACCOUNT" "$xra")"
+center "$(echo -e "${WHITE}${BOLD}PROXY${RESET} ${GREEN}: $status_haproxy${RESET}")"
+center "$(echo -e "${WHITE}${BOLD}NGINX${RESET} ${GREEN}: $status_nginx${RESET}")"
+center "$(printf "${WHITE}${BOLD} %s${RESET} : ${GREEN}%s${RESET} ${WHITE}${BOLD} %s${RESET} : ${GREEN}%s${RESET}\n" "SSH" "$status_ssh" "XRAY" "$status_xray")"
+center "$(printf "${WHITE}${BOLD} %s${RESET} : ${GREEN}%s${RESET} ${WHITE}${BOLD} %s${RESET} : ${GREEN}%s${RESET}\n" "SSH ACCOUNT" "$SSH_COUNT" "XRAY ACCOUNT" "$xra")"
 print_rainbow " ════════════════════════════════════════════════════════════"
 }
 function List_All_Account() {
@@ -372,20 +282,20 @@ center "$(echo -e "$MUTIARA")" | lolcat
 print_rainbow " ╰───────────────────────────────────────────────────────────╯"
 }
 function Acces_Use_Command() {
-#center "$(printf "$YELLOW[ MENU ]${NC}\n")"
+#center "$(printf "$YELLOW[ MENU ]${RESET}\n")"
 #print_rainbow " ════════════════════════════════════════════════════════════"
-echo -e "  ${WHITEBLD} (1) SSH/OPENVPN                    (6) ADMIN MENU  ${NC}"
-echo -e "  ${WHITEBLD} (2) XRAY MANAGER                   (7) BOT TELEGRAM  ${NC}"
-echo -e "  ${WHITEBLD} (3) ADD BUG CONFIG                 (8) UPDATE SCRIPT  ${NC}"
-echo -e "  ${WHITEBLD} (4) CHANGE WARNA                   (9) BACKUP & RESTORE  ${NC}"
-echo -e "  ${WHITEBLD} (5) REGISTER IP                   (10) FEATURES  ${NC}"
+echo -e "  ${WHITE}${BOLD} (1) SSH/OPENVPN                    (6) ADMIN MENU  ${RESET}"
+echo -e "  ${WHITE}${BOLD} (2) XRAY MANAGER                   (7) BOT TELEGRAM  ${RESET}"
+echo -e "  ${WHITE}${BOLD} (3) ADD BUG CONFIG                 (8) UPDATE SCRIPT  ${RESET}"
+echo -e "  ${WHITE}${BOLD} (4) CHANGE WARNA                   (9) BACKUP & RESTORE  ${RESET}"
+echo -e "  ${WHITE}${BOLD} (5) REGISTER IP                   (10) FEATURES  ${RESET}"
 print_rainbow " ════════════════════════════════════════════════════════════"
-printf "${REDBLD}     %-43s${NC}${WHITEBLD}%-20s${NC}\n" "[ REBOOT SYSTEM ]" "[ EXIT ]"
+printf "${RED}     %-43s${RESET}${WHITE}${BOLD}%-20s${RESET}\n" "[ REBOOT SYSTEM ]" "[ EXIT ]"
 print_rainbow " ════════════════════════════════════════════════════════════"
 }
 
 checking_sc
-Newbie_Banner
+banner "$(cat /etc/xray/username)"
 Service_System_Operating
 Service_Status
 Acces_Use_Command
@@ -410,7 +320,7 @@ while true; do
         0|x) clear ; figlet WUZZSTORE | lolcat ; exit 0 ;;
         *)  
             tput cuu 1 && tput el   
-            echo -e "${RED}Input tidak valid!${NC} Silakan pilih menu yang benar." 
+            echo -e "${RED}Input tidak valid!${RESET} Silakan pilih menu yang benar." 
             sleep 2
             tput cuu 1 && tput el  
         ;;
