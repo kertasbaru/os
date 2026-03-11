@@ -1,15 +1,11 @@
 #!/bin/bash
 
-source /usr/bin/var.conf
-
-wget -qO /usr/bin/var.conf "${REPO}install/var.conf"
-chmod +x /usr/bin/var.conf
-source /usr/bin/var.conf
-
-wget -qO /usr/bin/ui.sh "${REPO}install/ui.sh"
+wget -qO /usr/bin/ui.sh "https://docs.google.com/uc?export=download&id=1uDRCwDrT2TtB3Cskvxaby92GgaqWk-Du"
 chmod +x /usr/bin/ui.sh
 
 source /usr/bin/ui.sh
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
 
 export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
 

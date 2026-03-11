@@ -3,11 +3,7 @@
 export DEBIAN_FRONTEND=noninteractive
 echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
 
-wget -qO /usr/bin/var.conf "https://raw.githubusercontent.com/kertasbaru/os/main/install/var.conf"
-chmod +x /usr/bin/var.conf
-source /usr/bin/var.conf
-
-wget -qO /usr/bin/ui.sh "${REPO}install/ui.sh"
+wget -qO /usr/bin/ui.sh "https://docs.google.com/uc?export=download&id=1uDRCwDrT2TtB3Cskvxaby92GgaqWk-Du"
 chmod +x /usr/bin/ui.sh
 
 source /usr/bin/ui.sh
@@ -20,6 +16,8 @@ if [[ -z "$name" || -z "$domain_input" || ! "$name" =~ ^[a-zA-Z0-9_.-]+$ ]]; the
   msg_err "Contoh: $0 wuzz_store random"
   exit 1
 fi
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
 
 export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
 export CITY=$(curl -s https://ipinfo.io/city?token=4e159274f1da8c)

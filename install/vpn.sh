@@ -2,7 +2,7 @@
 # Mod By NEWBIE VPN 
 
 source /usr/bin/ui.sh
-source /usr/bin/var.conf
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
 
 export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
 

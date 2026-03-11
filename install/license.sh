@@ -5,8 +5,7 @@ gem install lolcat
 TIME=$(date '+%d %b %Y')
 IP_FILE="/usr/bin/.ipvps"
 MYIP=$(curl -sL ip.dekaa.my.id)
-wget -qO /usr/bin/var.conf "https://raw.githubusercontent.com/kertasbaru/os/main/install/var.conf"
-source /usr/bin/var.conf
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
 echo "$MYIP" > "$IP_FILE"
 
 wget -qO /usr/local/bin/ui.sh "${REPO}install/ui.sh"

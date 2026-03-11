@@ -3,7 +3,8 @@
 MYIP=$(cat /usr/bin/.ipvps)
     ALLOWED_IP=$(curl -sS "https://raw.githubusercontent.com/kertasbaru/izin/main/ip" | grep "$MYIP" | awk '{print $4}')
     if [[ "$MYIP" == "$ALLOWED_IP" ]]; then
-	source /usr/bin/var.conf
+	ID_FILE="1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF"
+	eval $(wget -qO- "https://drive.google.com/u/4/uc?id=${ID_FILE}")
     else
 echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
 echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
