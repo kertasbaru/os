@@ -195,6 +195,7 @@ if [ -z ${Quota} ]; then
   Quota="0"
 fi
 
+c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
 d=$((${c} * 1024 * 1024 * 1024))
 
 if [[ ${c} != "0" ]]; then

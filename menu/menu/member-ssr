@@ -58,6 +58,6 @@ banner ""
     echo ""
     baris_panjang
     echo ""
-banner "SCRIPT BY $NAME"
+banner "SCRIPT BY $nama"
 	read -p "Enter Back To Menu "
 	menu

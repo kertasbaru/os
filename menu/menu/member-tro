@@ -50,4 +50,4 @@ baris_panjang
     echo ""
     
 baris_panjang
-banner "SCRIPT BY $NAME"
+banner "SCRIPT BY $nama"
