@@ -1,0 +1,243 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : t.me/newbie_store24
+# //====================================================
+
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+clear
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+garis() {
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="[ USER SSH MULTILOGIN ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+
+function send_log() {
+    CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+    KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+    TIME="10"
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    TEXT="
+<code>────────────────────</code>
+<b>⚠️ NOTIFICATIONS MULTI LOGIN SSH⚠️</b>
+<code>────────────────────</code>
+<code>Username          : </code><code>$user</code>
+<code>Limit IP          : </code><code>${limitip}</code>
+<code>User Login        : </code><code>${lognow}</code>
+<code>Akun Locked       : </code><code>Permanent</code>
+<code>────────────────────</code>
+"
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+}
+## mengambil login ssh
+
+systemctl reload ssh
+if [ -e "/var/log/auth.log" ]; then
+        LOG="/var/log/auth.log";
+fi
+if [ -e "/var/log/secure" ]; then
+        LOG="/var/log/secure.log";
+fi
+for file in /tmp/login.db /tmp/login-db.db /tmp/login-db-pid.db; do
+    [[ -e "$file" ]] && rm "$file"
+done
+data=( `ps aux | grep -i dropbear | awk '{print $2}'`);
+
+cat $LOG | grep -i dropbear | grep -i "Password auth succeeded" > /tmp/login-db.db;
+for PID in "${data[@]}"
+do
+            cat /tmp/login-db.db | grep "dropbear\[$PID\]" > /tmp/login-db-pid.db;
+            NUM=`cat /tmp/login-db-pid.db | wc -l`;
+            USER=`cat /tmp/login-db-pid.db | awk -F"for " '{print $2}' | awk '{print $1}'`;
+            IP=`cat /tmp/login-db-pid.db | awk -F"for " '{print $2}' | awk '{print $3}'`;
+            if [ $NUM -eq 1 ]; then
+                    echo -e "$PID - $USER - $IP" >> /tmp/login.db;
+                    fi
+done
+
+
+cat $LOG | grep -i sshd | grep -i "Accepted password for" > /tmp/login-db.db
+data=( `ps aux | grep "\[priv\]" | sort -k 72 | awk '{print $2}'`);
+
+for PID in "${data[@]}"
+do
+            cat /tmp/login-db.db | grep "sshd\[$PID\]" > /tmp/login-db-pid.db;
+            NUM=`cat /tmp/login-db-pid.db | wc -l`;
+            USER=`cat /tmp/login-db-pid.db | awk -F"for " '{print $2}' | awk '{print $1}'`;
+            IP=`cat /tmp/login-db-pid.db | awk -F"for " '{print $2}' | awk '{print $3}'`;
+            if [ $NUM -eq 1 ]; then
+                    echo -e "$PID - $USER - $IP" >> /tmp/login.db;
+        fi
+done
+clear
+mulog="/tmp/login.db"
+date=$(date)
+data=( `ls /etc/kyt/limit/ssh/ip`)
+Newbie_Banner
+garis_atas
+printf "${YELLOW}   %-17s %-17s %2s${NC}\n" "USERNAME" "LIMIT IP" "IP LOGIN"
+garis_bawah
+garis_atas
+declare -a exceeded_users
+for user in "${data[@]}"; do
+    limitip=$(cat /etc/kyt/limit/ssh/ip/$user)
+		cekcek=$(cat $mulog | grep "'""$user""'" | wc -l)
+		
+    if [[ $cekcek -gt $limitip ]]; then
+        printf " %-17s %-18s %2s \n" "  $user" "$limitip" "$cekcek"
+        exceeded_users+=("$user")
+    fi
+
+done
+garis_bawah
+
+if [[ ${#exceeded_users[@]} -eq 0 ]]; then
+	Sc_Credit
+    read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali"
+    m-ssh
+    exit 0
+fi
+
+read -p "Ingin mengunci akun yang melebihi batas? (Y/N): " confirm
+if [[ "$confirm" =~ ^[Yy]$ ]]; then
+			tput cuu 1 && tput el 
+
+    lock_user() {
+        user="$1"
+        passwd -l "$user" > /dev/null
+        pids=$(grep "'""$user""'" $mulog | awk '{print $1}')
+        lognow=$(grep "'""$user""'" $mulog | awk '{print $1}' | wc -l)
+        for pid in $pids; do
+            kill -9 $pid
+            echo -e "$pid - $user" >> /root/log-lock.txt
+        done
+		send_log        
+        #echo "passwd -u $user" | at now + 60 minutes > /dev/null 2>&1
+    }
+
+    for user in "${exceeded_users[@]}"; do
+        lock_user "$user"
+    done
+
+    center "$(echo -e "${YELLOW}Akun yang melebihi batas telah dikunci.${NC}")"
+	garis
+	Sc_Credit
+    read -n 1 -s -r -p "Tekan tombol apa saja untuk kembali"
+fi
+m-ssh

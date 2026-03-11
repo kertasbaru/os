@@ -1,0 +1,85 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+ON="${GREEN}[ON]${RESET}"
+OFF="${RED}[OFF]${RESET}"
+cek=$(grep -c -E "^# Autokill" /etc/cron.d/limitssh-ip)
+if [[ "$cek" = "1" ]]; then
+  sts="${ON}"
+else
+  sts="${OFF}"
+fi
+
+clear
+echo -e ""
+banner "AUTOKILL"
+echo -e " STATUS: $sts"
+echo -e ""
+echo -e " 1. AutoKill After 1 Minutes"
+echo -e " 2. AutoKill After 2 Minutes"
+echo -e " 3. AutoKill After 3 Minutes"
+echo -e " 4. Turn On/Off Autokill / Multilogin"
+echo -e " x. Exit"
+garis
+echo -e ""
+read -p " Select From Options [1-4 or x] :  " AutoKill
+echo -e ""
+text() {
+  echo -e ""
+  garis
+  center "Allowed Multilogin: $1"
+  center "Autokill Every: $2 Minutes"
+  garis
+  echo -e ""
+  read -n 1 -s -r -p " Press [ Enter ] to back on menu"
+  menu
+}
+case $AutoKill in
+  1)
+    echo -e ""
+    read -p "Multilogin Maximum Number Of Allowed: " iplimit
+    sleep 1
+    clear
+    echo > /etc/cron.d/limitssh-ip
+    echo "# Autokill" >>/etc/cron.d/limitssh-ip
+    echo "*/1 * * * *  root /usr/local/sbin/tendang $max" >>/etc/cron.d/limitssh-ip
+    text "$iplimit" "1"
+    ;;
+  2)
+    echo -e ""
+    read -p "Multilogin Maximum Number Of Allowed: " iplimit
+    sleep 1
+    clear
+    echo > /etc/cron.d/limitssh-ip
+    echo "# Autokill" >>/etc/cron.d/limitssh-ip
+    echo "*/2 * * * *  root /usr/local/sbin/tendang $iplimit" >>/etc/cron.d/limitssh-ip
+    text "$iplimit" "2"
+    ;;
+  3)
+    echo -e ""
+    read -p "Multilogin Maximum Number Of Allowed: " iplimit
+    sleep 1
+    clear
+    echo > /etc/cron.d/limitssh-ip
+    echo "# Autokill" >>/etc/cron.d/limitssh-ip
+    echo "*/3 * * * *  root /usr/local/sbin/tendang $iplimit" >>/etc/cron.d/limitssh-ip
+    text "$iplimit" "3"
+    ;;
+  4)
+    clear
+    echo > /etc/cron.d/limitssh-ip
+    echo -e ""
+    garis
+    center "Autokill Multilogin Turned Off"
+    garis
+    echo -e ""
+    read -n 1 -s -r -p " Press [ Enter ] to back on menu"
+    menu
+    ;;
+  x)
+    clear
+    menu
+    ;;
+esac

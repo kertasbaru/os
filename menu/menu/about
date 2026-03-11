@@ -1,0 +1,34 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+garis
+center "ABOUT" "${CYAN}${BOLD}"
+garis
+center ""
+echo -e " ${BLUE}PRO: ${RESET}Monthly for one IP: Rp 10.000"
+echo -e " ${BLUE}VIP: ${RESET}Lifetime for one IP: Rp 30.000"
+echo -e ""
+echo -e " ${BLUE}SOURCE CODE: ${RESET}Rp 500.000"
+echo -e ""
+echo -e " 30% PRO Discount for adding months or IPs"
+echo -e " 50% VIP Discount for adding IPs"
+center ""
+garis
+center ""
+center "This script is an automatic tunnel installation."
+center "The available tunnel features include"
+center "SSH, OVPN, UDP, and XRAY. This installation script"
+center "requires an official license from"
+center "the author to run as intended."
+center ""
+center "Please continue to support us.😊"
+center ""
+garis
+center "@WUZZSTORE 2023-2026" "${CYAN}${BOLD}"
+garis
+center ""
+
+read -n 1 -s -r -p " Press [ Enter ] to continue"
+m-ftr

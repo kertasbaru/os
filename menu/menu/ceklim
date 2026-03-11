@@ -1,0 +1,50 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+touch /root/.system
+data1=( `awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd `)
+for user in "${data1[@]}"
+do
+  dir="/etc/kyt/limit/ssh/ip"
+  iplimit1="$dir/$user"
+  
+  # Cek apakah direktori ada, jika tidak buat direktori
+  if [[ ! -d $dir ]]; then
+      mkdir -p $dir
+  fi
+  
+  # Cek apakah file ada dan tidak kosong, jika tidak, tulis data "2"
+  if [[ ! -f $iplimit1 || ! -s $iplimit1 ]]; then
+      echo "2" > $iplimit1
+  fi
+done
+
+clear
+echo -e ""
+banner "[ USER LOGIN SSH ]"
+garis
+printf "${YELLOW}  %-20s %-22s %-20s %2s${RESET}\n" "USERNAME" "LIMIT IP" "LOGIN IP"  
+garis
+mulog=$(cekssh)
+data=( `awk -F: '$3 >= 1000 && $1 != "nobody" {print $1}' /etc/passwd`)
+for user in "${data[@]}"
+do
+  cekcek=$(echo -e "$mulog" | grep -wE $user | wc -l)
+  if [[ $cekcek -gt 0 ]]; then
+    iplimit=$(cat /etc/kyt/limit/ssh/ip/$user)
+    printf "  %-20s %-22s %-20s %2s\n" "${user}" "${iplimit} IP" "${cekcek} IP" 
+    echo "slot" >> /root/.system
+  else
+    echo > /dev/null
+  fi
+  echo send_log > /dev/null
+done
+aktif=$(cat /root/.system | wc -l)
+garis
+center "${WHITE}${BOLD}$aktif$ ${YELLOW}[ USER ONLINE ]${RESET}"
+garis
+sed -i "d" /root/.system
+read -n 1 -s -r -p " Press [ Enter ] to continue"
+m-ssh

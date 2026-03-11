@@ -1,0 +1,191 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+
+MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
+
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+exp=$(curl -sS $IZIN | grep $MYIP | awk '{print $3}')
+IPCLIENT=$(curl -sS $IZIN | grep $MYIP | awk '{print $4}')
+
+if [[ "$MYIP" != "$IPCLIENT" ]]; then
+  rejected "$MYIP"
+else
+  if [[ $date_list > $exp ]] then
+    rejected "$MYIP"
+  fi
+fi
+
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+DOMAIN=$(cat /etc/xray/domain)
+NAME=$(cat /etc/xray/username)
+
+CHATID=$(grep -E "^#notif# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#notif# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+echo -e ""
+banner "CREATE SSH OPENVPN ACCOUNT"
+echo -e "${WHITE}${BOLD}"
+read -p " Username      : " Login
+egrep "^$Login" /etc/passwd >/dev/null
+if [ $? -eq 0 ]; then
+  msg_err "USER SUDAH ADA DAN MASIH AKTIF"
+  sleep 2
+  add-ssh
+fi
+egrep "^$Login" /etc/group >/dev/null
+if [ $? -eq 0 ]; then
+  sed -i "/$Login/d" /etc/group >/dev/null
+fi
+read -p " Password      : " Pass
+read -p " Limit (IP)    : " iplimit
+read -p " Expired (day) : " masaaktif
+echo -e "${RESET}"
+#limitip
+if [[ $iplimit -gt 0 ]]; then
+  mkdir -p /etc/kyt/limit/ssh/ip/
+  echo -e "$iplimit" > /etc/kyt/limit/ssh/ip/$Login
+else
+  echo > /dev/null
+fi
+
+clear
+tgl=$(date -d "$masaaktif days" +"%d")
+bln=$(date -d "$masaaktif days" +"%b")
+thn=$(date -d "$masaaktif days" +"%Y")
+expe="$tgl $bln, $thn"
+tgl2=$(date +"%d")
+bln2=$(date +"%b")
+thn2=$(date +"%Y")
+tnggl="$tgl2 $bln2, $thn2"
+useradd -e `date -d "$masaaktif days" +"%Y-%m-%d"` -s /bin/false -M $Login
+expi="$(chage -l $Login | grep "Account expires" | awk -F": " '{print $2}')"
+echo -e "$Pass\n$Pass\n"| passwd $Login &> /dev/null
+hariini=`date -d "0 days" +"%Y-%m-%d"`
+expi=`date -d "$masaaktif days" +"%Y-%m-%d"`
+
+if [ ! -e /etc/ssh ]; then
+  mkdir -p /etc/ssh
+fi
+
+if [ -z ${Quota} ]; then
+  Quota="0"
+fi
+
+c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
+d=$((${c} * 1024 * 1024 * 1024))
+
+if [[ ${c} != "0" ]]; then
+  echo "${d}" >/etc/ssh/${Login}
+fi
+
+DATADB=$(cat /etc/ssh/.ssh.db | grep "^#ssh#" | grep -w "${Login}" | awk '{print $2}')
+if [[ "${DATADB}" != '' ]]; then
+  sed -i "/\b${Login}\b/d" /etc/ssh/.ssh.db
+  echo "#ssh# ${Login} ${Pass} ${Quota} ${iplimit} ${expe}" >>/etc/ssh/.ssh.db
+else
+  echo "#ssh# ${Login} ${Pass} ${Quota} ${iplimit} ${expe}" >>/etc/ssh/.ssh.db
+fi
+
+clear
+
+TEXT="
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH OVPN Account     </code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Username         : </code> <code>$Login</code>
+<code>Password         : </code> <code>$Pass</code>
+<code>Limit Quota      : </code> <code>$Quota</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Host             : </code> <code>$DOMAIN</code>
+<code>Port OpenSSH     : 443, 80, 22</code>
+<code>Port Dropbear    : 443, 109</code>
+<code>Port SSH WS      : 80, 8080, 8081-9999 </code>
+<code>Port SSH UDP     : 1-65535 </code>
+<code>Port SSH SSL WS  : 443</code>
+<code>Port SSL/TLS     : 400-900</code>
+<code>Port OVPN WS SSL : 443</code>
+<code>Port OVPN SSL    : 443</code>
+<code>Port OVPN TCP    : 443, 1194</code>
+<code>Port OVPN UDP    : 2200</code>
+<code>BadVPN UDP       : 7100, 7300, 7300</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>SSH WEBSOCKET    : </code><code>$DOMAIN:80@$Login:$Pass</code>
+<code>SSH SSL          : </code><code>$DOMAIN:443@$Login:$Pass</code>
+<code>SSH UDP          : </code><code>$DOMAIN:1-65535@$Login:$Pass</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Payload WSS      : </code><code>GET wss://BUG.COM/ HTTP/1.1[crlf]Host: $DOMAIN[crlf]Upgrade: websocket[crlf][crlf]</code>
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+OVPN Download : https://$DOMAIN:81/
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+<code>Save Link Account: </code>https://$DOMAIN:81/ssh-$Login.txt
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+Aktif Selama         : $masaaktif Hari
+Dibuat Pada          : $tnggl
+Berakhir Pada        : $expe
+<code>◇━━━━━━━━━━━━━━━━━◇</code>
+"
+
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+
+TEXT="<code>◇━━━━━━━━━━━━━━━━━◇
+*_PEMBELIAN BERHASIL_*
+◇━━━━━━━━━━━━━━━━━◇
+-» PRODUK : SSH
+-» REGION : $CITY
+-» REQ CONFIG : 
+-» REQ NAMA : $Login
+-» DEVICE : $iplimit IP
+-» HARGA : 
+-» AKTIF : $masaaktif HARI
+-» TGL EXP : $expe
+◇━━━━━━━━━━━━━━━━━◇
+$nama </code>"
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+clear
+PAYLOADWS="GET / HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADTLS="GET wss://$DOMAIN/ HTTP/1.1[crlf]Host: [host][crlf]Connection: Upgrade[crlf]User-Agent: [ua][crlf]Upgrade: websocket[crlf][crlf]"
+
+PAYLOADHANCED="HEAD / HTTP/1.1[crlf]Host: Masukan_Bug[crlf][crlf]PATCH / HTTP/1.1[crlf]Host: [host][crlf]Upgrade: websocket[crlf][crlf][split]HTTP/ 1[crlf][crlf]"
+
+# Details ACcount
+clear
+echo -e ""
+banner "[ SSH OPENVPN ACCOUNT ]"
+echo -e "${WHITE}${BOLD} Remark      : $Login"
+echo -e " Password    : $Pass"
+echo -e " Limit Ip    : ${iplimit} Device"
+echo -e " DOMAIN      : $DOMAIN"
+echo -e " ISP         : $ISP"
+echo -e " OpenSSH     : 443, 80, 22"
+echo -e " Port UDP    : 1-65535"
+echo -e " SSH WS      : 80,8080,8880,2082"
+echo -e " SSL/TLS     : 443"
+echo -e " OVPN UDP    : 2200${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Port 80     : $DOMAIN:80@$Login:$Pass"
+echo -e " Port 443    : $DOMAIN:443@$Login:$Pass"
+echo -e " Udp Custom  : $DOMAIN:1-65535@$Login:$Pass"
+echo -e " OpenVpn     : https://$DOMAIN:81/"
+echo -e " Account     : https://$DOMAIN:81/ssh-$Login.txt${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Payload WS  : ${PAYLOADWS}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Payload TLS : ${PAYLOADTLS}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Payload ENCD: ${PAYLOADHANCED}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Days in     : $masaaktif Day"
+echo -e " Expiry in   : $expe${RESET}"
+garis
+echo -e ""
+read -n 1 -s -r -p " Press [ Enter ] to continue"
+m-ssh

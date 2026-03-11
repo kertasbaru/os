@@ -1,0 +1,176 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+
+MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
+
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+exp=$(curl -sS $IZIN | grep $MYIP | awk '{print $3}')
+IPCLIENT=$(curl -sS $IZIN | grep $MYIP | awk '{print $4}')
+
+if [[ "$MYIP" != "$IPCLIENT" ]]; then
+  rejected "$MYIP"
+else
+  if [[ $date_list > $exp ]] then
+    rejected "$MYIP"
+  fi
+fi
+
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+DOMAIN=$(cat /etc/xray/domain)
+NAME=$(cat /etc/xray/username)
+
+CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+echo -e ""
+banner "CREATE SHADOWSOCKS ACCOUNT"
+read -rp "${WHITE}${BOLD} Username         : " -e user
+CLIENT_EXISTS=$(grep -w $user /etc/xray/config.json | wc -l)
+if [[ ${CLIENT_EXISTS} == '1' ]]; then
+  msg_err "USER SUDAH ADA"
+  sleep 2
+	add-ssr
+fi
+#	done
+
+cipher="aes-128-gcm"
+uuid=$(cat /proc/sys/kernel/random/uuid)
+read -p " Limit User (GB)  : " Quota
+read -p " Limit User (IP)  : " iplimit
+read -p " Expired (days)   : " masaaktif
+echo -e "${RESET}"
+
+tgl=$(date -d "$masaaktif days" +"%d")
+bln=$(date -d "$masaaktif days" +"%b")
+thn=$(date -d "$masaaktif days" +"%Y")
+expe="$tgl $bln, $thn"
+tgl2=$(date +"%d")
+bln2=$(date +"%b")
+thn2=$(date +"%Y")
+tnggl="$tgl2 $bln2, $thn2"
+exp=`date -d "$masaaktif days" +"%Y-%m-%d"`
+sed -i '/#ssws$/a\#!# '"$user $exp"'\
+},{"password": "'""$uuid""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
+sed -i '/#ssgrpc$/a\#!# '"$user $exp"'\
+},{"password": "'""$uuid""'","method": "'""$cipher""'","email": "'""$user""'"' /etc/xray/config.json
+echo $cipher:$uuid > /tmp/log
+shadowsocks_base64=$(cat /tmp/log)
+echo -n "${shadowsocks_base64}" | base64 > /tmp/log1
+shadowsocks_base64e=$(cat /tmp/log1)
+shadowsockslink="ss://${shadowsocks_base64e}@$DOMAIN:$tls?plugin=xray-plugin;mux=0;path=/ss-ws;host=$DOMAIN;tls#${user}"
+shadowsockslink1="ss://${shadowsocks_base64e}@$DOMAIN:$tls?plugin=xray-plugin;mux=0;serviceName=ss-grpc;host=$DOMAIN;tls#${user}"
+
+#buat ss WEBSOCKET
+sslinkws="ss://${shadowsocks_base64e}@${DOMAIN}:443?path=/ss-ws&security=tls&encryption=none&type=ws#${user}"
+nonsslinkws="ss://${shadowsocks_base64e}@${DOMAIN}:80?path=/ss-ws&security=none&encryption=none&type=ws#${user}"
+
+#buat ss GRPC
+sslinkgrpc="ss://${shadowsocks_base64e}@${DOMAIN}:443?mode=gun&security=tls&encryption=none&type=grpc&serviceName=ss-grpc&sni=$DOMAIN#${user}"
+nonsslinkgrpc="ss://${shadowsocks_base64e}@${DOMAIN}:80?mode=gun&security=none&encryption=none&type=grpc&serviceName=ss-grpc&sni=$DOMAIN#${user}"
+
+systemctl restart xray
+if [ ! -e /etc/shadowsocks ]; then
+  mkdir -p /etc/shadowsocks
+fi
+
+if [ -z ${Quota} ]; then
+  Quota="0"
+fi
+
+c=$(echo "${Quota}" | sed 's/[^0-9]*//g')
+d=$((${c} * 1024 * 1024 * 1024))
+
+if [[ ${c} != "0" ]]; then
+  echo "${d}" >/etc/shadowsocks/${user}
+fi
+DATADB=$(cat /etc/shadowsocks/.shadowsocks.db | grep "^###" | grep -w "${user}" | awk '{print $2}')
+if [[ "${DATADB}" != '' ]]; then
+  sed -i "/\b${user}\b/d" /etc/shadowsocks/.shadowsocks.db
+fi
+echo "### ${user} ${exp} ${uuid}" >>/etc/shadowsocks/.shadowsocks.db
+curl -s -o /dev/null -X POST "https://api.telegram.org/bot$KEY/sendMessage" \
+-F chat_id="$CHATID" \
+-F parse_mode="HTML" \
+-F text="◇━━━━━━━━━━━━━━━━━◇
+      XRAY/SHADOWSOCKS
+◇━━━━━━━━━━━━━━━━━◇
+Remarks   : ${user}
+Domain    : ${DOMAIN}
+Limit Quota : ${Quota} GB
+Port TLS  : 443-900
+Port NTLS : 80, 8080, 8081-9999
+id        : <code>${uuid}</code>
+Cipers    : aes-128-gcm
+network   : ws or grpc
+Path      : /ss-ws
+Dynamic   : https://bugmu.com/path
+Name      : ss-grpc
+◇━━━━━━━━━━━━━━━━━◇
+LINK TLS  
+◇━━━━━━━━━━━━━━━━━◇
+<code>${sslinkws}</code>
+◇━━━━━━━━━━━━━━━━━◇
+LINK NTLS 
+◇━━━━━━━━━━━━━━━━━◇
+<code>${nonsslinkws}</code>
+◇━━━━━━━━━━━━━━━━━◇
+LINK GPRC 
+◇━━━━━━━━━━━━━━━━━◇
+<code>${sslinkgrpc}</code>
+◇━━━━━━━━━━━━━━━━━◇
+Info Script    : https://${DOMAIN}:81/.txt
+◇━━━━━━━━━━━━━━━━━◇
+Aktif Selama   : $masaaktif Hari
+Dibuat Pada    : $tnggl
+Berakhir Pada  : $expe
+◇━━━━━━━━━━━━━━━━━◇
+"
+
+TEXT1="<code>◇━━━━━━━━━━━━━━━━━◇
+*_PEMBELIAN BERHASIL_*
+◇━━━━━━━━━━━━━━━━━◇
+-» PRODUK : SHADOWSOCKS
+-» REGION : $CITY
+-» REQ CONFIG : 
+-» REQ NAMA : $user
+-» DEVICE : $iplimit IP
+-» HARGA : 
+-» AKTIF : $masaaktif HARI
+-» TGL EXP : $expe
+◇━━━━━━━━━━━━━━━━━◇
+$nama </code>"
+curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT1&parse_mode=html" $URL >/dev/null
+
+clear
+banner "[ SHADOWSOCKS ACCOUNT ]"
+echo -e "${WHITE}${BOLD} Remarks     : ${user}"
+echo -e " Domain      : ${DOMAIN}"
+echo -e " User Quota  : ${Quota} GB"
+echo -e " Port TLS    : 443-900"
+echo -e " Password    : ${uuid}"
+echo -e " Cipers      : aes-128-gcm"
+echo -e " Network     : ws/grpc"
+echo -e " Path        : /ss-ws"
+echo -e " ServiceName : ss-grpc${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Link WS TLS : ${sslinkws}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Link WS     : ${nonsslinkws}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Link GRPC   : ${sslinkgrpc}${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Info Script : https://$DOMAIN:81/${RESET}"
+garis
+echo -e "${WHITE}${BOLD} Expiry in   : $masaaktif Day${RESET}"
+garis
+echo -e ""
+read -n 1 -s -r -p " Press [ Enter ] to continue"
+m-ssr

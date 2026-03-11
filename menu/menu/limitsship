@@ -1,0 +1,123 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : t.me/newbie_store24
+# //====================================================
+
+function send_log() {
+    CHATID=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+    KEY=$(grep -E "^#bot# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+    TIME="10"
+    URL="https://api.telegram.org/bot$KEY/sendMessage"
+    TEXT="
+<code>────────────────────</code>
+<b>⚠️ NOTIFICATIONS MULTI LOGIN SSH⚠️</b>
+<code>────────────────────</code>
+<code>Username          : </code><code>$user</code>
+<code>Limit IP          : </code><code>${limitip}</code>
+<code>User Login        : </code><code>${cur_logins}</code>
+<code>Akun Locked       : </code><code>10 Jam</code>
+<code>────────────────────</code>
+"
+    curl -s --max-time $TIME -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" $URL >/dev/null
+}
+if [ -e "/var/log/auth.log" ]; then
+    LOG="/var/log/auth.log"
+elif [ -e "/var/log/secure" ]; then
+    LOG="/var/log/secure"
+else
+    echo "Log file not found!"
+    exit 1
+fi
+
+# Bersihkan file sementara
+rm -f /tmp/login.db /tmp/login-db.db /tmp/login-db-pid.db
+
+# Ambil proses Dropbear yang login berhasil
+data=( $(ps aux | grep -i dropbear | awk '{print $2}') )
+grep -i dropbear "$LOG" | grep -i "Password auth succeeded" > /tmp/login-db.db
+
+for PID in "${data[@]}"; do
+    grep "dropbear\[$PID\]" /tmp/login-db.db > /tmp/login-db-pid.db
+    if [[ $(wc -l < /tmp/login-db-pid.db) -eq 1 ]]; then
+        USER=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $1}')
+        IP=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $3}')
+        echo "$PID - $USER - $IP" >> /tmp/login.db
+    fi
+done
+grep -i sshd "$LOG" | grep -i "Accepted password for" > /tmp/login-db.db
+data=( $(ps aux | grep "\[priv\]" | awk '{print $2}') )
+
+for PID in "${data[@]}"; do
+    grep "sshd\[$PID\]" /tmp/login-db.db > /tmp/login-db-pid.db
+    if [[ $(wc -l < /tmp/login-db-pid.db) -eq 1 ]]; then
+        USER=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $1}')
+        IP=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $3}')
+        echo "$PID - $USER - $IP" >> /tmp/login.db
+    fi
+done
+mulog="/tmp/login.db"
+data=( $(ls /etc/kyt/limit/ssh/ip) )
+declare -a suspected_users
+
+for user in "${data[@]}"; do
+    limitip=$(cat /etc/kyt/limit/ssh/ip/$user)
+    cur_logins=$(grep -w "$user" $mulog | wc -l)
+
+    if [[ $cur_logins -gt $limitip ]]; then
+        echo "KILLING $user: limit=$limitip current=$cur_logins"
+        suspected_users+=("$user")
+
+        # Kill semua proses user
+        pids=$(grep -w "$user" $mulog | awk '{print $1}')
+        for pid in $pids; do
+            kill -9 "$pid"
+            echo "$pid - $user - killed" >> /root/log-kill-first.txt
+        done
+    fi
+done
+sleep 10
+rm -f /tmp/login.db
+data=( $(ps aux | grep -i dropbear | awk '{print $2}') )
+grep -i dropbear "$LOG" | grep -i "Password auth succeeded" > /tmp/login-db.db
+
+for PID in "${data[@]}"; do
+    grep "dropbear\[$PID\]" /tmp/login-db.db > /tmp/login-db-pid.db
+    if [[ $(wc -l < /tmp/login-db-pid.db) -eq 1 ]]; then
+        USER=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $1}')
+        IP=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $3}')
+        echo "$PID - $USER - $IP" >> /tmp/login.db
+    fi
+done
+grep -i sshd "$LOG" | grep -i "Accepted password for" > /tmp/login-db.db
+data=( $(ps aux | grep "\[priv\]" | awk '{print $2}') )
+
+for PID in "${data[@]}"; do
+    grep "sshd\[$PID\]" /tmp/login-db.db > /tmp/login-db-pid.db
+    if [[ $(wc -l < /tmp/login-db-pid.db) -eq 1 ]]; then
+        USER=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $1}')
+        IP=$(awk -F"for " '{print $2}' /tmp/login-db-pid.db | awk '{print $3}')
+        echo "$PID - $USER - $IP" >> /tmp/login.db
+    fi
+done
+for user in "${suspected_users[@]}"; do
+    limitip=$(cat /etc/kyt/limit/ssh/ip/$user)
+    cur_logins=$(grep -w "$user" /tmp/login.db | wc -l)
+
+    if [[ $cur_logins -gt $limitip ]]; then
+        echo "LOCKING $user: limit=$limitip current=$cur_logins"
+        passwd -l "$user" > /dev/null
+        pids=$(grep -w "$user" /tmp/login.db | awk '{print $1}')
+        for pid in $pids; do
+            kill -9 "$pid"
+            echo "$pid - $user - locked" >> /root/log-lock-final.txt
+        done
+	send_log
+        echo "passwd -u $user" | at now + 600 minutes > /dev/null 2>&1
+    fi
+done

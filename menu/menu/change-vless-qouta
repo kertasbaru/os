@@ -1,0 +1,233 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : https://t.me/newbie_store24
+# //====================================================
+clear
+REDBG="\033[41m"  
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" 
+NC="\033[0m"         
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+domain=$(cat /etc/xray/domain)
+
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_bawah(){
+print_rainbow " └──────────────────────────────────────────────┘"
+}
+garis_atas(){
+print_rainbow " ┌──────────────────────────────────────────────┐"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(echo -e "$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Newbie_Banner() {
+BOX_WIDTH=48
+TEXT="[ CHANGE LIMIT QUOTA VLESS ACCOUNT ] "
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+read -p "Tekan Enter untuk kembali ke menu..."
+m-xray
+exit 0
+}
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    # Jika useexp adalah "Lifetime", anggap tetap aktif
+
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e ""
+echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+echo -e ""
+echo -e "  \033[0;33m🔒 Your VPS\033[0m $ipsaya \033[0;33mHas been Banned\033[0m"
+echo -e ""
+echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
+echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+echo -e ""
+echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
+echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
+echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+echo -e ""
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+exit 1
+  fi
+}
+checking_sc
+clear
+IP=$(curl -sS ipv4.icanhazip.com)
+function Daftar_Account() {
+grep -E "^#& " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
+    printf "${WHITEBLD}    %-25s %-12s${NC}\n" "$user" "$date"
+done
+}
+Newbie_Banner      
+printf "${WHITEBLD}     %-25s %-12s${NC}\n" "USERNAME" "EXP DATE"
+garis_atas
+Daftar_Account
+garis_bawah
+  echo -e "${WHITEBLD}"
+  read -rp " Username         : " -e user
+  	if [[ -z "$user" || "$user" == "exit" ]]; then
+    m-xray
+    exit
+	fi
+	if ! grep -qwE "^#& $user" /etc/xray/config.json; then
+    echo -e "User $user Tidak Ditemukan!!"
+	sleep 1
+    change-vless-qouta
+	exit 1
+	fi
+	echo -e "${NC}"
+clear
+  quota_file="/etc/vless/${user}"
+if [ ! -e "$quota_file" ]; then
+  echo "0" > "$quota_file"
+else
+  current_quota=$(cat "$quota_file")
+  garis_tebal
+  center "$(printf "${YELLOW}[ CHANGE LIMIT QUOTA ]${NC}\n")"
+  garis_tebal
+  garis_atas
+  printf "${WHITEBLD}  Username    : $user${NC}\n"
+  printf "${WHITEBLD}  Limit Quota : $((current_quota / 1024 / 1024 / 1024)) GB ${NC}\n"
+  garis_bawah
+  echo -e "${WHITEBLD}"
+  while true; do
+    read -p " Input New Quota (GB): " new_quota
+    echo -e "${NC}"
+    if [[ -z "$new_quota" ]]; then
+      echo -e "${REDBLD} Input tidak boleh kosong! Silakan coba lagi.${NC}"
+    elif ! [[ "$new_quota" =~ ^[0-9]+$ ]]; then
+      echo -e "${REDBLD} Input harus berupa angka! Silakan coba lagi.${NC}"
+    else
+      break
+    fi
+  done
+  new_quota_bytes=$((new_quota * 1024 * 1024 * 1024))
+  echo "$new_quota_bytes" > "$quota_file"
+  clear
+  Newbie_Banner
+  garis_atas
+  printf "${WHITEBLD}  Username    : $user ${NC}\n"
+  printf "${WHITEBLD}  Limit Quota : $new_quota GB ${NC}\n"
+  garis_bawah
+  Sc_Credit
+fi
+

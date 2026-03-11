@@ -1,0 +1,595 @@
+#!/bin/bash
+# //====================================================
+# //  Newbie Store - Copy 2024
+# //====================================================
+# //  System Request : DEB 9-12 / UBUNTU 18-24
+# //  Author         : Kurniawan Setiadi
+# //  Develop        : Newbie Store
+# //  email          : Newbiestore09@gmail.com
+# //  telegram       : https://t.me/newbie_store24
+# //====================================================
+ TAG="V2.4.3"
+ASSET="xray"
+OWNER="kertasbaru"
+REPO="vip"
+REDBG="\033[41m"   
+WHITEBLD="\033[1;37m"
+WHITE="\033[1;37m" 
+NC="\033[0m"    
+GREEN="\033[96;1m"
+REDBLD="\033[0m\033[91;1m"
+Green="\e[92;1m"
+RED="\033[1;31m"
+YELLOW="\033[33m"
+BLUE="\033[36m"
+FONT="\033[0m"
+GREENBG="\033[42;37m"
+nama=$(cat /etc/xray/username)
+print_rainbow() {
+    local text="$1"
+    local warna_file="/etc/warna"
+
+    # Inisialisasi warna default
+    local start_r=0 start_g=255 start_b=150
+    local mid_r=0 mid_g=150 mid_b=255
+    local end_r=0 end_g=255 end_b=150
+
+    # Fungsi untuk membaca nilai numerik dari file
+    function get_value() {
+        local key="$1"
+        local value=$(grep -E "^$key=" "$warna_file" | cut -d'=' -f2 | tr -d '[:space:]')
+        echo "${value:-0}"
+    }
+
+    # Jika file warna ada, baca isinya
+    if [[ -f "$warna_file" ]]; then
+        start_r=$(get_value "start_r")
+        start_g=$(get_value "start_g")
+        start_b=$(get_value "start_b")
+
+        mid_r=$(get_value "mid_r")
+        mid_g=$(get_value "mid_g")
+        mid_b=$(get_value "mid_b")
+
+        end_r=$(get_value "end_r")
+        end_g=$(get_value "end_g")
+        end_b=$(get_value "end_b")
+    fi
+
+    # Jalankan awk dengan warna yang sudah dimuat dari file
+    echo "$text" | awk -v start_r="$start_r" -v start_g="$start_g" -v start_b="$start_b" \
+                        -v mid_r="$mid_r" -v mid_g="$mid_g" -v mid_b="$mid_b" \
+                        -v end_r="$end_r" -v end_g="$end_g" -v end_b="$end_b" '
+    {
+        len = length($0);
+        for (i = 1; i <= len; i++) {
+            progress = (i - 1) / (len - 1);
+            if (progress < 0.5) {
+                factor = progress * 2;
+                r = int((1 - factor) * start_r + factor * mid_r);
+                g = int((1 - factor) * start_g + factor * mid_g);
+                b = int((1 - factor) * start_b + factor * mid_b);
+            } else {
+                factor = (progress - 0.5) * 2;
+                r = int((1 - factor) * mid_r + factor * end_r);
+                g = int((1 - factor) * mid_g + factor * end_g);
+                b = int((1 - factor) * mid_b + factor * end_b);
+            }
+            printf "\033[38;2;%d;%d;%dm%s", r, g, b, substr($0, i, 1);
+        }
+        print "\033[0m";
+    }'
+}
+garis(){
+print_rainbow " ────────────────────────────────────────────────"
+}
+garis_tebal(){
+print_rainbow " ════════════════════════════════════════════════"
+}
+
+center() {
+    BOX_WIDTH=48
+    TEXT="$1"
+    TEXT_LENGTH=${#TEXT}
+    TEXT_CLEAN=$(printf "${WHITEBLD}$TEXT" | sed 's/\x1b\[[0-9;]*m//g')
+    TEXT_LENGTH=${#TEXT_CLEAN}
+    # Hitung padding
+    LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+    RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+
+    # Cetak dengan warna menggunakan printf
+    printf "%*s%s%*s\n" "$LEFT_PADDING" "" "$TEXT" "$RIGHT_PADDING" ""
+}
+
+function Sc_Credit(){
+BOX_WIDTH=48
+TEXT="SCRIPT BY $nama"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+function Newbie_Banner() {
+clear
+BOX_WIDTH=48
+TEXT="[ XRAY MANAGER ]"
+TEXT_LENGTH=${#TEXT}
+LEFT_PADDING=$(( (BOX_WIDTH - TEXT_LENGTH) / 2 ))
+RIGHT_PADDING=$(( BOX_WIDTH - TEXT_LENGTH - LEFT_PADDING ))
+LEFT_SPACE=$(printf '%*s' $LEFT_PADDING '')
+RIGHT_SPACE=$(printf '%*s' $RIGHT_PADDING '')
+print_rainbow " ════════════════════════════════════════════════"
+print_rainbow " ${LEFT_SPACE}${TEXT}${RIGHT_SPACE}"
+print_rainbow " ════════════════════════════════════════════════"
+}
+ipsaya=$(curl -sS ipv4.icanhazip.com)
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+data_ip="https://raw.githubusercontent.com/kertasbaru/izin/main/ip"
+checking_sc() {
+  useexp=$(wget -qO- $data_ip | grep -wE $ipsaya | awk '{print $3}')
+
+  if [[ "$useexp" == "Lifetime" ]]; then
+    # Jika useexp adalah "Lifetime", anggap tetap aktif
+
+    return
+  fi
+  date_list_epoch=$(date -d "$date_list" +%s)
+  useexp_epoch=$(date -d "$useexp" +%s 2>/dev/null)
+
+  if [[ $? -ne 0 || $date_list_epoch -gt $useexp_epoch ]]; then
+    # Tanggal sekarang lebih besar dari tanggal expired, atau format salah
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e "\033[41;1m ⚠️       AKSES DI TOLAK         ⚠️ \033[0m"
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+echo -e ""
+echo -e "        \033[91;1m❌ SCRIPT LOCKED ❌\033[0m"
+echo -e ""
+echo -e "  \033[0;33m🔒 Your VPS\033[0m $ipsaya \033[0;33mHas been Banned\033[0m"
+echo -e ""
+echo -e "  \033[91m⚠️  Masa Aktif Sudah Habis ⚠️\033[0m"
+echo -e "  \033[0;33m💡 Beli izin resmi hanya dari Admin!\033[0m"
+echo -e ""
+echo -e "  \033[92;1m📞 Contact Admin:\033[0m"
+echo -e "  \033[96m🌍 Telegram: https://t.me/WuzzSTORE\033[0m"
+echo -e "  \033[96m📱 WhatsApp: https://wa.me/6287760204418\033[0m"
+echo -e ""
+echo -e "\033[1;93m────────────────────────────────────────────\033[0m"
+exit 1
+  fi
+}
+checking_sc
+function Cek_User_Login() {
+  # Menampilkan output dari cek-vme
+  cek-vme
+}
+
+# Fungsi list member
+function List_Member() {
+  # Menampilkan output dari member-xray
+  member-vme
+}
+
+# Fungsi untuk membuat akun
+function Create_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ CREATE ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Create Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Create Account Vless\n"
+  printf "${WHITEBLD}  3.)  Create Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Create_Vmess ;;   # Create Vmess Account
+    2) clear ; Create_Vless ;;   # Create Vless Account
+    3) clear ; Create_Trojan ;;  # Create Trojan Account
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Create_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk create Vmess Account
+function Create_Vmess() {
+  clear
+add-vme
+}
+
+# Menu untuk create Vless Account
+function Create_Vless() {
+  clear
+add-vle
+}
+
+# Menu untuk create Trojan Account
+function Create_Trojan() {
+  clear
+add-tro
+}
+function Trial_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ TRIAL ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Trial Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Trial Account Vless\n"
+  printf "${WHITEBLD}  3.)  Trial Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Trial_Vmess ;;   # Create Vmess Account
+    2) clear ; Trial_Vless ;;   # Create Vless Account
+    3) clear ; Trial_Trojan ;;  # Create Trojan Account
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Trial_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk create Vmess Account
+function Trial_Vmess() {
+  clear
+trial-vme
+}
+
+# Menu untuk create Vless Account
+function Trial_Vless() {
+  clear
+trial-vle
+}
+
+# Menu untuk create Trojan Account
+function Trial_Trojan() {
+  clear
+trial-tro
+}
+function Delete_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ DELETE ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Delete Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Delete Account Vless\n"
+  printf "${WHITEBLD}  3.)  Delete Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Delete_Vmess ;;   # Create Vmess Account
+    2) clear ; Delete_Vless ;;   # Create Vless Account
+    3) clear ; Delete_Trojan ;;  # Create Trojan Account
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Delete_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk create Vmess Account
+function Delete_Vmess() {
+  clear
+del-vme
+}
+
+# Menu untuk create Vless Account
+function Delete_Vless() {
+  clear
+del-vle
+}
+
+# Menu untuk create Trojan Account
+function Delete_Trojan() {
+  clear
+del-tro
+}
+
+function Renew_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ RENEW ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Renew Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Renew Account Vless\n"
+  printf "${WHITEBLD}  3.)  Renew Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Renew_Vmess ;;   # Create Vmess Account
+    2) clear ; Renew_Vless ;;   # Create Vless Account
+    3) clear ; Renew_Trojan ;;  # Create Trojan Account
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Renew_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk create Vmess Account
+function Renew_Vmess() {
+  clear
+renew-vme
+}
+
+# Menu untuk create Vless Account
+function Renew_Vless() {
+  clear
+renew-vle
+}
+
+# Menu untuk create Trojan Account
+function Renew_Trojan() {
+  clear
+renew-tro
+}
+
+# Menu untuk Check Config Account
+function Check_Config_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ CHECK CONFIG ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Check Config Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Check Config Account Vless\n"
+  printf "${WHITEBLD}  3.)  Check Config Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; check-vme ;;   # Check Vmess Account Config
+    2) clear ; check-vle ;;   # Check Vless Account Config
+    3) clear ; check-tro ;;  # Check Trojan Account Config
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Check_Config_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk Recovery Account
+function Recovery_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ RECOVERY ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Recover Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Recover Account Vless\n"
+  printf "${WHITEBLD}  3.)  Recover Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; recover-vm ;;   # Recover Vmess Account
+    2) clear ; recover-vl ;;   # Recover Vless Account
+    3) clear ; recover-tr ;;  # Recover Trojan Account
+    x) clear ; Main_Menu ;;           # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Recovery_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk Edit Limit IP Account
+function Edit_Limit_IP() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ EDIT LIMIT IP ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Edit Limit IP Vmess\n"
+  printf "${WHITEBLD}  2.)  Edit Limit IP Vless\n"
+  printf "${WHITEBLD}  3.)  Edit Limit IP Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Edit_Limit_Vmess_IP ;;   # Edit Vmess IP Limit
+    2) clear ; Edit_Limit_Vless_IP ;;   # Edit Vless IP Limit
+    3) clear ; Edit_Limit_Trojan_IP ;;  # Edit Trojan IP Limit
+    x) clear ; Main_Menu ;;              # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Edit_Limit_IP ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk Edit Limit Bandwidth Account
+function Edit_Limit_Bandwidth() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ EDIT LIMIT BW ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Edit Bandwidth Limit Vmess\n"
+  printf "${WHITEBLD}  2.)  Edit Bandwidth Limit Vless\n"
+  printf "${WHITEBLD}  3.)  Edit Bandwidth Limit Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Edit_Vmess_Bandwidth ;;   # Edit Vmess Bandwidth Limit
+    2) clear ; Edit_Vless_Bandwidth ;;   # Edit Vless Bandwidth Limit
+    3) clear ; Edit_Trojan_Bandwidth ;;  # Edit Trojan Bandwidth Limit
+    x) clear ; Main_Menu ;;               # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Edit_Limit_Bandwidth ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk Lock Account
+function Lock_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ LOCK ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Lock Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Lock Account Vless\n"
+  printf "${WHITEBLD}  3.)  Lock Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Lock_Vmess ;;   # Lock Vmess Account
+    2) clear ; Lock_Vless ;;   # Lock Vless Account
+    3) clear ; Lock_Trojan ;;  # Lock Trojan Account
+    x) clear ; Main_Menu ;;    # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Lock_Account ;; # Jika input tidak valid
+  esac
+}
+
+# Menu untuk Unlock Account
+function Unlock_Account() {
+  clear
+  garis_tebal
+  center "$(printf "${YELLOW}[ UNLOCK ACCOUNT ]${NC}\n")"
+  garis_tebal
+  garis
+  printf "${WHITEBLD}  1.)  Unlock Account Vmess\n"
+  printf "${WHITEBLD}  2.)  Unlock Account Vless\n"
+  printf "${WHITEBLD}  3.)  Unlock Account Trojan\n"
+  printf "${WHITEBLD}  x.)  Back to Main Menu\n"
+  garis
+  read -p "Select Account Type [1-3 or x] : " pilih_akun
+  case $pilih_akun in
+    1) clear ; Unlock_Vmess ;;   # Unlock Vmess Account
+    2) clear ; Unlock_Vless ;;   # Unlock Vless Account
+    3) clear ; Unlock_Trojan ;;  # Unlock Trojan Account
+    x) clear ; Main_Menu ;;      # Kembali ke menu utama
+    *) echo "Invalid Option!" ; Unlock_Account ;; # Jika input tidak valid
+  esac
+}
+function Lock_Vmess() {
+  clear
+  lock-vm
+}
+
+function Unlock_Vmess() {
+  clear
+  unlock-vm
+}
+
+function Lock_Vless() {
+  clear
+  lock-vl
+}
+
+function Unlock_Vless() {
+  clear
+  unlock-vl
+}
+
+function Lock_Trojan() {
+  clear
+  lock-tr
+}
+
+function Unlock_Trojan() {
+  clear
+  unlock-tr
+}
+
+function Edit_Limit_Vmess_IP() {
+  clear
+  ganti-ip-vmess
+}
+
+function Edit_Limit_Vless_IP() {
+  clear
+  ganti-ip-vless
+}
+
+function Edit_Limit_Trojan_IP() {
+  clear
+  ganti-ip-trojan
+}
+
+function Edit_Vmess_Bandwidth() {
+  clear
+  change-vmess-qouta
+}
+
+function Edit_Vless_Bandwidth() {
+  clear
+  change-vless-qouta
+}
+
+function Edit_Trojan_Bandwidth() {
+  clear
+  change-trojan-qouta
+}
+function change_onering() {
+  clear
+  Newbie_Banner
+  garis
+  center "$(printf " ${YELLOW}[ SETUP ONE RING XRAY ]${NC}")"
+  garis
+  systemctl stop xray
+  wget -O /usr/local/bin/${ASSET} "https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/${ASSET}"
+  systemctl start xray
+  garis
+  center "$(printf " ${YELLOW}[ Succesfully Setup ]${NC}")"
+  garis
+  printf "${WHITEBLD}Link Apk V2rayang OneRing : https://github.com/${OWNER}/${REPO}/releases/download/${TAG}/v2rayNG_Onering_1.10.26_universal.apk${NC}\n"
+}
+
+# Main Menu
+function Main_Menu() { 
+Newbie_Banner
+garis
+center "$(printf " ${YELLOW}[ ACCOUNT MANAGEMENT ]${NC}")"
+garis
+printf "  ${WHITEBLD}(1) Check Users Login      (5) Delete Account${NC}\n"
+printf "  ${WHITEBLD}(2) List Member            (6) Renew Accounts${NC}\n"
+printf "  ${WHITEBLD}(3) Create Account         (7) Check Config Accounts${NC}\n"
+printf "  ${WHITEBLD}(4) Trial Account${NC}\n"
+garis
+center "$(printf " ${YELLOW}[ SECURITY & SETTINGS ]${NC}")"
+garis
+printf "  ${WHITEBLD}(8) Recovery Account      (11) Lock Account${NC}\n"
+printf "  ${WHITEBLD}(9) Edit Limit IP Account (12) Unlock Account${NC}\n"
+printf " ${WHITEBLD}(10) Edit Limit Bw Account (13) Setup Onering Metode${NC}\n"
+garis
+center "$(printf " ${WHITEBLD}(14) Back to Main Menu${NC}     ${REDBLD}(x) Exit${NC}\n")"
+garis
+Sc_Credit
+while true; do
+echo ""
+	  read -p "Select Option [1-13 or x] : " main_menu_option
+	  case $main_menu_option in
+		1) clear ; Cek_User_Login ; break ;;    # Cek User Login
+		2) clear ; List_Member ; break ;;       # List Member
+		3) clear ; Create_Account ; break ;;    # Langsung menuju menu pembuatan akun
+		4) clear ; Trial_Account ; break ;;        # Pilih jenis akun
+		5) clear ; Delete_Account ; break ;;   # Delete Account Trojan
+		6) clear ; Renew_Account ; break ;;    # Renew Account Trojan
+		7) clear ; Check_Config_Account ; break ;;    # Check Config Account Trojan
+		8) clear ; Recovery_Account ; break ;;         # Recovery Account Trojan
+		9) clear ; Edit_Limit_IP ; break ;;        # Edit Limit IP Account Trojan
+		10) clear ; Edit_Limit_Bandwidth ; break ;; # Edit Limit Bandwidth Account Trojan
+		11) clear ; Lock_Account ; break ;;     # Lock Account Trojan
+		12) clear ; Unlock_Account ; break ;;   # Unlock Account Trojan
+		13) clear ; change_onering ; break ;;   # Unlock Account Trojan
+	    14) clear ; menu ; break ;;
+        0|x|X) 
+            clear
+            figlet "WUZZSTORE" | lolcat
+            exit 0
+            ;;                     # Exit
+        *) 	
+			tput cuu 1 && tput el 
+			tput cuu 1 && tput el 
+            echo -e "\nInput tidak valid! Silakan coba lagi."
+            sleep 2
+			tput cuu 1 && tput el  
+            ;;
+    esac
+	tput cuu 1 && tput el  
+    read -p "Tekan Enter untuk kembali ke menu..."
+    tput cuu 1 && tput el  # Hapus pesan error sebelum kembali ke input
+done
+
+}
+
+Main_Menu

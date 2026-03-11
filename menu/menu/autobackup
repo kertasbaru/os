@@ -1,0 +1,147 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
+
+MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
+
+data_server=$(curl -v --insecure --silent https://google.com/ 2>&1 | grep Date | sed -e 's/< Date: //')
+date_list=$(date +"%Y-%m-%d" -d "$data_server")
+exp=$(curl -sS $IZIN | grep $MYIP | awk '{print $3}')
+IPCLIENT=$(curl -sS $IZIN | grep $MYIP | awk '{print $4}')
+
+if [[ "$MYIP" != "$IPCLIENT" ]]; then
+  rejected "$MYIP"
+else
+  if [[ $date_list > $exp ]] then
+    rejected "$MYIP"
+  fi
+fi
+
+CITY=$(cat /etc/xray/city)
+ISP=$(cat /etc/xray/isp)
+DOMAIN=$(cat /etc/xray/domain)
+NAME=$(cat /etc/xray/username)
+
+DB_FILE="/etc/bot/.bot.db"
+
+# Mengambil CHATID dan KEY dari database
+CHATID=$(grep -E "^#backup# " "$DB_FILE" | cut -d ' ' -f 3)
+KEY=$(grep -E "^#backup# " "$DB_FILE" | cut -d ' ' -f 2)
+TIME="10"
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+
+if [ -z "$CHATID" ] || [ -z "$KEY" ]; then
+  echo -e ""
+  banner "AUTOBACKUP BOT CONFIGURATION"
+  read -p "${CYAN}✦ Masukkan ID Telegram Anda: ${RESET}" id_telegram
+  read -p "${CYAN}✦ Masukkan Token Bot Anda  : ${RESET}" bot_telegram
+  
+  echo "#backup# $bot_telegram $id_telegram" >> "$DB_FILE"
+  
+  CHATID="$id_telegram"
+  KEY="$bot_telegram"
+fi
+
+clear
+rm /usr/local/bin/backup_otomatis 2>/dev/null
+
+if [ ! -e /usr/local/bin/backup_otomatis ]; then
+  cat <<'EOF' > /usr/local/bin/backup_otomatis
+#!/bin/bash
+cd
+tanggal=$(date +"%m-%d-%Y")
+waktu=$(date +"%T")
+echo "Successfully Reboot On $tanggal Time $waktu." >> /root/log-backup.txt
+/usr/bin/backer
+EOF
+  chmod +x /usr/local/bin/backup_otomatis
+fi
+
+clear
+banner "AUTOBACKUP MANAGER"
+echo -e "  ${GREEN}1. ${WHITE}${BOLD}Set Auto-Backup 1 Hour Period${RESET}"
+echo -e "  ${GREEN}2. ${WHITE}${BOLD}Set Auto-Backup 6 Hour Period${RESET}"
+echo -e "  ${GREEN}3. ${WHITE}${BOLD}Set Auto-Backup 12 Hour Period${RESET}"
+echo -e "  ${GREEN}4. ${WHITE}${BOLD}Set Auto-Backup 1 Day Period${RESET}"
+echo -e "  ${GREEN}5. ${WHITE}${BOLD}Deactivate Auto-Backup${RESET}"
+echo -e "  ${GREEN}6. ${WHITE}${BOLD}See Backup Log${RESET}"
+echo -e "  ${GREEN}7. ${WHITE}${BOLD}Delete Backup Log${RESET}"
+echo -e "  ${GREEN}0. ${RED}${BOLD}BACK TO EXIT MENU ${RESET}"
+garis
+echo -e ""
+
+pesan() {
+  msg_info "Auto-Backup Sucsesfully Set By $1 Period"
+  echo -e ""
+  read -n 1 -s -r -p "Press any key to back on menu"
+  autobackup
+}
+while true; do
+  read -p " Select menu : " opt
+  case $opt in
+    1 | 01)
+      clear
+      echo "57 * * * * root /usr/local/bin/backup_otomatis" > /etc/cron.d/backup_otomatis
+      pesan "1 Hour"
+    break ;;
+    2 | 02)
+      clear
+      echo "10 */6 * * * root /usr/local/bin/backup_otomatis" > /etc/cron.d/backup_otomatis
+      pesan "6 Hour"
+    break ;;
+    3 | 03)
+      clear
+      echo "10 */12 * * * root /usr/local/bin/backup_otomatis" > /etc/cron.d/backup_otomatis
+      pesan "12 Hour"
+    break ;;
+    4 | 04)
+      clear
+      echo "0 0 * * * root /usr/local/bin/backup_otomatis" > /etc/cron.d/backup_otomatis
+      pesan "1 Day"
+    break ;;
+    5 | 05)
+      clear
+      rm -f /etc/cron.d/backup_otomatis
+      msg_info "Autobackup Deactived"
+      read -n 1 -s -r -p "Press any key to back on menu"
+      autobackup
+    break ;;
+    6 | 06)
+      clear
+      if [ ! -e /root/log-backup.txt ]; then
+        msg_info "No Activity Found"
+      else
+        echo -e ""
+        banner "AUTOBACKUP LOGS"
+        cat /root/log-backup.txt
+        garis
+      fi
+      read -n 1 -s -r -p "Press any key to back on menu"
+      autobackup
+    break ;;
+    7 | 07)
+      clear
+      echo "" > /root/log-backup.txt
+      msg_info "Autobackup log deleted"
+      read -n 1 -s -r -p "Press any key to back on menu"
+      autobackup
+    break ;;
+    0 | 00)
+      clear
+      menu
+    break ;;
+    *) 	
+			tput cuu 1 && tput el 
+			tput cuu 1 && tput el 
+			echo -e "\nInput tidak valid! Silakan coba lagi."
+			sleep 2
+			tput cuu 1 && tput el  
+	  ;;
+  esac
+	tput cuu 1 && tput el  
+    read -p "Tekan Enter untuk kembali ke menu..."
+    tput cuu 1 && tput el  # Hapus pesan error sebelum kembali ke input
+done

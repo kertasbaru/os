@@ -1,0 +1,85 @@
+#!/bin/bash
+clear
+
+source /usr/bin/ui.sh
+
+NAME=$(cat /etc/xray/username)
+
+echo -e ""
+banner "BANDWITH MONITOR"
+echo -e " [${CYAN}•1${RESET}] Lihat Total Bandwith Tersisa"
+echo -e " [${CYAN}•2${RESET}] Tabel Penggunaan Setiap 5 Menit"
+echo -e " [${CYAN}•3${RESET}] Tabel Penggunaan Setiap Jam"
+echo -e " [${CYAN}•4${RESET}] Tabel Penggunaan Setiap Hari"
+echo -e " [${CYAN}•5${RESET}] Tabel Penggunaan Setiap Bulan"
+echo -e " [${CYAN}•6${RESET}] Tabel Penggunaan Setiap Tahun"
+echo -e " [${CYAN}•7${RESET}] Tabel Penggunaan Tertinggi"
+echo -e " [${CYAN}•8${RESET}] Statistik Penggunaan Setiap Jam"
+echo -e " [${CYAN}•9${RESET}] Lihat Penggunaan Aktif Saat Ini"
+echo -e " [${CYAN}10${RESET}] Lihat Trafik Penggunaan Aktif Saat Ini [5s]"
+echo -e "" 
+echo -e " [${CYAN}•0${RESET}] ${RED}BACK TO MENU${RESET}"
+echo -e " [${CYAN}•x${RESET}] Keluar"
+echo -e "" 
+garis
+echo -e ""
+
+perintah() {
+  clear
+  banner "[ $1 ]"
+  $2
+  garis
+  echo -e ""
+  read -n 1 -s -r -p "Press any key to back on menu"
+  bw
+}
+
+read -p " Select menu : " opt
+case $opt in
+  1)
+    perintah "TOTAL BANDWITH SERVER TERSISA" "vnstat"
+  ;;
+  2)
+    perintah "TOTAL BANDWITH SETIAP 5 MENIT" "vnstat -5"
+  ;;
+  3)
+    perintah "TOTAL BANDWITH SETIAP JAM" "vnstat -h"
+  ;;
+  4)
+    perintah "TOTAL BANDWITH SETIAP HARI" "vnstat -d"
+  ;;
+  5)
+    perintah "TOTAL BANDWITH SETIAP BULAN" "vnstat -m"
+  ;;
+  6)
+    perintah "TOTAL BANDWITH SETIAP TAHUN" "vnstat -y"
+  ;;
+  7)
+    perintah "TOTAL BANDWITH TERTINGGI" "vnstat -t"
+  ;;
+  8)
+    perintah "STATISTIK TERPAKAI SETIAP JAM" "vnstat -hg"
+  ;;
+  9)
+    perintah "LIVE BANDWITH SAAT INI" "vnstat -l"
+  ;;
+  10)
+    perintah "LIVE TRAFIK PENGGUNAAN BANDWITH" "vnstat -tr"
+  ;;
+  0)
+    sleep 1
+    menu
+  ;;
+  x|X)
+    clear
+    echo -e ""
+    banner "$NAME"
+    exit 0
+  ;;
+  *)
+    echo -e ""
+    echo -e "\nInput tidak valid! Silakan coba lagi."
+    sleep 1
+    bw
+  ;;
+esac
