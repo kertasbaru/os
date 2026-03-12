@@ -21,7 +21,7 @@ print_rainbow " ┌────────────────────�
 }
 
 function Daftar_Account() {
-#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
+grep -E "^#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
     printf "${WHITE}${BOLD}     %-23s %-12s${RESET}\n" "$user" "$date"
 done
 
@@ -38,16 +38,16 @@ banner "DELETE TROJAN ACCOUNT"
     m-xray
     exit
 	fi
-#! $user" /etc/xray/config.json; then
+	if ! grep -qwE "^#! $user" /etc/xray/config.json; then
     echo -e "User $user Tidak Ditemukan!!"
 	sleep 1
 	m-xray
     exit 1
     else
     uuid=$(grep -wE "$user" "/etc/xray/config.json" | cut -d '"' -f 4 | tail -n1)
-#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
-#! $user $exp/,/^},{/d" /etc/xray/config.json
-#! $user $uuid" >> /etc/xray/.userall.db
+    exp=$(grep -wE "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+    sed -i "/^#! $user $exp/,/^},{/d" /etc/xray/config.json
+    echo "#! $user $uuid" >> /etc/xray/.userall.db
 	sed -i "/^### $user $exp/,/^},{/d" /etc/trojan/.trojan.db
     rm -rf /etc/trojan/$user
     rm -rf /etc/kyt/limit/trojan/ip

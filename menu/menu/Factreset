@@ -138,15 +138,15 @@ for user in "${data[@]}"; do
 done
 
 #----- Auto Remove Trojan
-#!' | cut -d ' ' -f 2 | sort | uniq))
+data=($(cat /etc/xray/config.json | grep '^#!' | cut -d ' ' -f 2 | sort | uniq))
 now=$(date +"%Y-%m-%d")
 for user in "${data[@]}"; do
     uuid=$(grep -E "###" "/etc/trojan/.trojan.db" |  grep -wE ${user} | awk '{print $4}' | uniq )
-#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+    exp=$(grep -w "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     d1=$(date -d "$exp" +%s)
     d2=$(date -d "$now" +%s)
     exp2=$(((d1 - d2) / 86400))
-#! $user $exp/,/^},{/d" /etc/xray/config.json
+        sed -i "/^#! $user $exp/,/^},{/d" /etc/xray/config.json
         sed -i "d" /etc/trojan/.trojan.db
         rm -rf /etc/trojan/$user
         rm -f /etc/kyt/trojan/ip/*
@@ -157,15 +157,15 @@ for user in "${data[@]}"; do
 done
 
 #----- Auto Remove SS
-#!#' | cut -d ' ' -f 2 | sort | uniq))
+data=($(cat /etc/xray/config.json | grep '^#!#' | cut -d ' ' -f 2 | sort | uniq))
 now=$(date +"%Y-%m-%d")
 for user in "${data[@]}"; do
-#!# $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+    exp=$(grep -w "^#!# $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     d1=$(date -d "$exp" +%s)
     d2=$(date -d "$now" +%s)
     exp2=$(((d1 - d2) / 86400))
 		uuid=$(grep -E "^},{" "/etc/xray/config.json" |  grep -wE '"'"${user}"'"' | cut -d " " -f 2 | cut -d '"' -f 2 | uniq )
-#!# $user $exp/,/^},{/d" /etc/xray/config.json
+        sed -i "/^#!# $user $exp/,/^},{/d" /etc/xray/config.json
         sed -i "/^### $user $exp/,/^},{/d" /etc/shadowsocks/.shadowsocks.db
         rm -rf /etc/shadowsocks/$user
         rm -f /etc/kyt/shadowsocks/ip/$user

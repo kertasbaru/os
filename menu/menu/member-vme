@@ -33,7 +33,7 @@ done
 }
 
 function Daftar_Member_Trojan() {
-#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
+grep -E "^#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
     printf "${WHITE}${BOLD}     %-23s %-12s${RESET}\n" "$user" "$date"
 done
 }

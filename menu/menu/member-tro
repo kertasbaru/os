@@ -46,7 +46,7 @@ clear
 banner ""
 baris_panjang
 	
-#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
+grep -E "^#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | column -t | sort | uniq
     echo ""
     
 baris_panjang

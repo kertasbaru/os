@@ -125,7 +125,7 @@ chmod +x /root/.acme.sh/acme.sh
 ~/.acme.sh/acme.sh --installcert -d $domain --fullchainpath /etc/xray/xray.crt --keypath /etc/xray/xray.key --ecc
 
 # nginx renew ssl
-#!/bin/bash
+echo '#!/bin/bash
 /etc/init.d/nginx stop
 "/root/.acme.sh"/acme.sh --cron --home "/root/.acme.sh" &> /root/renew_ssl.log
 /etc/init.d/nginx start
@@ -232,7 +232,7 @@ wget -q -O /usr/local/ddos/ddos.sh http://www.inetbase.com/scripts/ddos/ddos.sh
 chmod 0755 /usr/local/ddos/ddos.sh
 cp -s /usr/local/ddos/ddos.sh /usr/local/bin/ddos
 echo '...done'
-echo; echo -n 'Creating cron to run script every minute.....(Default setting)'
+echo; echo -n 'Creating cron to run script every minute.....Default setting'
 /usr/local/ddos/ddos.sh --cron > /dev/null 2>&1
 echo '.....done'
 echo; echo 'Installation has completed.'

@@ -80,7 +80,7 @@ checking_sc
 clear
 IP=$(curl -sS ipv4.icanhazip.com)
 function Daftar_Account() {
-#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
+grep -E "^#! " "/etc/xray/config.json" | cut -d ' ' -f 2-3 | sort | uniq | while read -r user date; do
     printf "${WHITE}${BOLD}    %-25s %-12s${RESET}\n" "$user" "$date"
 done
 }
@@ -96,7 +96,7 @@ garis_bawah
     m-xray
     exit
 	fi
-#! $user" /etc/xray/config.json; then
+	if ! grep -qwE "^#! $user" /etc/xray/config.json; then
     clear
 banner "LOCK TROJAN ACCOUNT"
     garis
@@ -119,9 +119,9 @@ banner "SCRIPT BY $nama"
 	m-xray
 	exit 1
 	else
-#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
-#! '"$user $exp $uuid"'' /etc/xray/.lock.db
-#! $user $exp/,/^},{/d" /etc/xray/config.json
+    exp=$(grep -wE "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
+    sed -i '/#vmess$/a\#! '"$user $exp $uuid"'' /etc/xray/.lock.db
+    sed -i "/^#! $user $exp/,/^},{/d" /etc/xray/config.json
     systemctl restart xray > /dev/null 2>&1
     clear
 banner "LOCK TROJAN ACCOUNT"
