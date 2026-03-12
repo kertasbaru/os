@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Backup Result</title>
+  <style>
+    body, html {
+      height: 100%;
+      font-family: sans-serif;
+      background: url('https://raw.githubusercontent.com/kertasbaru/nebot/main/Assets/banner.jpg') no-repeat center center/cover;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: <%= success ? '#2e7d32' : '#b00020' %>;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2.5rem 3rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+      width: 360px;
+      text-align: center;
+      backdrop-filter: blur(8px);
+    }
+    a.button {
+      display: inline-block;
+      margin-top: 1.5rem;
+      padding: 0.85rem 1.5rem;
+      background: linear-gradient(90deg, #00cec9 0%, #6c5ce7 100%);
+      color: white;
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      box-shadow: 0 4px 15px rgba(108, 92, 231, 0.6);
+      transition: background 0.4s ease;
+    }
+    a.button:hover {
+      background: linear-gradient(90deg, #6c5ce7 0%, #00cec9 100%);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2><%= success ? '✅ Backup Berhasil' : '❌ Backup Gagal' %></h2>
+    <p><%= message %></p>
+    <% if (success) { %>
+      <a href="/backup/download" class="button">⬇️ Unduh Backup</a>
+    <% } %>
+    <br>
+    <a href="/backup" class="button">🔄 Buat Lagi</a>
+  </div>
+</body>
+</html>
+
