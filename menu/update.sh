@@ -163,8 +163,12 @@ echo "/root/fix.sh" | at now + 5 minute
 }
 Updatews() {
 systemctl stop ws
+systemctl stop ohp
 wget -qO /usr/bin/ws "${REPO}sshws/ws" >/dev/null 2>&1
+wget -qO /usr/bin/ohpserver "${REPO}sshws/ohpserver" >/dev/null 2>&1
+chmod +x /usr/bin/ohpserver
 systemctl start ws >/dev/null 2>&1
+systemctl start ohp >/dev/null 2>&1
 }
 updatewebui() {
 cd /opt
