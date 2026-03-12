@@ -33,6 +33,7 @@ checking_sc() {
     exit 1
   fi
 }
+checking_sc
 
 egrep "^$User" /etc/passwd >/dev/null
 if [ $? -eq 0 ]; then
@@ -56,6 +57,10 @@ expi=$(cat /etc/xray/ssh | grep -wE "$User" | cut -d " " -f6-8)
 sed -i "s/$expi/$expe/" /etc/xray/ssh
 passwd -u $User
 usermod -e  $Expiration $User
+if [[ $iplimit -gt 0 ]]; then
+    mkdir -p /etc/kyt/limit/ssh/ip/
+    echo -e "$iplimit" > /etc/kyt/limit/ssh/ip/$User
+fi
 clear
 echo -e "  RENEW SSH"
 echo -e " Remark      : $User "

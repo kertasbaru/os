@@ -34,6 +34,7 @@ checking_sc() {
     exit 1
   fi
 }
+checking_sc
 
 ISP=$(cat /etc/xray/isp)
 CITY=$(cat /etc/xray/city)
@@ -57,9 +58,9 @@ sed -i '/#trojangrpc$/a\#! '"$user $exp"'\
 
 # Link Trojan Akun
 systemctl restart xray
-trojanlink1="trojan://${uuid}@bugkamu.com:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
-trojanlink="trojan://${uuid}@bugkamu.com:443?path=%2Ftrojan-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
-trojanlink2="trojan://${uuid}@bugkamu.com:80?path=%2Ftrojan-ws&security=none&host=${domain}&type=ws#${user}"
+trojanlink1="trojan://${uuid}@${domain}:443?mode=gun&security=tls&type=grpc&serviceName=trojan-grpc&sni=${domain}#${user}"
+trojanlink="trojan://${uuid}@${domain}:443?path=%2Ftrojan-ws&security=tls&host=${domain}&type=ws&sni=${domain}#${user}"
+trojanlink2="trojan://${uuid}@${domain}:80?path=%2Ftrojan-ws&security=none&host=${domain}&type=ws#${user}"
 
 cat >/var/www/html/trojan-$user.txt <<-END
 ======================
@@ -147,7 +148,7 @@ echo -e " Remark       : ${user}"
 echo -e " Domain        : ${domain}"
 echo -e " Limit Quota    : ${Quota} GB"
 echo -e " Limit Ip       : ${iplimit} IP"
-echo -e " Port TLS      : 400,8443"
+echo -e " Port TLS      : 443,8443"
 echo -e " port WS       : 80,8880,8080,2082"
 echo -e " Key           : ${uuid}"
 echo -e " Localtions    : $CITY"

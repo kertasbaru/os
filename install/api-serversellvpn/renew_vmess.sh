@@ -34,6 +34,7 @@ checking_sc() {
     exit 1
   fi
 }
+checking_sc
 
 	if ! grep -qwE "^### $user" /etc/xray/config.json; then
     echo -e "User $user Tidak Ditemukan!!"
@@ -41,7 +42,7 @@ checking_sc() {
 	else
 exp=$(grep -wE "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     mkdir -p /etc/kyt/limit/vmess/ip
-echo ${iplimit} >> /etc/kyt/limit/vmess/ip/${user}
+echo "${iplimit}" > /etc/kyt/limit/vmess/ip/${user}
 if [ ! -e /etc/vmess/ ]; then
   mkdir -p /etc/vmess/
 fi
@@ -69,7 +70,7 @@ clear
 echo -e "  RENEW VMESS"
 echo -e " Remark      : $user "
 echo -e " Limit Ip    : ${iplimit} Devic "
-echo -e " Limit Quota : ${Quota} Devic "
+echo -e " Limit Quota : ${Quota} GB "
 echo -e " Expiry in   : $exp4 "
 exit 0
 fi

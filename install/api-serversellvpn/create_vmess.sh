@@ -34,6 +34,7 @@ checking_sc() {
     exit 1
   fi
 }
+checking_sc
 
 ISP=$(cat /etc/xray/isp)
 CITY=$(cat /etc/xray/city)
@@ -101,9 +102,6 @@ grpc=`cat<<EOF
       "tls": "tls"
 }
 EOF`
-vmess_base641=$( base64 -w 0 <<< $vmess_json1)
-vmess_base642=$( base64 -w 0 <<< $vmess_json2)
-vmess_base643=$( base64 -w 0 <<< $vmess_json3)
 vmesslink1="vmess://$(echo $asu | base64 -w 0)"
 vmesslink2="vmess://$(echo $ask | base64 -w 0)"
 vmesslink3="vmess://$(echo $grpc | base64 -w 0)"
@@ -222,7 +220,7 @@ echo -e " Remark       : ${user}"
 echo -e " Domain        : ${domain}"
 echo -e " Limit Quota    : ${Quota} GB"
 echo -e " Limit Ip       : ${iplimit} IP"
-echo -e " Port TLS      : 400,8443"
+echo -e " Port TLS      : 443,8443"
 echo -e " port WS       : 80,8880,8080,2082"
 echo -e " Key           : ${uuid}"
 echo -e " Localtions    : $CITY"

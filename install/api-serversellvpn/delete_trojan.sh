@@ -8,12 +8,11 @@ user=$1
     exp=$(grep -wE "^#! $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     sed -i "/^#! $user $exp/,/^},{/d" /etc/xray/config.json
     echo "#! $user $uuid" >> /etc/xray/.userall.db
-	sed -i "/^### $user $exp/,/^},{/d" /etc/trojan/.trojan.db
+	sed -i "/^### ${user} /d" /etc/trojan/.trojan.db
     rm -rf /etc/trojan/$user
-    rm -rf /etc/kyt/limit/trojan/ip
+    rm -f /etc/kyt/limit/trojan/ip/${user}
 	rm -rf /var/www/html/trojan-$user.txt
     systemctl restart xray > /dev/null 2>&1
-    clear
-    echo -e "${WHITEBLD}    Client Name : $user ${NC}"
-    echo -e "${WHITEBLD}    Expired On  : $exp  ${NC}"
+    echo -e "    Client Name : $user"
+    echo -e "    Expired On  : $exp"
     fi

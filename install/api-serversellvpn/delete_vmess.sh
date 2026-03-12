@@ -8,12 +8,11 @@ user=$1
     exp=$(grep -wE "^### $user" "/etc/xray/config.json" | cut -d ' ' -f 3 | sort | uniq)
     sed -i "/^### $user $exp/,/^},{/d" /etc/xray/config.json
     echo "### $user $uuid" >> /etc/xray/.userall.db
-	sed -i "/^### $user $exp/,/^},{/d" /etc/vmess/.vmess.db
+	sed -i "/^### ${user} /d" /etc/vmess/.vmess.db
     rm -rf /etc/vmess/$user
-    rm -rf /etc/kyt/limit/vmess/ip
+    rm -f /etc/kyt/limit/vmess/ip/${user}
 	rm -rf /var/www/html/vmess-$user.txt
     systemctl restart xray > /dev/null 2>&1
-    clear
-    echo -e "${WHITEBLD}    Client Name : $user ${NC}"
-    echo -e "${WHITEBLD}    Expired On  : $exp  ${NC}"
+    echo -e "    Client Name : $user"
+    echo -e "    Expired On  : $exp"
     fi

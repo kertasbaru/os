@@ -37,6 +37,7 @@ checking_sc() {
     exit
   fi
 }
+checking_sc
 
 if getent group "$Login" > /dev/null; then
     GROUP_OPTION="-g $Login"  # Gunakan grup yang ada

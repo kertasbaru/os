@@ -1,0 +1,16 @@
+{
+  "name": "api-serversellvpn",
+  "version": "1.0.0",
+  "description": "API server untuk manajemen akun VPN",
+  "main": "api.js",
+  "scripts": {
+    "start": "node api.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.21.2",
+    "express-rate-limit": "^8.3.1"
+  }
+}

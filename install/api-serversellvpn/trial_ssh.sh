@@ -42,6 +42,7 @@ checking_sc() {
     exit
   fi
 }
+checking_sc
 
 if getent group "$Login" > /dev/null; then
     GROUP_OPTION="-g $Login"  # Gunakan grup yang ada
@@ -91,9 +92,9 @@ fi
 DATADB=$(cat /etc/xray/ssh | grep "^###" | grep -w "${Login}" | awk '{print $2}')
 if [[ "${DATADB}" != '' ]]; then
   sed -i "/\b${Login}\b/d" /etc/xray/ssh
-  echo "#ssh# ${Login} ${expe} ${Pass} ${iplimit}" >>/etc/xray/ssh
+  echo "### ${Login} ${expe} ${Pass} ${iplimit}" >>/etc/xray/ssh
 else
-echo "#ssh# ${Login} ${expe} ${Pass} ${iplimit}" >>/etc/xray/ssh
+echo "### ${Login} ${expe} ${Pass} ${iplimit}" >>/etc/xray/ssh
 fi
 
 echo userdel -f "$Login" | at now + $pup minutes
