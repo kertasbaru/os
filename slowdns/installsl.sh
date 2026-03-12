@@ -32,32 +32,34 @@ if [[ "${#RECORD}" -le 10 ]]; then
     curl -sLX POST "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records" \
         -H "Authorization: Bearer ${CF_KEY}" \
         -H "Content-Type: application/json" \
-        --data '{"type":"NS","name":"'${NS_DOMAIN}'","content":"'${MYIP}'","proxied":false}' >/dev/null
+        --data '{"type":"A","name":"'${NS_DOMAIN}'","content":"'${MYIP}'","proxied":false}' >/dev/null
 else
     # Jika Record sudah ada (Update)
     curl -sLX PUT "https://api.cloudflare.com/client/v4/zones/${ZONE}/dns_records/${RECORD}" \
         -H "Authorization: Bearer ${CF_KEY}" \
         -H "Content-Type: application/json" \
-        --data '{"type":"NS","name":"'${NS_DOMAIN}'","content":"'${MYIP}'","proxied":false}' >/dev/null
+        --data '{"type":"A","name":"'${NS_DOMAIN}'","content":"'${MYIP}'","proxied":false}' >/dev/null
 fi
 
 echo $NS_DOMAIN >/etc/xray/dns
 
-cd
 cd /etc/slowdns
-wget -O dnstt-server "${REPO}slowdns/dnstt-server" >/dev/null 2>&1
-chmod +x dnstt-server >/dev/null 2>&1
-wget -O dnstt-client "${REPO}slowdns/dnstt-client" >/dev/null 2>&1
-chmod +x dnstt-client >/dev/null 2>&1
+wget -qO dnstt-server "${REPO}slowdns/dnstt-server"
+chmod +x dnstt-server
+wget -qO dnstt-client "${REPO}slowdns/dnstt-client"
+chmod +x dnstt-client
 ./dnstt-server -gen-key -privkey-file server.key -pubkey-file server.pub
-chmod +x *
-wget -O /etc/systemd/system/client.service "${REPO}slowdns/client" >/dev/null 2>&1
-wget -O /etc/systemd/system/server.service "${REPO}slowdns/server" >/dev/null 2>&1
-sed -i "s/xxxx/$NS_DOMAIN/g" /etc/systemd/system/client.service 
+chmod 600 server.key server.pub
+wget -qO /etc/systemd/system/client.service "${REPO}slowdns/client"
+wget -qO /etc/systemd/system/server.service "${REPO}slowdns/server"
+sed -i "s/xxxx/$NS_DOMAIN/g" /etc/systemd/system/client.service
+if grep -q 'yyyy' /etc/systemd/system/client.service; then
+  sed -i "s/yyyy/$MYIP/g" /etc/systemd/system/client.service
+fi
 sed -i "s/xxxx/$NS_DOMAIN/g" /etc/systemd/system/server.service
 
 systemctl daemon-reload
 systemctl enable server
 systemctl enable client
-systemctl start server
-systemctl start client
+systemctl restart server
+systemctl restart client
