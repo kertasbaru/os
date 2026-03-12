@@ -81,6 +81,7 @@ fi
 
 if [[ "$EUID" -ne 0 ]]; then 
   msg_err "Harap jalankan script sebagai root!"
+  exit 1
 fi
 
 if [[ "$(systemd-detect-virt)" == "openvz" ]]; then 
@@ -168,8 +169,8 @@ install_domain() {
     host1="$SUBDOMAIN.$DOMAINAUTO"
     
     wget -qO pointing.sh ${REPO}install/pointing.sh
-    chmod +x pointing.sh "${host1}"
-    ./pointing.sh
+    chmod +x pointing.sh
+    ./pointing.sh "${host1}"
     rm -f pointing.sh
   else
     host1="$domain_input"
@@ -256,8 +257,8 @@ install_ssh() {
   chmod +x /etc/pam.d/common-password
   
   sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
-    sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
-    
+  sed -i 's/PasswordAuthentication no/PasswordAuthentication yes/g' /etc/ssh/sshd_config
+  
   sed -i 's/^#.*Port 22.*/Port 22/g' /etc/ssh/sshd_config
 
   for port in 22 200 500 40000 51443 58080; do
@@ -290,11 +291,13 @@ install_ssh() {
   done
   
   iptables-save > /etc/iptables.up.rules
-  iptables-restore -t < /etc/iptables.up.rules
+  iptables-restore < /etc/iptables.up.rules
 }
 
 install_extra() {
   header_install "EXTRA MODULES"
+  
+  NET=$(ip route show default | awk '/default/ {print $5}' | head -1)
   
   wget -qO limit.sh "${REPO}install/limit.sh"
   chmod +x limit.sh
@@ -327,22 +330,24 @@ EOF
   wget -qO vpn.sh "${REPO}install/vpn.sh"
   chmod +x vpn.sh
   ./vpn.sh
+  rm -f vpn.sh
   
   dd if=/dev/zero of=/swapfile bs=1024 count=1048576
   mkswap /swapfile
   chmod 0600 /swapfile
   swapon /swapfile
-  sed -i '$ i\/swapfile      swap swap   defaults    0 0' /etc/fstab
+  grep -q '/swapfile' /etc/fstab || echo '/swapfile      swap swap   defaults    0 0' >> /etc/fstab
   
   wget -qO bbr.sh "${REPO}install/bbr.sh"
   chmod +x bbr.sh
   ./bbr.sh
+  rm -f bbr.sh
   
   wget https://humdi.net/vnstat/vnstat-2.13.tar.gz
   tar zxvf vnstat-2.13.tar.gz
-  cd vnstat-2.13
+  cd vnstat-2.13 || exit 1
   ./configure --prefix=/usr --sysconfdir=/etc && make && make install
-  cd
+  cd /root
   vnstat -u -i $NET
   sed -i "s/Interface \"eth0\"/Interface \"$NET\"/g" /etc/vnstat.conf
   chown vnstat:vnstat /var/lib/vnstat -R
@@ -436,7 +441,7 @@ apply_sysctl
 finalize_services
 
 URL="https://api.telegram.org/bot${KEY}/sendMessage"
-TEXT="<code>───────────────</code>%0A<b>🟢 NOTIFICATIONS INSTALL 🟢</b>%0A<code>───────────────</code>%0A<code>Domain :</code> <code>$domain</code>%0A<code>IP VPS :</code> <code>$MYIP</code>%0A<code>OS     :</code> <code>$PRETTY_NAME</code>%0A<code>Time   :</code> <code>$(date)</code>%0A<code>───────────────</code>"
+TEXT="<code>───────────────</code>%0A<b>🟢 NOTIFICATIONS INSTALL 🟢</b>%0A<code>───────────────</code>%0A<code>Domain :</code> <code>$domain</code>%0A<code>IP VPS :</code> <code>$MYIP</code>%0A<code>ISP    :</code> <code>$ISP</code>%0A<code>City   :</code> <code>$CITY</code>%0A<code>Client :</code> <code>$client</code>%0A<code>User   :</code> <code>$name</code>%0A<code>───────────────</code>"
 curl -s --max-time 10 -d "chat_id=$CHATID&disable_web_page_preview=1&text=$TEXT&parse_mode=html" "$URL" >/dev/null
 
 # --- Pembersihan Sistem ---
