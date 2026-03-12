@@ -14,7 +14,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(session({
-  secret: 'ganti_secret_key_ini_restore_backup',
+  secret: process.env.SESSION_SECRET || 'ganti_secret_key_ini_restore_backup',
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 10 * 60 * 1000 }
@@ -46,7 +46,7 @@ app.get('/restore/login', (req, res) => {
 
 app.post('/restore/login', (req, res) => {
   const { password } = req.body;
-  console.log(`[RESTORE LOGIN] Percobaan login dengan password: ${password}`);
+  console.log(`[RESTORE LOGIN] Percobaan login`);
   if (!password) return res.render('login_restore', { error: 'Password tidak boleh kosong!' });
 
   const escapedPassword = password.replace(/'/g, `'\\''`);
@@ -75,7 +75,7 @@ app.get('/backup/login', (req, res) => {
 
 app.post('/backup/login', (req, res) => {
   const { password } = req.body;
-  console.log(`[BACKUP LOGIN] Percobaan login dengan password: ${password}`);
+  console.log(`[BACKUP LOGIN] Percobaan login`);
   if (!password) return res.render('login_backup', { error: 'Password tidak boleh kosong!' });
 
   const escapedPassword = password.replace(/'/g, `'\\''`);
@@ -103,10 +103,17 @@ app.get('/restore/upload', requireRestoreLogin, (req, res) => {
 });
 
 app.post('/restore/upload', requireRestoreLogin, upload.single('backup'), (req, res) => {
+  if (!req.file) {
+    return res.render('restore-result', {
+      success: false,
+      message: 'Tidak ada file yang diunggah.'
+    });
+  }
+
   const tempPath = req.file.path;
   const targetPath = '/root/backup.zip';
   const zipPassword = req.body.zipPassword || '';
-  console.log(`[RESTORE UPLOAD] File diterima: ${req.file.originalname}, password ZIP: ${zipPassword}`);
+  console.log(`[RESTORE UPLOAD] File diterima: ${req.file.originalname}`);
 
   fs.rename(tempPath, targetPath, err => {
     if (err) {
@@ -117,10 +124,15 @@ app.post('/restore/upload', requireRestoreLogin, upload.single('backup'), (req, 
       });
     }
 
-    console.log(`[RESTORE EXEC] Menjalankan restore: /usr/bin/restore '${zipPassword}'`);
-    exec(`/usr/bin/restore '${zipPassword}' > /tmp/restore.log 2>&1`, (error) => {
-      if (error) {
-        console.log(`[RESTORE EXEC] Gagal restore: ${error.message}`);
+    const restoreArgs = zipPassword ? [zipPassword] : [];
+    console.log(`[RESTORE EXEC] Menjalankan restore`);
+    const restoreProcess = spawn('/usr/bin/restore', restoreArgs);
+    let restoreLog = '';
+    restoreProcess.stdout.on('data', d => { restoreLog += d; });
+    restoreProcess.stderr.on('data', d => { restoreLog += d; });
+    restoreProcess.on('close', (code) => {
+      if (code !== 0) {
+        console.log(`[RESTORE EXEC] Gagal restore (kode: ${code})`);
         return res.render('restore-result', {
           success: false,
           message: 'Terjadi kesalahan saat proses restore. Pastikan password ZIP benar dan file valid.'
@@ -180,7 +192,16 @@ app.post('/backup', requireBackupLogin, (req, res) => {
     }
 
     const content = fs.readFileSync(passFile, 'utf8').trim();
-    const [backup_pw, backup_id] = content.split(':');
+    const colonIdx = content.indexOf(':');
+    if (colonIdx === -1) {
+      console.log(`[BACKUP] Format file password tidak valid: ${passFile}`);
+      return res.render('backup-result', {
+        success: false,
+        message: 'Format file password backup tidak valid.'
+      });
+    }
+    const backup_pw = content.slice(0, colonIdx);
+    const backup_id = content.slice(colonIdx + 1);
     console.log(`[BACKUP] Backup ID: ${backup_id}, Password: ${backup_pw}`);
 
     res.render('backup-result', {
@@ -193,13 +214,12 @@ app.post('/backup', requireBackupLogin, (req, res) => {
 });
 
 app.get('/backup/download', requireBackupLogin, (req, res) => {
-  const filePath = path.join(__dirname, 'temp', 'backup.zip');
+  const filePath = '/root/backup.zip';
   if (fs.existsSync(filePath)) {
     console.log(`[BACKUP DOWNLOAD] Mengunduh file backup.zip`);
     res.download(filePath, 'backup.zip', err => {
       if (!err) {
-        console.log(`[BACKUP DOWNLOAD] File backup.zip berhasil dikirim dan dihapus`);
-        fs.unlinkSync(filePath);
+        console.log(`[BACKUP DOWNLOAD] File backup.zip berhasil dikirim`);
       } else {
         console.log(`[BACKUP DOWNLOAD] Gagal mengirim file: ${err.message}`);
       }
