@@ -36,7 +36,7 @@ unzip -o vpn.zip
 rm -f vpn.zip
 chown -R root:root /etc/openvpn/server/easy-rsa/
 
-cd
+cd /root
 mkdir -p /usr/lib/openvpn/
 cp /usr/lib/x86_64-linux-gnu/openvpn/plugins/openvpn-plugin-auth-pam.so /usr/lib/openvpn/openvpn-plugin-auth-pam.so
 
@@ -102,7 +102,7 @@ comp-lzo
 verb 3
 END
 
-cd
+cd /root
 # pada tulisan xxx ganti dengan alamat ip address VPS anda
 /etc/init.d/openvpn restart
 
@@ -240,13 +240,11 @@ cd /var/www/html
 zip openvpn.zip tcp.ovpn udp.ovpn ssl.ovpn
 wget -qO /usr/share/nginx/html/index.html "${REPO}install/index.html"
 sed -i "s/xxx/${domain}/" /usr/share/nginx/html/index.html
-cd
+cd /root
 iptables -t nat -I POSTROUTING -s 10.6.0.0/24 -o $ANU -j MASQUERADE
 iptables -t nat -I POSTROUTING -s 10.7.0.0/24 -o $ANU -j MASQUERADE
 iptables-save > /etc/iptables.up.rules
-chmod +x /etc/iptables.up.rules
-
-iptables-restore -t < /etc/iptables.up.rules
+iptables-restore < /etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 

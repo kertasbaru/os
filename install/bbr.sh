@@ -46,6 +46,7 @@ Check_And_Add_Line(){
 Install_BBR(){
   if [ -n "$(lsmod | grep bbr)" ];then
     msg_info "TCP BBR is Installed"
+    return
   fi
 
   modprobe tcp_bbr

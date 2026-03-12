@@ -21,7 +21,7 @@ else
 fi
 
 wget -q -O /usr/bin/limit-ip "${REPO}install/limit-ip"
-chmod +x /usr/bin/*
+chmod +x /usr/bin/limit-ip
 cd /usr/bin
 sed -i 's/\r//' limit-ip
 cd

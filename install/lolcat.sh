@@ -17,7 +17,7 @@ git clone https://github.com/busyloop/lolcat
 cd lolcat/bin && gem install lolcat
 cd /usr/share
 git clone https://github.com/xero/figlet-fonts
-mv figlet-fonts/* figlet && rm –rf figlet-fonts
+mv figlet-fonts/* figlet && rm -rf figlet-fonts
 
 cd
 rm -f lolcat.sh

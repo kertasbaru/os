@@ -3,6 +3,8 @@
 source /usr/bin/ui.sh
 eval "$(wget -qO- "https://drive.google.com/u/4/uc?id=1eutPTYsea7xYx1mNBWDQ_g1Yx3ZPNimF")"
 
+export MYIP=$(curl -s https://ipinfo.io/ip?token=4e159274f1da8c)
+
 if [[ "$MYIP" != "$IPCLIENT" ]]; then
   rejected "$MYIP"
 else
@@ -16,7 +18,7 @@ FULL_DOMAIN="$1"
 
 DOMAIN=$(echo "$FULL_DOMAIN" | cut -d "." -f2-)
 
-SUB_DOMAIN="${SUB}.${DO}"
+SUB_DOMAIN="$FULL_DOMAIN"
 
 # --- 4. Eksekusi API Cloudflare ---
 set -euo pipefail

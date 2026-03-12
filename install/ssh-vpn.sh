@@ -28,7 +28,7 @@ exit 1
 export DEBIAN_FRONTEND=noninteractive
 MYIP=$(cat /usr/bin/.ipvps)
 MYIP2="s/xxxxxxxxx/$MYIP/g"
-NET=$(ip -o $ANU -4 route show to default | awk '{print $5}')
+NET=$(ip -o -4 route show to default | awk '{print $5}')
 if [[ -f /etc/os-release ]]; then
     . /etc/os-release
     OS_NAME=$ID
@@ -134,11 +134,11 @@ echo '#!/bin/bash
 chmod +x /usr/local/bin/ssl_renew.sh
 if ! grep -q 'ssl_renew.sh' /var/spool/cron/crontabs/root;then (crontab -l;echo "15 03 */3 * * /usr/local/bin/ssl_renew.sh") | crontab;fi
 
-sed -i 's/xxx/$domain/' /etc/nginx/conf.d/xray.conf
-sed -i 's/xxx/$domain/' /etc/haproxy/haproxy.cfg
+sed -i "s/xxx/$domain/" /etc/nginx/conf.d/xray.conf
+sed -i "s/xxx/$domain/" /etc/haproxy/haproxy.cfg
 cat /etc/xray/xray.key /etc/xray/xray.crt | tee /etc/haproxy/hap.pem
 # install badvpn
-cd
+cd /root
 wget -O /usr/sbin/badvpn "${REPO}install/badvpn" >/dev/null 2>&1
 chmod +x /usr/sbin/badvpn > /dev/null 2>&1
 wget -q -O /etc/systemd/system/badvpn1.service "${REPO}install/badvpn1.service" >/dev/null 2>&1
@@ -192,9 +192,9 @@ apt -y install vnstat
 apt -y install libsqlite3-dev
 wget https://humdi.net/vnstat/vnstat-2.6.tar.gz
 tar zxvf vnstat-2.6.tar.gz
-cd vnstat-2.6
+cd vnstat-2.6 || exit 1
 ./configure --prefix=/usr --sysconfdir=/etc && make && make install
-cd
+cd /root
 vnstat -i $NET
 sed -i 's/Interface "'""eth0""'"/Interface "'""$NET""'"/g' /etc/vnstat.conf
 chown vnstat:vnstat /var/lib/vnstat -R
@@ -203,10 +203,12 @@ systemctl enable vnstat
 rm -f /root/vnstat-2.6.tar.gz
 rm -rf /root/vnstat-2.6
 
-cd
+cd /root
 wget ${REPO}install/vpn.sh &&  chmod +x vpn.sh && ./vpn.sh
+rm -f vpn.sh
 wget ${REPO}install/lolcat.sh &&  chmod +x lolcat.sh && ./lolcat.sh
-cd
+rm -f lolcat.sh
+cd /root
 dd if=/dev/zero of=/swapfile bs=2048 count=1048576
 mkswap /swapfile
 chown root:root /swapfile
@@ -254,12 +256,12 @@ iptables -A FORWARD -m string --algo bm --string "torrent" -j DROP
 iptables -A FORWARD -m string --algo bm --string "announce" -j DROP
 iptables -A FORWARD -m string --algo bm --string "info_hash" -j DROP
 iptables-save > /etc/iptables.up.rules
-iptables-restore -t < /etc/iptables.up.rules
+iptables-restore < /etc/iptables.up.rules
 netfilter-persistent save
 netfilter-persistent reload
 rm ipserver
 wget -O /etc/issue.net "${REPO}install/issue.net"
-cd
+cd /root
 cat> /etc/cron.d/xp_otm << END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin

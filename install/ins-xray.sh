@@ -320,4 +320,4 @@ yellow "xray/Vmess"
 yellow "xray/Vless"
 mv /root/domain /etc/xray/
 clear
-rm -r
+rm -rf /root/ins-xray.sh
