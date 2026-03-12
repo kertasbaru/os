@@ -69,8 +69,8 @@ setup_bot() {
         chmod +x Nebotsell/*
     fi
 
-    if ! npm list --prefix /root/Nebotsell sqlite3 express crypto telegraf axios dotenv bull js-yaml dayjs moment pdfkit autoft-orkut >/dev/null 2>&1; then
-        npm install --prefix /root/Nebotsell sqlite3 express crypto telegraf axios dotenv bull js-yaml dayjs moment pdfkit autoft-orkut qris-payment
+    if ! npm list --prefix /root/Nebotsell sqlite3 express crypto telegraf axios dotenv bull js-yaml dayjs moment pdfkit autoft-qris >/dev/null 2>&1; then
+        npm install --prefix /root/Nebotsell sqlite3 express crypto telegraf axios dotenv bull js-yaml dayjs moment pdfkit autoft-qris
     fi
 
 
@@ -136,7 +136,7 @@ server_app() {
 	
 	while [ -z "$mcid1" ]; do
 		read -p "Masukkan Link Saluran: " mcid1
-		if [ -z "$mcid" ]; then
+		if [ -z "$mcid1" ]; then
 			echo -e "${red}Link saluran tidak boleh kosong. Silakan coba lagi.${neutral}"
 		fi
 	done
@@ -151,7 +151,7 @@ server_app() {
 	while [ -z "$username" ]; do
 		read -p "Masukkan Username Orkut: " username
 		if [ -z "$username" ]; then
-			echo -e "${red}Base String tidak boleh kosong. Silakan coba lagi.${neutral}"
+			echo -e "${red}Username tidak boleh kosong. Silakan coba lagi.${neutral}"
 		fi
 	done
 
@@ -213,7 +213,6 @@ EOF
 
     systemctl daemon-reload >/dev/null 2>&1
     systemctl enable sellvpn.service >/dev/null 2>&1
-    systemctl start sellvpn.service >/dev/null 2>&1
     systemctl restart sellvpn.service >/dev/null 2>&1
     service cron restart
     printf "\033[5A\033[0J"

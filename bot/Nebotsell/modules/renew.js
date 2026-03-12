@@ -205,7 +205,6 @@ async function renewvmess(username, exp, quota, limitip, serverId) {
            
                 console.log('Trojan account renewed successfully');
                 return resolve(msg);
-						  console.log('✅ MSG dari createssh:', msg);
               } else {
                 console.log('Error renewing Trojan account');
                 return resolve(`❌ Terjadi kesalahan: ${response.data.message}`);

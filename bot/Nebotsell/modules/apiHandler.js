@@ -1,5 +1,3 @@
-const fetch = require("node-fetch");
-
 /**
  * Normalize base server URL so it works with `new URL()`.
  * Accepts:

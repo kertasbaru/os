@@ -57,7 +57,6 @@ Format Account UDP:
 `;
               console.log(`SSH ${sshData.username} account created successfully`);
           return resolve(msg);
-		  console.log('✅ MSG dari createssh:', msg);
         } else {
           return resolve(`❌ Terjadi kesalahan: ${response.data.message}`);
         }

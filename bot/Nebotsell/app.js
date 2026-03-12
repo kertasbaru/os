@@ -40,7 +40,7 @@ const { hapusAkun } = require('./modules/delete');
 const fs = require('fs');
 const vars = JSON.parse(fs.readFileSync('./.vars.json', 'utf8'));
 
-const PAYDISINI_KEY = vars.PAYDISINI_KEY; // Sudah di-set di VPS
+const PAYDISINI_KEY = vars.OKE_API_KEY; // Sudah di-set di VPS
 const BOT_TOKEN = vars.BOT_TOKEN; // Sudah di-set di VPS
 const port = vars.PORT || 50123; // Sudah di-set di VPS
 const ADMIN = vars.USER_ID; // Sudah di-set di VPS
