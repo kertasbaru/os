@@ -1,0 +1,118 @@
+#!/bin/env bash
+
+ulimit -s unlimited >/dev/null 2>&1
+
+# Variabel untuk menampung argumen tambahan dari user
+EXTRA_ARGS=""
+
+show_usage_unshell() {
+	printf "%s - Deobfuscate shell scripts with dynamic arguments
+  Usage: %s -f [FILE] [ARGUMENTS...]
+
+  Contoh:
+    %s -f Install.sh domain.com
+    %s -f Install.sh nama domain
+    \n" "${0##*/}" "${0##*/}" "${0##*/}" "${0##*/}"
+	exit 0
+}
+
+decrypt_ricrypt() {
+	if ! hash strace; then echo "error: butuh strace"; return 127; fi
+	spath=$(echo $PATH | cut -d: -f1)
+	cp ./$filename.temp1.sh $spath/$filename.temp1.sh
+	chmod +x $spath/$filename.temp1.sh
+
+	# Menjalankan dengan argumen tambahan agar script tidak error/exit
+	strace -s 50000 -f -e trace=execve $filename.temp1.sh $EXTRA_ARGS 2>&1 |
+		while read -r line; do
+			if echo "$line" | grep -q "eval"; then
+				pkill $filename.temp1.sh
+				echo $line | grep -oP 'eval.*?"\K[^"]+' | tr -d '\' 2>/dev/null | base64 -d >./$filename.temp2.sh
+				break
+			fi
+		done
+
+	rm -f $spath/$filename.temp1.sh
+	[ -s ./$filename.temp2.sh ] && mv ./$filename.temp2.sh ./$filename.temp1.sh
+}
+
+decrypt_ssc() {
+	spath=$(echo $PATH | cut -d: -f1)
+	cp ./$filename.temp1.sh $spath/$filename.temp1.sh
+	chmod +x $spath/$filename.temp1.sh
+
+	for sec in {10..28}; do
+		$filename.temp1.sh $EXTRA_ARGS &
+		child=$!
+		sleep 0.0"$sec"
+		kill -STOP $child
+		cat /proc/$child/fd/3 >"./$filename.temp2.sh" 2>/dev/null
+		kill -TERM $child
+		if [ -s ./$filename.temp2.sh ]; then break; fi
+	done
+
+	rm -f $spath/$filename.temp1.sh
+	[ -s ./$filename.temp2.sh ] && mv ./$filename.temp2.sh ./$filename.temp1.sh
+}
+
+decrypt_shc() {
+	spath=$(echo $PATH | cut -d: -f1)
+	cp ./$filename.temp1.sh $spath/$filename.temp1.sh
+	chmod +x $spath/$filename.temp1.sh
+
+	for sec in {1..7}; do
+		$filename.temp1.sh $EXTRA_ARGS &
+		child=$!
+		sleep 0.0"$sec"
+		kill -STOP $child
+		cat /proc/$child/cmdline | sed 's/.*\(#!\)/\1/' >"./$filename.temp2.sh" 2>/dev/null
+		kill -TERM $child
+		if grep -q '#!/' "./$filename.temp2.sh"; then break; fi
+	done
+
+	rm -f $spath/$filename.temp1.sh
+	grep -q '#!/' "./$filename.temp2.sh" && mv ./$filename.temp2.sh ./$filename.temp1.sh
+}
+
+# Fungsi dekripsi standar lainnya
+decrypt_bashrock() { sed 's/eval "$x";/echo "$x";/g' ./$filename.temp1.sh >./$filename.temp2.sh && mv ./$filename.temp2.sh ./$filename.temp1.sh; }
+decrypt_base64() { sed 's/base64 -d | [a-z\/]*sh/base64 -d/' ./$filename.temp1.sh >./$filename.temp2.sh && bash ./$filename.temp2.sh > ./$filename.temp1.sh; }
+
+init_dec() {
+	PASSED_LOOP=0
+	while true; do
+		if [ ! -f ./$filename.temp1.sh ]; then break;
+		elif grep -q '$RzE' ./$filename.temp1.sh; then echo "Layer: bashrock"; decrypt_bashrock; PASSED_LOOP=1
+		elif grep -q 'base64 -d | [a-z\/]*sh$' ./$filename.temp1.sh; then echo "Layer: base64"; decrypt_base64; PASSED_LOOP=1
+		elif strings ./$filename.temp1.sh | grep -q 'SSC_ARGV0'; then echo "Layer: ssc"; decrypt_ssc; PASSED_LOOP=1
+		elif strings ./$filename.temp1.sh | grep -q 'E:\sneither\sargv\[0\]\snor\s\$_\sworks\.'; then echo "Layer: shc"; decrypt_shc; PASSED_LOOP=1
+		elif strings ./$filename.temp1.sh | grep -q 'sh-cFailed'; then echo "Layer: Ri-crypt"; decrypt_ricrypt; PASSED_LOOP=1
+		else
+			break
+		fi
+	done
+
+	if [ -f ./$filename.temp1.sh ]; then
+		mv ./$filename.temp1.sh ./$filename.dec.sh
+		echo "Berhasil: ./$filename.dec.sh"
+	fi
+}
+
+# --- Logic Parsing ---
+if [[ "$1" == "-f" ]]; then
+    shift
+    FILE_TARGET="$1"
+    shift
+    EXTRA_ARGS="$@" # Mengambil sisa argumen sebagai input untuk Install.sh
+    
+    if [ -f "$FILE_TARGET" ]; then
+        filename=$(basename "$FILE_TARGET")
+        cp "$FILE_TARGET" "./$filename.temp1.sh"
+        echo "Mendekripsi $FILE_TARGET dengan argumen: $EXTRA_ARGS"
+        init_dec
+    else
+        echo "File tidak ditemukan!"
+    fi
+else
+    show_usage_unshell
+fi
