@@ -49,7 +49,8 @@ chmod +x dnstt-server
 wget -qO dnstt-client "${REPO}slowdns/dnstt-client"
 chmod +x dnstt-client
 ./dnstt-server -gen-key -privkey-file server.key -pubkey-file server.pub
-chmod 600 server.key server.pub
+chmod 600 server.key
+chmod 644 server.pub
 wget -qO /etc/systemd/system/client.service "${REPO}slowdns/client"
 wget -qO /etc/systemd/system/server.service "${REPO}slowdns/server"
 sed -i "s/xxxx/$NS_DOMAIN/g" /etc/systemd/system/client.service

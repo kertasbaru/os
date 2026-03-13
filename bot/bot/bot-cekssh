@@ -8,7 +8,7 @@ WHITE="\033[1;37m"
 RED="\e[91;1m"
 GREEN='\033[0;32m'
 NC='\033[0m'
-red() { echo -e "\\033[32;1m${*}\\033[0m"; }
+red() { echo -e "\\033[31;1m${*}\\033[0m"; }
 clear
 echo " "
 echo " "
