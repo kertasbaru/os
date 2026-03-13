@@ -125,6 +125,7 @@ FILE_WARNA="/etc/warna"
 
 if [ ! -f "$FILE_WARNA" ] || [ ! -s "$FILE_WARNA" ]; then
     msg_info "Menyiapkan Warna Script..."
+    # Format: "start/mid/end=R G B" (space-separated RGB values)
     cat <<EOF > "$FILE_WARNA"
 start=0 5 0
 mid=0 200 0
