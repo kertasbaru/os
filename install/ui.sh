@@ -197,8 +197,23 @@ function lane_bawah() {
 }
 
 # =========================================
-# 4. KOMPONEN GARIS RAINBOW DOUBLE
+# 4. KOMPONEN GARIS RAINBOW (BORDER & DOUBLE)
 # =========================================
+
+function garis_atas() {
+    local line=$(printf "%0.s─" $(seq 1 $WIDTH))
+    print_rainbow " ┌${line}┐"
+}
+
+function garis_tengah() {
+    local line=$(printf "%0.s─" $(seq 1 $WIDTH))
+    print_rainbow " ├${line}┤"
+}
+
+function garis_bawah() {
+    local line=$(printf "%0.s─" $(seq 1 $WIDTH))
+    print_rainbow " └${line}┘"
+}
 
 function garis() {
     local total_len=$((WIDTH + 2))
