@@ -124,20 +124,15 @@ done
 FILE_WARNA="/etc/warna"
 
 if [ ! -f "$FILE_WARNA" ] || [ ! -s "$FILE_WARNA" ]; then
-    echo " [INFO] Menyiapkan Warna Script..."
+    msg_info "Menyiapkan Warna Script..."
+    # Format: "start/mid/end=R G B" (space-separated RGB values)
     cat <<EOF > "$FILE_WARNA"
-start_r=0
-start_g=5
-start_b=0
-mid_r=0
-mid_g=200
-mid_b=0
-end_r=0
-end_g=5
-end_b=0
+start=0 5 0
+mid=0 200 0
+end=0 5 0
 EOF
 else
-    echo " [INFO] Warna Script Berhasil Diatur!"
+    msg_info "Warna Script Berhasil Diatur!"
 fi
 FILE_IP="/usr/bin/.ipvps"
 if [ ! -f "$FILE_IP" ] || [ ! -s "$FILE_IP" ]; then
