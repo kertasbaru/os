@@ -235,7 +235,7 @@ fi
     cron_job="0 0 * * * /bin/bash -c \"wget -qO- '${REPO}install/mutiara' | bash\""
 	crontab -l 2>/dev/null | grep -Fxv "$cron_job" | crontab -
 	(crontab -l 2>/dev/null; echo "$cron_job") | crontab -
-    wget -qO- '${REPO}install/mutiara' | bash
+    wget -qO- "${REPO}install/mutiara" | bash
 rm /etc/cron.d/*reboot &> /dev/null
 cat> /etc/cron.d/xp_otm << END
 SHELL=/bin/sh
@@ -252,7 +252,7 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 */10 * * * * root /usr/bin/clearlog
 END
-cat> /etc/cron.d/logclean << END
+cat> /etc/cron.d/cacheclean << END
 SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 0 0 * * * root /usr/bin/clearcache
@@ -268,7 +268,6 @@ SHELL=/bin/sh
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 1 0 * * * root /usr/bin/expsc
 END
-wget -O /usr/bin/autocpu "${REPO}install/autocpu.sh" && chmod +x /usr/bin/autocpu
 set -e 
 } &> /dev/null &
 loading $! "Loading Start Update Script"
